@@ -171,7 +171,7 @@ PlayableDirector:
     value: {fileID: 993887083}
   - key: {fileID: 0}
     value: {fileID: 993887083}
-  - key: {fileID: -4795396796215624092, guid: 88f79ac9dacb4426c80547702e2357fd, type: 2}
+  - key: {fileID: 0}
     value: {fileID: 993887083}
   - key: {fileID: 1533976475158955954, guid: 88f79ac9dacb4426c80547702e2357fd, type: 2}
     value: {fileID: 547519308}
@@ -187,6 +187,10 @@ PlayableDirector:
     value: {fileID: 993887083}
   - key: {fileID: 4873586104128568558, guid: 88f79ac9dacb4426c80547702e2357fd, type: 2}
     value: {fileID: 993887088}
+  - key: {fileID: -8415819120556741162, guid: 88f79ac9dacb4426c80547702e2357fd, type: 2}
+    value: {fileID: 1635407576}
+  - key: {fileID: 2036159825829520048, guid: 88f79ac9dacb4426c80547702e2357fd, type: 2}
+    value: {fileID: 1635407576}
   m_ExposedReferences:
     m_References: []
 --- !u!114 &155153278
@@ -426,6 +430,7 @@ GameObject:
   - component: {fileID: 547519304}
   - component: {fileID: 547519308}
   - component: {fileID: 547519309}
+  - component: {fileID: 547519310}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -580,6 +585,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: BovineLabs.Timeline.EntityLinks.Authoring::BovineLabs.Timeline.EntityLinks.Authoring.EntityEssenceRefComponentAuthoring
   statAuthoring: {fileID: 619819028}
+--- !u!114 &547519310
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 547519298}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5ce5be625b13416781e3426ee2109abf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: BovineLabs.Core.Authoring::BovineLabs.Core.Authoring.TransformAuthoring
+  TransformUsageFlags: 2
 --- !u!1 &619819017
 GameObject:
   m_ObjectHideFlags: 0
@@ -915,7 +933,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!136 &993887084
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -1656,6 +1674,7 @@ GameObject:
   - component: {fileID: 1635407574}
   - component: {fileID: 1635407576}
   - component: {fileID: 1635407575}
+  - component: {fileID: 1635407577}
   m_Layer: 0
   m_Name: Cube
   m_TagString: Untagged
@@ -1880,6 +1899,27 @@ MonoBehaviour:
     Tag05: 0
     Tag06: 0
     Tag07: 0
+--- !u!114 &1635407577
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1635407573}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0038df9991804dab9b4127193908728a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: BovineLabs.Reaction.Authoring::BovineLabs.Reaction.Authoring.Core.TargetsAuthoring
+  Owner: {fileID: 0}
+  Source: {fileID: 0}
+  Target: {fileID: 547519298}
+  Custom:
+    Enable: 0
+    Target0: {fileID: 0}
+    Target1: {fileID: 0}
+  Initialize:
+    Target: 1
 --- !u!1 &1982397285
 GameObject:
   m_ObjectHideFlags: 0
