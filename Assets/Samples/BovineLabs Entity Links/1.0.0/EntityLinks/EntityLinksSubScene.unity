@@ -174,7 +174,7 @@ PlayableDirector:
   - key: {fileID: 0}
     value: {fileID: 993887083}
   - key: {fileID: 1533976475158955954, guid: 88f79ac9dacb4426c80547702e2357fd, type: 2}
-    value: {fileID: 547519308}
+    value: {fileID: 507966448}
   - key: {fileID: 2713462620551172859, guid: 88f79ac9dacb4426c80547702e2357fd, type: 2}
     value: {fileID: 619819017}
   - key: {fileID: 5063639177002891229, guid: 88f79ac9dacb4426c80547702e2357fd, type: 2}
@@ -433,6 +433,7 @@ GameObject:
   - component: {fileID: 507966445}
   - component: {fileID: 507966447}
   - component: {fileID: 507966446}
+  - component: {fileID: 507966448}
   m_Layer: 0
   m_Name: Physics
   m_TagString: Untagged
@@ -508,7 +509,7 @@ MonoBehaviour:
     m_Template: {fileID: 0}
     m_CollisionResponse:
       m_Override: 0
-      m_Value: 0
+      m_Value: 3
     m_DetailedStaticMeshCollision:
       m_Override: 0
       m_Value:
@@ -658,6 +659,18 @@ MonoBehaviour:
     Tag05: 0
     Tag06: 0
     Tag07: 0
+--- !u!114 &507966448
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 507966444}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 374892803943bc04cb79933b2eeba006, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: BovineLabs.Core.Extensions.Authoring::BovineLabs.Core.Authoring.PhysicsStates.StatefulTriggerEventAuthoring
 --- !u!1 &537646644
 GameObject:
   m_ObjectHideFlags: 0
@@ -796,7 +809,6 @@ GameObject:
   - component: {fileID: 547519303}
   - component: {fileID: 547519305}
   - component: {fileID: 547519304}
-  - component: {fileID: 547519308}
   - component: {fileID: 547519309}
   - component: {fileID: 547519310}
   m_Layer: 0
@@ -805,7 +817,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!23 &547519300
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -927,18 +939,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Bovinelabs.Timeline.Entity.Links.Authoring::Bovinelabs.Timeline.Entity.Links.Authoring.EntityTagAuthoring
   entityLinkTagSchema: {fileID: 11400000, guid: 82c8b7806cd430c0cbb4e26755d8cdee, type: 2}
---- !u!114 &547519308
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 547519298}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 374892803943bc04cb79933b2eeba006, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: BovineLabs.Core.Extensions.Authoring::BovineLabs.Core.Authoring.PhysicsStates.StatefulTriggerEventAuthoring
 --- !u!114 &547519309
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -986,7 +986,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &619819018
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1473,7 +1473,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!23 &957161711
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -1824,7 +1824,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1007598384
 Transform:
   m_ObjectHideFlags: 0
@@ -1980,7 +1980,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1079886010
 Transform:
   m_ObjectHideFlags: 0
@@ -2348,7 +2348,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!23 &1336369578
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -2603,7 +2603,7 @@ Transform:
   m_GameObject: {fileID: 1635407573}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: 0.2923719, z: -0, w: 0.9563047}
-  m_LocalPosition: {x: -1.11, y: 0.12, z: 0.8}
+  m_LocalPosition: {x: -1.11, y: 0.12, z: -0.53}
   m_LocalScale: {x: 1, y: 1, z: 2}
   m_ConstrainProportionsScale: 0
   m_Children:
