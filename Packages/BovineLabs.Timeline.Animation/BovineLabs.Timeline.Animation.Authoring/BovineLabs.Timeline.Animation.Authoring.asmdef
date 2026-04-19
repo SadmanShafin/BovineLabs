@@ -2,6 +2,7 @@
   "name": "BovineLabs.Timeline.Animation.Authoring",
   "rootNamespace": "",
   "references": [
+    "BovineLabs.Core",
     "BovineLabs.Core.Authoring",
     "BovineLabs.Reaction.Authoring",
     "BovineLabs.Timeline.Authoring",

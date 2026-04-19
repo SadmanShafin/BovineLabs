@@ -1,6 +1,5 @@
 using System;
 using BovineLabs.Timeline.Authoring;
-using BovineLabs.Timeline.Animation;
 using BovineLabs.Timeline.PlayerInputs.Authoring;
 using Unity.Entities;
 using Unity.Mathematics;

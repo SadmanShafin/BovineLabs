@@ -1,5 +1,4 @@
 using BovineLabs.Timeline.Authoring;
-using BovineLabs.Timeline.Animation;
 using Rukhanka.Hybrid;
 using Unity.Entities;
 using UnityEngine;
