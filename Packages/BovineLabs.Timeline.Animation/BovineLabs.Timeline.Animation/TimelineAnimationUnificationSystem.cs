@@ -1,5 +1,3 @@
-using BovineLabs.Timeline.Animation;
-using BovineLabs.Timeline.Data;
 using Rukhanka;
 using Unity.Burst;
 using Unity.Collections;

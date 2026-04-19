@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using BovineLabs.Timeline.Authoring;
-using BovineLabs.Timeline.Animation;
-using BovineLabs.Timeline.Data;
 using Rukhanka;
 using Rukhanka.Hybrid;
 using Unity.Entities;

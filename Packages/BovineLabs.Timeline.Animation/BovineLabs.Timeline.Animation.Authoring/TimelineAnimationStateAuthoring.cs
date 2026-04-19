@@ -1,5 +1,5 @@
-using BovineLabs.Timeline.Data;
-using BovineLabs.Timeline.Animation;
+using BovineLabs.Core.Authoring.EntityCommands;
+using BovineLabs.Timeline.Animation.Data.Builders;
 using Rukhanka;
 using Rukhanka.Hybrid;
 using Unity.Entities;
@@ -27,41 +27,36 @@ namespace BovineLabs.Timeline.Animation.Authoring
                 var rigDef = GetComponent<RigDefinitionAuthoring>();
                 var avatar = rigDef != null ? rigDef.GetAvatar() : null;
 
-                Hash128 fallbackHash = default;
+                var commands = new BakerCommands(this, entity);
+                var builder = new TimelineAnimationStateBuilder()
+                    .WithFallback(default, authoring.blendInDuration, authoring.blendOutDuration);
 
                 if (authoring.fallbackAnimationClip != null)
-                    fallbackHash = BakeFallBackAnimationCLip(authoring, avatar, entity);
-
-                AddComponent(entity, new BlendGroupTimer { FallbackAccumulatedTime = 0f });
-
-                AddComponent(entity, new BlendGroupFallBackForNoAnimationToProcessComponent
                 {
-                    ClipHash = fallbackHash,
-                    BlendInSpeed = 1f / Mathf.Max(0.001f, authoring.blendInDuration),
-                    BlendOutSpeed = 1f / Mathf.Max(0.001f, authoring.blendOutDuration)
-                });
+                    var (fallbackHash, fallbackBlob) = BakeFallbackAnimation(authoring, avatar, entity);
+                    builder.WithFallback(fallbackHash, authoring.blendInDuration, authoring.blendOutDuration)
+                        .WithFallbackBlob(fallbackBlob, fallbackHash);
+                }
 
-                AddBuffer<BlendGroupEntry>(entity);
-                AddBuffer<SmoothBlendGroupEntry>(entity);
+                builder.ApplyTo(ref commands);
             }
 
-            private Hash128 BakeFallBackAnimationCLip(TimelineAnimationStateAuthoring authoring, Avatar avatar,
-                Entity entity)
+            private (Hash128 hash, BlobAssetReference<AnimationClipBlob> blob) BakeFallbackAnimation(
+                TimelineAnimationStateAuthoring authoring, Avatar avatar, Entity entity)
             {
-                Hash128 fallbackHash;
-                fallbackHash = BakingUtils.ComputeAnimationHash(authoring.fallbackAnimationClip, avatar);
+                var fallbackHash = BakingUtils.ComputeAnimationHash(authoring.fallbackAnimationClip, avatar);
                 var animationBaker = new AnimationClipBaker();
                 var bakedAnimations = animationBaker.BakeAnimations(this, new[] { authoring.fallbackAnimationClip },
                     avatar, authoring.gameObject);
 
-                var dbBuffer = AddBuffer<NewBlobAssetDatabaseRecord<AnimationClipBlob>>(entity);
+                BlobAssetReference<AnimationClipBlob> fallbackBlob = default;
+
                 if (bakedAnimations is { IsCreated: true, Length: > 0 } &&
                     bakedAnimations[0] != BlobAssetReference<AnimationClipBlob>.Null)
-                    dbBuffer.Add(new NewBlobAssetDatabaseRecord<AnimationClipBlob>
-                        { hash = fallbackHash, value = bakedAnimations[0] });
+                    fallbackBlob = bakedAnimations[0];
 
                 if (bakedAnimations.IsCreated) bakedAnimations.Dispose();
-                return fallbackHash;
+                return (fallbackHash, fallbackBlob);
             }
         }
     }
