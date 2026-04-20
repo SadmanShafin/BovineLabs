@@ -338,7 +338,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: BovineLabs.Timeline.Animation.Authoring::BovineLabs.Timeline.Animation.Authoring.BlendTree2DClip
   BlendParameter:
     x: 0
-    y: 1
+    y: 0
   blendDirectionComponentTarget: 0
 --- !u!114 &6261315033065379634
 MonoBehaviour:
@@ -381,4 +381,4 @@ MonoBehaviour:
   BlendParameter:
     x: 0.7
     y: 0.7
-  blendDirectionComponentTarget: 0
+  blendDirectionComponentTarget: 1
