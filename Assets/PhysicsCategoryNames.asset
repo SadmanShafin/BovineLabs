@@ -13,20 +13,20 @@ MonoBehaviour:
   m_Name: PhysicsCategoryNames
   m_EditorClassIdentifier: Unity.Physics.Custom::Unity.Physics.Authoring.PhysicsCategoryNames
   m_CategoryNames:
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - ground
-  - enemy
-  - player
-  - weapon
-  - 
-  - 
+  - StaticGeometry
+  - DynamicGeometry
+  - Environment
+  - Hazards
+  - Blocker
+  - PlayerBody
+  - EnemyBody
+  - PlayerHitbox
+  - PlayerHurtbox
+  - EnemyHitbox
+  - EnemyHurtbox
+  - Conduit
+  - Interactable
+  - Sensor
   - 
   - 
   - 
