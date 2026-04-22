@@ -18,4 +18,4 @@ MonoBehaviour:
   defaultValue: 0
   range: {x: 0, y: 99}
   minStat: {fileID: 0}
-  maxStat: {fileID: 0}
+  maxStat: {fileID: 11400000, guid: 3c2b34b9047d44d6be323c7eaac3980d, type: 2}
