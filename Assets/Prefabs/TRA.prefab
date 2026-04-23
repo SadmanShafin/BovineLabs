@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 9004067756099737358}
   - component: {fileID: 1098962258232063701}
   - component: {fileID: 4616796968432120501}
+  - component: {fileID: 1433335432143944984}
   m_Layer: 0
   m_Name: TRA
   m_TagString: Untagged
@@ -184,3 +185,45 @@ MonoBehaviour:
   - Intrinsic: {fileID: 11400000, guid: edcc8c3a9d4e8d1328e7b6922fd354aa, type: 2}
     Amount: 20
     Target: 1
+--- !u!114 &1433335432143944984
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7912966824055113308}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa5ecda837bb43eab25da6fc98bb6bfa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: BovineLabs.Timeline.Essence.Authoring::BovineLabs.Essence.Authoring.Actions.ActionTickDistributionAuthoring
+  Distributions:
+  - Curve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 3
+        inWeight: 0
+        outWeight: 0.333333
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 3.0000029
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 3
+        inWeight: 0.33333302
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    TotalTicksStat: {fileID: 0}
+    StatTarget: 0
+    Intrinsic: {fileID: 0}
+    IntrinsicTarget: 0
+    Event: {fileID: 0}
