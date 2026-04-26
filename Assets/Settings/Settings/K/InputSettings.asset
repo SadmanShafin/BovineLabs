@@ -13,6 +13,14 @@ MonoBehaviour:
   m_Name: InputSettings
   m_EditorClassIdentifier: Bovinelabs.Timeline.PlayerInputs.Data::Bovinelabs.Timeline.PlayerInputs.Data.InputSettings
   description: 
-  inputActionReferences:
-  - {fileID: -2099379676528639254, guid: 052faaac586de48259a63d0c4782560b, type: 3}
-  - {fileID: -1680190386980627800, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  inputActions:
+  - Input: {fileID: -1680190386980627800, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+    Events:
+    - Phase: 0
+      Condition:
+        Value: 25
+      Value: 0
+    - Phase: 0
+      Condition:
+        Value: 150
+      Value: 0
