@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 440095c87aa76057688288916ad04fab, type: 3}
+  m_Name: SourceTags
+  m_EditorClassIdentifier: BovineLabs.EntityLinks::BovineLabs.EntityLinks.EntityLinkKeys
+  description: 
+  sourceSchemas:
+  - {fileID: 11400000, guid: 226b0052de3c956149bb824f68319df3, type: 2}
+  - {fileID: 11400000, guid: 76647808ebb7b0bbb904a697f563fa51, type: 2}
+  - {fileID: 11400000, guid: e171bfe1e0df23080a0cd0d1e36236d2, type: 2}
+  - {fileID: 11400000, guid: 9f78876b9a0bcaf1097a466640df4bf6, type: 2}
+  - {fileID: 11400000, guid: 396eae5308942e2c5a06a0975df02c43, type: 2}
+  - {fileID: 11400000, guid: 6b27ddd61cc53ac27aa8b2fb413538da, type: 2}
+  - {fileID: 11400000, guid: cf2c34d74403c0e47992813b36f9cd8e, type: 2}
+  - {fileID: 11400000, guid: 82c8b7806cd430c0cbb4e26755d8cdee, type: 2}
+  - {fileID: 11400000, guid: c64308e537c154da0a1dd899467e2a9a, type: 2}
