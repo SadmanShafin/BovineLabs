@@ -1,29 +1,25 @@
 {
-    "name": "Scripts.Debug",
+    "name": "Targets.Debug",
     "rootNamespace": "",
     "references": [
         "BovineLabs.Core",
-        "BovineLabs.Core.Editor",
-        "Scripts",
-        "Scripts.Data",
+        "BovineLabs.Reaction.Data",
+        "BovineLabs.Timeline.Data",
+        "BovineLabs.Timeline.Targets",
+        "BovineLabs.Quill",
         "Unity.Burst",
         "Unity.Collections",
         "Unity.Entities",
         "Unity.Mathematics",
-        "Unity.Transforms",
-        "Unity.UIElements",
-        "Unity.UIElements.Toolkit"
+        "Unity.Transforms"
     ],
-    "optionalUnityReferences": [],
-    "includePlatforms": [
-        "Editor"
-    ],
+    "includePlatforms": ["Editor"],
     "excludePlatforms": [],
     "allowUnsafeCode": true,
     "overrideReferences": false,
     "precompiledReferences": [],
     "autoReferenced": false,
-    "defineConstraints": [],
+    "defineConstraints": ["UNITY_EDITOR || BL_DEBUG"],
     "versionDefines": [],
     "noEngineReferences": false
 }

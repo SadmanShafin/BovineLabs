@@ -2,5 +2,13 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Packages/BovineLabs.Spatial" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Packages/BovineLabs.Timeline.Animation" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Packages/BovineLabs.Timeline.Core" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Packages/BovineLabs.Timeline.EntityLinks" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Packages/BovineLabs.Timeline.Essence" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Packages/BovineLabs.Timeline.Physics" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Packages/BovineLabs.Timeline.PlayerInputs" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Packages/BovineLabs.Timeline.Time" vcs="Git" />
   </component>
 </project>
