@@ -12,5 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a69e6db8b21c3d69e883ed102e739b98, type: 3}
   m_Name: SpatialGridSettings
   m_EditorClassIdentifier: BovineLabs.Spatial::BovineLabs.Spatial.Settings.SpatialGridSettings
-  cellSize: 2
+  cellSize: 0.5
   activeMapSize: 100
+  cameraOffset: 0
