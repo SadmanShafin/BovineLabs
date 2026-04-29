@@ -192,7 +192,6 @@ GameObject:
   - component: {fileID: 356887548}
   - component: {fileID: 356887547}
   - component: {fileID: 356887549}
-  - component: {fileID: 356887550}
   m_Layer: 0
   m_Name: Combat and Loc
   m_TagString: Untagged
@@ -253,26 +252,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: BovineLabs.Core.Authoring::BovineLabs.Core.Authoring.TransformAuthoring
   TransformUsageFlags: 2
---- !u!114 &356887550
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 356887545}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d94505da470cb8dcab0dad652007d170, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: BovineLabs.Timeline.Combat.Authoring::BovineLabs.Timeline.Combat.Authoring.CombatAgentAuthoring
-  physicsLink: {fileID: 0}
-  essenceLink: {fileID: 0}
-  maxSpeed: 10
-  maxAcceleration: 50
-  turnSpeed: 15
-  angularDamping: 10
-  sensorRadius: 20
-  maxSensedTargets: 8
 --- !u!1 &440108312
 GameObject:
   m_ObjectHideFlags: 0
@@ -1137,7 +1116,9 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1
-  m_Children: []
+  m_Children:
+  - {fileID: 1319626932}
+  - {fileID: 1387560017}
   m_Father: {fileID: 1749563369}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &588256447
@@ -1304,8 +1285,8 @@ MonoBehaviour:
   m_MotionType: 0
   m_Smoothing: 0
   m_Mass: 1
-  m_LinearDamping: 0.01
-  m_AngularDamping: 0.05
+  m_LinearDamping: 1
+  m_AngularDamping: 1
   m_InitialLinearVelocity:
     x: 0
     y: 0
@@ -1315,7 +1296,7 @@ MonoBehaviour:
     y: 0
     z: 0
   m_GravityFactor: 1
-  m_OverrideDefaultMassDistribution: 0
+  m_OverrideDefaultMassDistribution: 1
   m_CenterOfMass:
     x: 0
     y: 0
@@ -1327,9 +1308,9 @@ MonoBehaviour:
       z: 0
     RotationOrder: 4
   m_InertiaTensor:
-    x: 0.4
+    x: Infinity
     y: 0.4
-    z: 0.4
+    z: Infinity
   m_SolverType: 0
   m_WorldIndex: 0
   m_CustomTags:
@@ -1387,7 +1368,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: bfa42ba6d484e4e448024c9acf736ce9, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 4.08
+      value: 1.39
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: bfa42ba6d484e4e448024c9acf736ce9, type: 3}
       propertyPath: m_LocalRotation.w
@@ -1606,7 +1587,7 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 1749563369}
+    m_TransformParent: {fileID: 588256446}
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: 45e46922349eb5144bb396aa0f5d85f5, type: 3}
       propertyPath: m_LocalPosition.x
@@ -1682,6 +1663,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 435279536478608640, guid: 45e46922349eb5144bb396aa0f5d85f5, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1697952400}
+    - targetCorrespondingSourceObject: {fileID: 435279536478608640, guid: 45e46922349eb5144bb396aa0f5d85f5, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1697952401}
   m_SourcePrefab: {fileID: 100100000, guid: 45e46922349eb5144bb396aa0f5d85f5, type: 3}
 --- !u!1 &1319626923 stripped
 GameObject:
@@ -1808,12 +1792,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1387560016}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1
   m_Children: []
-  m_Father: {fileID: 1749563369}
+  m_Father: {fileID: 588256446}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1387560018
 MonoBehaviour:
@@ -2043,6 +2027,7 @@ GameObject:
   - component: {fileID: 1452734294}
   - component: {fileID: 1452734295}
   - component: {fileID: 1452734296}
+  - component: {fileID: 1452734297}
   m_Layer: 0
   m_Name: Ball
   m_TagString: Untagged
@@ -2368,6 +2353,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 837071d424172fedfad1570f5bda42dc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: BovineLabs.Spatial.Authoring::BovineLabs.Spatial.Authoring.NeighborTargetAuthoring
+--- !u!114 &1452734297
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1452734287}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5ce5be625b13416781e3426ee2109abf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: BovineLabs.Core.Authoring::BovineLabs.Core.Authoring.TransformAuthoring
+  TransformUsageFlags: 2
 --- !u!1 &1642187687
 GameObject:
   m_ObjectHideFlags: 0
@@ -2627,6 +2625,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: BovineLabs.Timeline.EntityLinks.Authoring::BovineLabs.Timeline.EntityLinks.Authoring.EntityLinkSourceAuthoring
   Root: {fileID: 1749563370}
   Schemas: []
+--- !u!114 &1697952401
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1697952398}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5ce5be625b13416781e3426ee2109abf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: BovineLabs.Core.Authoring::BovineLabs.Core.Authoring.TransformAuthoring
+  TransformUsageFlags: 2
 --- !u!1 &1715107373
 GameObject:
   m_ObjectHideFlags: 0
@@ -2816,6 +2827,7 @@ GameObject:
   - component: {fileID: 1749563369}
   - component: {fileID: 1749563370}
   - component: {fileID: 1749563371}
+  - component: {fileID: 1749563372}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -2836,9 +2848,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1
   m_Children:
-  - {fileID: 1319626932}
   - {fileID: 459224083}
-  - {fileID: 1387560017}
   - {fileID: 160821345}
   - {fileID: 356887546}
   - {fileID: 440108313}
@@ -2859,12 +2869,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: BovineLabs.Timeline.EntityLinks.Authoring::BovineLabs.Timeline.EntityLinks.Authoring.EntityLinkRootAuthoring
   Links:
   - {fileID: 1749563371}
-  - {fileID: 1319626929}
-  - {fileID: 1697952400}
   - {fileID: 459224086}
-  - {fileID: 1387560024}
   - {fileID: 160821347}
   - {fileID: 588256449}
+  - {fileID: 1319626929}
+  - {fileID: 1697952400}
+  - {fileID: 1387560024}
 --- !u!114 &1749563371
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2880,6 +2890,19 @@ MonoBehaviour:
   Root: {fileID: 1749563370}
   Schemas:
   - {fileID: 11400000, guid: c0c683033c37a137fae122e6ee8300c9, type: 2}
+--- !u!114 &1749563372
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1749563368}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5ce5be625b13416781e3426ee2109abf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: BovineLabs.Core.Authoring::BovineLabs.Core.Authoring.TransformAuthoring
+  TransformUsageFlags: 2
 --- !u!1 &1775309408
 GameObject:
   m_ObjectHideFlags: 0
