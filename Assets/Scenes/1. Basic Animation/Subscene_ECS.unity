@@ -1458,6 +1458,10 @@ GameObject:
   - component: {fileID: 1241495310}
   - component: {fileID: 1241495309}
   - component: {fileID: 1241495308}
+  - component: {fileID: 1241495314}
+  - component: {fileID: 1241495313}
+  - component: {fileID: 1241495312}
+  - component: {fileID: 1241495315}
   m_Layer: 0
   m_Name: TImeline
   m_TagString: Untagged
@@ -1581,6 +1585,84 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1241495312
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1241495307}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f6d5a07a3cf34c9da0f7aa29435adad0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: BovineLabs.Reaction.Authoring::BovineLabs.Reaction.Authoring.Core.ReactionAuthoring
+  Active:
+    trigger: 0
+    cooldown: 0
+    cooldownAfterDuration: 0
+    duration: 0
+    cancellable: 0
+  Conditions:
+    conditions: []
+    conditionLogic:
+      expression: 
+    chanceToTrigger: 1
+    doNotReset: 0
+  references:
+    version: 2
+    RefIds: []
+--- !u!114 &1241495313
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1241495307}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0038df9991804dab9b4127193908728a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: BovineLabs.Reaction.Authoring::BovineLabs.Reaction.Authoring.Core.TargetsAuthoring
+  Owner: {fileID: 0}
+  Source: {fileID: 0}
+  Target: {fileID: 1749563368}
+  Custom:
+    Enable: 0
+    Target0: {fileID: 0}
+    Target1: {fileID: 0}
+  Initialize:
+    Target: 1
+--- !u!114 &1241495314
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1241495307}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2d1839be73e81ae4c97132df4493e93f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: BovineLabs.Core.Extensions.Authoring::BovineLabs.Core.Authoring.LifeCycle.LifeCycleAuthoring
+--- !u!114 &1241495315
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1241495307}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8dcbda6791f5f841a9bee881a1df3ac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: BovineLabs.Reaction.Timeline.Authoring::BovineLabs.Reaction.Timeline.Authoring.ActionTimelineAuthoring
+  Timelines:
+  - Director: {fileID: 0}
+    InitialTime: 0
+    DisableTimelineOnDeactivate: 0
+    ResetWhenActive: 0
+    Bindings: []
 --- !u!1001 &1319626922
 PrefabInstance:
   m_ObjectHideFlags: 0
