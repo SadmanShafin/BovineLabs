@@ -28,7 +28,7 @@ MonoBehaviour:
   m_Version: 3
   m_AnimClip: {fileID: 0}
   m_Locked: 0
-  m_Muted: 0
+  m_Muted: 1
   m_CustomPlayableFullTypename: 
   m_Curves: {fileID: 0}
   m_Parent: {fileID: 11400000}
@@ -848,7 +848,8 @@ MonoBehaviour:
   rotationMode: 2
   rotationOffset: {x: 0, y: 0, z: 0}
   assignParent: 1
-  assignParentLink: {fileID: 0}
+  assignParentLink: {fileID: 11400000, guid: a83fe61ae6391c5d19028cc5f30e8892, type: 2}
+  targetLinkOverride: {fileID: 0}
 --- !u!114 &3742618853116167990
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1391,7 +1392,7 @@ MonoBehaviour:
   m_Version: 3
   m_AnimClip: {fileID: 0}
   m_Locked: 0
-  m_Muted: 0
+  m_Muted: 1
   m_CustomPlayableFullTypename: 
   m_Curves: {fileID: 0}
   m_Parent: {fileID: 11400000}
@@ -1501,7 +1502,7 @@ MonoBehaviour:
   m_Version: 3
   m_AnimClip: {fileID: 0}
   m_Locked: 0
-  m_Muted: 1
+  m_Muted: 0
   m_CustomPlayableFullTypename: 
   m_Curves: {fileID: 0}
   m_Parent: {fileID: 11400000}
