@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: SpatialMaskAsset
   m_EditorClassIdentifier: BovineLabs.Spatial.Authoring::BovineLabs.Spatial.Authoring.SpatialMaskAsset
   id: 1
-  width: 3
-  height: 3
-  values: 030303030003030303
+  width: 5
+  height: 5
+  values: 0505050505000a0a0a00000000000000000000000000000000
