@@ -1764,7 +1764,7 @@ PlayableDirector:
     value: {fileID: 1387560018}
   - key: {fileID: 5457701888208028253, guid: 6859290a3f49de0e19ca9bee321e85e9, type: 2}
     value: {fileID: 1387560018}
-  - key: {fileID: 4647803513463709322, guid: 6859290a3f49de0e19ca9bee321e85e9, type: 2}
+  - key: {fileID: 0}
     value: {fileID: 459224084}
   - key: {fileID: 7629110967774230932, guid: 6859290a3f49de0e19ca9bee321e85e9, type: 2}
     value: {fileID: 1452734289}
@@ -1776,6 +1776,14 @@ PlayableDirector:
     value: {fileID: 1452734289}
   - key: {fileID: 9021596343527273512, guid: 6859290a3f49de0e19ca9bee321e85e9, type: 2}
     value: {fileID: 1452734295}
+  - key: {fileID: 0}
+    value: {fileID: 459224084}
+  - key: {fileID: -5174208988558451568, guid: 6859290a3f49de0e19ca9bee321e85e9, type: 2}
+    value: {fileID: 459224084}
+  - key: {fileID: -4991845983732575270, guid: 6859290a3f49de0e19ca9bee321e85e9, type: 2}
+    value: {fileID: 459224084}
+  - key: {fileID: -5031337880447802677, guid: 6859290a3f49de0e19ca9bee321e85e9, type: 2}
+    value: {fileID: 459224084}
   m_ExposedReferences:
     m_References: []
 --- !u!4 &1241495310
@@ -2219,7 +2227,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bb54ea4f67dc17342bcd49954c53502d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Physics.Hybrid::Unity.Physics.Authoring.PhysicsDebugDisplayAuthoring
-  DrawColliders: 1
+  DrawColliders: 0
   DrawColliderEdges: 0
   DrawColliderAabbs: 0
   DrawMassProperties: 0
