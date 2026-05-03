@@ -14,6 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: BovineLabs.Spatial::BovineLabs.Spatial.Settings.SpatialGridSettings
   cellSize: 0.5
   activeMapSize: 100
-  cameraOffset: 0
   schemas:
   - {fileID: 11400000, guid: 2cc49b473e9e067e2911a87404b0b2b7, type: 2}
