@@ -1,21 +1,19 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements">
-    <ui:VisualElement
-        style="background-color: rgba(0, 0, 0, 0.85); padding: 15px; margin: 10px; border-radius: 8px; width: 250px;">
-        <ui:Label text="PLAYER ESSENCE"
-                  style="color: white; font-size: 16px; -unity-font-style: bold; margin-bottom: 5px;" />
-        <ui:Label style="color: #AACCFF; font-size: 14px;">
+<ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
+    <ui:VisualElement style="background-color: rgba(0, 0, 0, 0.85); padding: 15px; margin: 10px; border-radius: 8px; width: 250px;">
+        <ui:Label text="PLAYER ESSENCE" style="color: white; font-size: 16px; -unity-font-style: bold; margin-bottom: 5px;"/>
+        <ui:Label text="dsa" style="color: rgb(170, 204, 255); font-size: 14px;">
             <Bindings>
-                <ui:DataBinding property="text" data-source-path="StatsText" />
+                <ui:DataBinding property="text" data-source-path="StatsText"/>
             </Bindings>
         </ui:Label>
-        <ui:Label style="color: #FFAACC; font-size: 14px;">
+        <ui:Label text="ds" style="color: rgb(255, 170, 204); font-size: 14px;">
             <Bindings>
-                <ui:DataBinding property="text" data-source-path="IntrinsicsText" />
+                <ui:DataBinding property="text" data-source-path="IntrinsicsText"/>
             </Bindings>
         </ui:Label>
-        <ui:Label style="color: #CCFFAA; font-size: 14px; -unity-font-style: bold;">
+        <ui:Label text="dsa" style="color: rgb(204, 255, 170); font-size: 14px; -unity-font-style: bold;">
             <Bindings>
-                <ui:DataBinding property="text" data-source-path="EventsText" />
+                <ui:DataBinding property="text" data-source-path="EventsText"/>
             </Bindings>
         </ui:Label>
     </ui:VisualElement>
