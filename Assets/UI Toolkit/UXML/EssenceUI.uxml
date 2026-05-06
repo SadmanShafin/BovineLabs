@@ -1,9 +1,16 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:bl="BovineLabs.Anchor.Elements">
-    
-    <ui:VisualElement data-source-type="BovineLabs.Timeline.UI.Data.ViewModel.EssenceUIViewModel, BovineLabs.Timeline.UI.Data" style="position: absolute; width: 100%; height: 100%; picking-mode: ignore;">
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement data-source-type="BovineLabs.Timeline.UI.Data.ViewModel.EssenceUIViewModel, BovineLabs.Timeline.UI.Data" style="position: absolute; width: 100%; height: 100%; padding: 50px; picking-mode: ignore;">
         
-        <!-- The GridView will automatically spawn one 'PlayerUIBlock' per active player -->
-        <bl:AnchorGridView items-source-path="Players" style="width: 100%; height: 100%; picking-mode: ignore; flex-direction: row; justify-content: center; align-items: flex-end; padding-bottom: 50px;" />
+        <Bindings>
+            <ui:DataBinding property="style.display" data-source-path="IsVisible" converter-id="DisplayStyle" />
+        </Bindings>
 
+        <!-- The Text Dump -->
+        <ui:Label style="font-size: 24px; color: white; -unity-font-style: bold; white-space: normal; background-color: rgba(0,0,0,0.8); padding: 20px; border-radius: 10px;">
+            <Bindings>
+                <ui:DataBinding property="text" data-source-path="DumpText" />
+            </Bindings>
+        </ui:Label>
+        
     </ui:VisualElement>
 </ui:UXML>

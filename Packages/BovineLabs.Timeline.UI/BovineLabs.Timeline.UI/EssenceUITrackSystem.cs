@@ -3,6 +3,7 @@ using BovineLabs.Essence.Data;
 using BovineLabs.Reaction.Data.Conditions;
 using BovineLabs.Timeline;
 using BovineLabs.Timeline.Data;
+using BovineLabs.Timeline.Essence;
 using BovineLabs.Timeline.UI.Data;
 using BovineLabs.Timeline.UI.Data.ViewModel;
 using Unity.Burst;
@@ -12,60 +13,58 @@ using Unity.Entities;
 namespace BovineLabs.Timeline.UI
 {
     [UpdateInGroup(typeof(TimelineComponentAnimationGroup))]
-    [WorldSystemFilter(WorldSystemFilterFlags.LocalSimulation | WorldSystemFilterFlags.ClientSimulation |
-                       WorldSystemFilterFlags.ServerSimulation | WorldSystemFilterFlags.Presentation)]
+    [UpdateAfter(typeof(TimelineEssenceStatSystem))]
+    [UpdateAfter(typeof(TimelineEssenceIntrinsicSystem))]
+    [UpdateAfter(typeof(TimelineEssenceEventSystem))]
+    [WorldSystemFilter(
+        WorldSystemFilterFlags.LocalSimulation |
+        WorldSystemFilterFlags.ClientSimulation |
+        WorldSystemFilterFlags.ServerSimulation |
+        WorldSystemFilterFlags.Presentation
+    )]
     public partial struct EssenceUITrackSystem : ISystem, ISystemStartStop
     {
-        private UIHelper<EssenceUIViewModel, EssenceUIViewModel.Data> uiHelper;
-        private NativeList<PlayerUIBlock> players;
+        private UIHelper<EssenceUIViewModel, EssenceUIViewModel.Data> _uiHelper;
 
         public void OnCreate(ref SystemState state)
         {
-            uiHelper = new UIHelper<EssenceUIViewModel, EssenceUIViewModel.Data>(ref state,
-                ComponentType.ReadOnly<ClipStat>());
-            this.players = new NativeList<PlayerUIBlock>(4, Allocator.Persistent);
+            _uiHelper = new UIHelper<EssenceUIViewModel, EssenceUIViewModel.Data>(ref state, ComponentType.ReadOnly<ClipStat>());
         }
 
-        public void OnDestroy(ref SystemState state)
-        {
-            if (this.players.IsCreated) this.players.Dispose();
-        }
-
-        public void OnStartRunning(ref SystemState state) => uiHelper.Bind();
-        public void OnStopRunning(ref SystemState state) => uiHelper.Unbind();
+        public void OnStartRunning(ref SystemState state) => _uiHelper.Bind();
+        public void OnStopRunning(ref SystemState state) => _uiHelper.Unbind();
 
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
-            state.Dependency.Complete();
-
             float dt = SystemAPI.Time.DeltaTime;
 
             var statsLookup = SystemAPI.GetBufferLookup<Stat>(true);
             var intrinsicsLookup = SystemAPI.GetBufferLookup<Intrinsic>(true);
             var conditionEventsLookup = SystemAPI.GetBufferLookup<ConditionEvent>(true);
+            var activeUIEventsLookup = SystemAPI.GetBufferLookup<ActiveUIEvent>();
 
-            this.players.Clear();
+            state.Dependency.Complete();
 
-            foreach (var (clipStats, clipIntrinsics, clipEvents, _activeEvents, trackBinding) in
-                     SystemAPI
-                         .Query<DynamicBuffer<ClipStat>, DynamicBuffer<ClipIntrinsic>, DynamicBuffer<ClipEvent>,
-                             DynamicBuffer<ActiveUIEvent>, RefRO<TrackBinding>>()
-                         .WithAll<TimelineActive, ClipActive>())
+            bool isVisible = false;
+            FixedString4096Bytes dumpText = new FixedString4096Bytes();
+
+            foreach (var (clipStats, clipIntrinsics, clipEvents, _activeEvents, trackBinding, entity) in 
+                     SystemAPI.Query<DynamicBuffer<ClipStat>, DynamicBuffer<ClipIntrinsic>, DynamicBuffer<ClipEvent>, DynamicBuffer<ActiveUIEvent>, RefRO<TrackBinding>>().WithEntityAccess()
+                     .WithAll<TimelineActive, ClipActive>())
             {
+                isVisible = true;
+                Entity player = trackBinding.ValueRO.Value;
+
                 var activeEvents = _activeEvents;
 
-                Entity player = trackBinding.ValueRO.Value;
-                var block = new PlayerUIBlock { PlayerEntity = player };
+                dumpText.Append($"--- PLAYER {player.Index} ---\n");
 
                 if (statsLookup.TryGetBuffer(player, out var stats))
                 {
                     foreach (var s in clipStats)
                     {
-                        block.StatsText.Append(s.Name);
-                        block.StatsText.Append(": ");
-                        block.StatsText.Append(stats.GetValueFloat(s.Key));
-                        block.StatsText.Append("\n");
+                        dumpText.Append($"[STAT] {s.Name}: {stats.GetValueFloat(s.Key)}\n");
                     }
                 }
 
@@ -73,10 +72,7 @@ namespace BovineLabs.Timeline.UI
                 {
                     foreach (var i in clipIntrinsics)
                     {
-                        block.IntrinsicsText.Append(i.Name);
-                        block.IntrinsicsText.Append(": ");
-                        block.IntrinsicsText.Append(intrinsics.GetValue(i.Key));
-                        block.IntrinsicsText.Append("\n");
+                        dumpText.Append($"[INT] {i.Name}: {intrinsics.GetValue(i.Key)}\n");
                     }
                 }
 
@@ -87,7 +83,7 @@ namespace BovineLabs.Timeline.UI
                     if (ev.TimeRemaining <= 0)
                         activeEvents.RemoveAtSwapBack(e);
                     else
-                        activeEvents[e] = ev;
+                        activeEvents[e] = ev; 
                 }
 
                 if (conditionEventsLookup.TryGetBuffer(player, out var conditionEvents))
@@ -110,26 +106,22 @@ namespace BovineLabs.Timeline.UI
                                     break;
                                 }
                             }
-
-                            if (!found)
-                                activeEvents.Add(new ActiveUIEvent
-                                    { Key = ce.Key, Name = ce.Name, Value = val, TimeRemaining = ce.Duration });
+                            if (!found) activeEvents.Add(new ActiveUIEvent { Key = ce.Key, Name = ce.Name, Value = val, TimeRemaining = ce.Duration });
                         }
                     }
                 }
 
                 foreach (var ev in activeEvents)
                 {
-                    block.EventsText.Append(ev.Name);
-                    block.EventsText.Append("! (");
-                    block.EventsText.Append(ev.Value);
-                    block.EventsText.Append(")\n");
+                    dumpText.Append($"[EVENT] {ev.Name}! ({ev.Value})\n");
                 }
-
-                this.players.Add(block);
+                
+                dumpText.Append("\n");
             }
 
-            uiHelper.Binding.Players = this.players;
+            ref var data = ref _uiHelper.Binding;
+            data.IsVisible = isVisible;
+            data.DumpText = dumpText;
         }
     }
 }

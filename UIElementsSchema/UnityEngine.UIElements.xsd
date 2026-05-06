@@ -116,11 +116,97 @@
     </xs:complexContent>
   </xs:complexType>
   <xs:element name="TextField" substitutionGroup="tns:BindableElement" type="tns:TextFieldType" />
+  <xs:complexType name="ScrollViewType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:VisualElementType">
+        <xs:choice />
+        <xs:attribute default="Vertical" name="mode" type="tns:ScrollViewModeType" />
+        <xs:attribute default="Default" name="nested-interaction-kind" type="tns:ScrollView_NestedInteractionKindType" />
+        <xs:attribute default="false" name="show-horizontal-scroller" type="xs:boolean" />
+        <xs:attribute default="false" name="show-vertical-scroller" type="xs:boolean" />
+        <xs:attribute default="Auto" name="horizontal-scroller-visibility" type="tns:ScrollerVisibilityType" />
+        <xs:attribute default="Auto" name="vertical-scroller-visibility" type="tns:ScrollerVisibilityType" />
+        <xs:attribute default="-1" name="horizontal-page-size" type="xs:float" />
+        <xs:attribute default="-1" name="vertical-page-size" type="xs:float" />
+        <xs:attribute default="18" name="mouse-wheel-scroll-size" type="xs:float" />
+        <xs:attribute default="Clamped" name="touch-scroll-type" type="tns:ScrollView_TouchScrollBehaviorType" />
+        <xs:attribute default="0.135" name="scroll-deceleration-rate" type="xs:float" />
+        <xs:attribute default="0.1" name="elasticity" type="xs:float" />
+        <xs:attribute default="16" name="elastic-animation-interval-ms" type="xs:long" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:simpleType name="ScrollViewModeType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Vertical" />
+      <xs:enumeration value="Horizontal" />
+      <xs:enumeration value="VerticalAndHorizontal" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="ScrollView_NestedInteractionKindType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Default" />
+      <xs:enumeration value="StopScrolling" />
+      <xs:enumeration value="ForwardScrolling" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="ScrollView_TouchScrollBehaviorType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Unrestricted" />
+      <xs:enumeration value="Elastic" />
+      <xs:enumeration value="Clamped" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:element name="ScrollView" substitutionGroup="tns:VisualElement" type="tns:ScrollViewType" />
+  <xs:simpleType name="SelectionTypeType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="None" />
+      <xs:enumeration value="Single" />
+      <xs:enumeration value="Multiple" />
+    </xs:restriction>
+  </xs:simpleType>
   <xs:simpleType name="BindingUpdateTriggerType">
     <xs:restriction base="xs:string">
       <xs:enumeration value="WhenDirty" />
       <xs:enumeration value="OnSourceChanged" />
       <xs:enumeration value="EveryUpdate" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:complexType name="TextElementType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:BindableElementType">
+        <xs:choice />
+        <xs:attribute name="text" type="xs:string" />
+        <xs:attribute default="true" name="enable-rich-text" type="xs:boolean" />
+        <xs:attribute default="true" name="emoji-fallback-support" type="xs:boolean" />
+        <xs:attribute default="false" name="parse-escape-sequences" type="xs:boolean" />
+        <xs:attribute default="false" name="selectable" type="xs:boolean" />
+        <xs:attribute default="true" name="double-click-selects-word" type="xs:boolean" />
+        <xs:attribute default="true" name="triple-click-selects-line" type="xs:boolean" />
+        <xs:attribute default="true" name="display-tooltip-when-elided" type="xs:boolean" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="TextElement" substitutionGroup="tns:BindableElement" type="tns:TextElementType" />
+  <xs:complexType name="ImageType">
+    <xs:complexContent mixed="false">
+      <xs:extension base="tns:VisualElementType">
+        <xs:choice />
+        <xs:attribute name="source" type="xs:string" />
+        <xs:attribute default="rgb(255, 255, 255)" name="tint-color" type="xs:string" />
+        <xs:attribute default="ScaleToFit" name="scale-mode" xmlns:q4="UnityEngine" type="q4:ScaleModeType" />
+        <xs:attribute default="0,0,1,1" name="uv" type="xs:string" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="Image" substitutionGroup="tns:VisualElement" type="tns:ImageType" />
+  <xs:simpleType name="AlignType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Auto" />
+      <xs:enumeration value="FlexStart" />
+      <xs:enumeration value="Center" />
+      <xs:enumeration value="FlexEnd" />
+      <xs:enumeration value="Stretch" />
     </xs:restriction>
   </xs:simpleType>
   <xs:complexType name="ImmediateModeElementType">
@@ -169,22 +255,6 @@
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
-  <xs:complexType name="TextElementType">
-    <xs:complexContent mixed="false">
-      <xs:extension base="tns:BindableElementType">
-        <xs:choice />
-        <xs:attribute name="text" type="xs:string" />
-        <xs:attribute default="true" name="enable-rich-text" type="xs:boolean" />
-        <xs:attribute default="true" name="emoji-fallback-support" type="xs:boolean" />
-        <xs:attribute default="false" name="parse-escape-sequences" type="xs:boolean" />
-        <xs:attribute default="false" name="selectable" type="xs:boolean" />
-        <xs:attribute default="true" name="double-click-selects-word" type="xs:boolean" />
-        <xs:attribute default="true" name="triple-click-selects-line" type="xs:boolean" />
-        <xs:attribute default="true" name="display-tooltip-when-elided" type="xs:boolean" />
-      </xs:extension>
-    </xs:complexContent>
-  </xs:complexType>
-  <xs:element name="TextElement" substitutionGroup="tns:BindableElement" type="tns:TextElementType" />
   <xs:element name="Button" substitutionGroup="tns:TextElement" type="tns:ButtonType" />
   <xs:complexType name="LabelType">
     <xs:complexContent mixed="false">
@@ -194,48 +264,6 @@
     </xs:complexContent>
   </xs:complexType>
   <xs:element name="Label" substitutionGroup="tns:TextElement" type="tns:LabelType" />
-  <xs:complexType name="ScrollViewType">
-    <xs:complexContent mixed="false">
-      <xs:extension base="tns:VisualElementType">
-        <xs:choice />
-        <xs:attribute default="Vertical" name="mode" type="tns:ScrollViewModeType" />
-        <xs:attribute default="Default" name="nested-interaction-kind" type="tns:ScrollView_NestedInteractionKindType" />
-        <xs:attribute default="false" name="show-horizontal-scroller" type="xs:boolean" />
-        <xs:attribute default="false" name="show-vertical-scroller" type="xs:boolean" />
-        <xs:attribute default="Auto" name="horizontal-scroller-visibility" type="tns:ScrollerVisibilityType" />
-        <xs:attribute default="Auto" name="vertical-scroller-visibility" type="tns:ScrollerVisibilityType" />
-        <xs:attribute default="-1" name="horizontal-page-size" type="xs:float" />
-        <xs:attribute default="-1" name="vertical-page-size" type="xs:float" />
-        <xs:attribute default="18" name="mouse-wheel-scroll-size" type="xs:float" />
-        <xs:attribute default="Clamped" name="touch-scroll-type" type="tns:ScrollView_TouchScrollBehaviorType" />
-        <xs:attribute default="0.135" name="scroll-deceleration-rate" type="xs:float" />
-        <xs:attribute default="0.1" name="elasticity" type="xs:float" />
-        <xs:attribute default="16" name="elastic-animation-interval-ms" type="xs:long" />
-      </xs:extension>
-    </xs:complexContent>
-  </xs:complexType>
-  <xs:simpleType name="ScrollViewModeType">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="Vertical" />
-      <xs:enumeration value="Horizontal" />
-      <xs:enumeration value="VerticalAndHorizontal" />
-    </xs:restriction>
-  </xs:simpleType>
-  <xs:simpleType name="ScrollView_NestedInteractionKindType">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="Default" />
-      <xs:enumeration value="StopScrolling" />
-      <xs:enumeration value="ForwardScrolling" />
-    </xs:restriction>
-  </xs:simpleType>
-  <xs:simpleType name="ScrollView_TouchScrollBehaviorType">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="Unrestricted" />
-      <xs:enumeration value="Elastic" />
-      <xs:enumeration value="Clamped" />
-    </xs:restriction>
-  </xs:simpleType>
-  <xs:element name="ScrollView" substitutionGroup="tns:VisualElement" type="tns:ScrollViewType" />
   <xs:complexType name="ToggleType">
     <xs:complexContent mixed="false">
       <xs:extension base="tns:BindableElementType">
@@ -269,18 +297,6 @@
     </xs:restriction>
   </xs:simpleType>
   <xs:element name="HelpBox" substitutionGroup="tns:VisualElement" type="tns:HelpBoxType" />
-  <xs:complexType name="ImageType">
-    <xs:complexContent mixed="false">
-      <xs:extension base="tns:VisualElementType">
-        <xs:choice />
-        <xs:attribute name="source" type="xs:string" />
-        <xs:attribute default="rgb(255, 255, 255)" name="tint-color" type="xs:string" />
-        <xs:attribute default="ScaleToFit" name="scale-mode" xmlns:q4="UnityEngine" type="q4:ScaleModeType" />
-        <xs:attribute default="0,0,1,1" name="uv" type="xs:string" />
-      </xs:extension>
-    </xs:complexContent>
-  </xs:complexType>
-  <xs:element name="Image" substitutionGroup="tns:VisualElement" type="tns:ImageType" />
   <xs:complexType name="MaskFieldType">
     <xs:complexContent mixed="false">
       <xs:extension base="tns:BindableElementType">
@@ -360,13 +376,6 @@
     <xs:restriction base="xs:string">
       <xs:enumeration value="FixedHeight" />
       <xs:enumeration value="DynamicHeight" />
-    </xs:restriction>
-  </xs:simpleType>
-  <xs:simpleType name="SelectionTypeType">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="None" />
-      <xs:enumeration value="Single" />
-      <xs:enumeration value="Multiple" />
     </xs:restriction>
   </xs:simpleType>
   <xs:simpleType name="AlternatingRowBackgroundType">

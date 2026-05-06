@@ -17,6 +17,25 @@
       <xs:enumeration value="OneTimeCode" />
     </xs:restriction>
   </xs:simpleType>
+  <xs:simpleType name="ScaleModeType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="StretchToFill" />
+      <xs:enumeration value="ScaleAndCrop" />
+      <xs:enumeration value="ScaleToFit" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="EventModifiersType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="None" />
+      <xs:enumeration value="Shift" />
+      <xs:enumeration value="Control" />
+      <xs:enumeration value="Alt" />
+      <xs:enumeration value="Command" />
+      <xs:enumeration value="Numeric" />
+      <xs:enumeration value="CapsLock" />
+      <xs:enumeration value="FunctionKey" />
+    </xs:restriction>
+  </xs:simpleType>
   <xs:simpleType name="TextAnchorType">
     <xs:restriction base="xs:string">
       <xs:enumeration value="UpperLeft" />
@@ -36,13 +55,6 @@
       <xs:enumeration value="Bold" />
       <xs:enumeration value="Italic" />
       <xs:enumeration value="BoldAndItalic" />
-    </xs:restriction>
-  </xs:simpleType>
-  <xs:simpleType name="ScaleModeType">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="StretchToFill" />
-      <xs:enumeration value="ScaleAndCrop" />
-      <xs:enumeration value="ScaleToFit" />
     </xs:restriction>
   </xs:simpleType>
 </xs:schema>
