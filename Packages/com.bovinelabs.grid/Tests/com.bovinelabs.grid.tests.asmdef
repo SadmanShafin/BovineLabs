@@ -1,0 +1,14 @@
+{
+  "name": "com.bovinelabs.grid.tests",
+  "rootNamespace": "",
+  "references": ["com.bovinelabs.grid", "Unity.Collections", "Unity.Mathematics"],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": true,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": ["UNITY_INCLUDE_TESTS"],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

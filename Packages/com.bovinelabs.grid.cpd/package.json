@@ -1,0 +1,12 @@
+{
+  "name": "com.bovinelabs.grid.cpd",
+  "version": "0.1.0",
+  "displayName": "BovineLabs Grid Cpd",
+  "description": "Compressed Path Database.",
+  "unity": "6000.0",
+  "dependencies": {
+    "com.bovinelabs.grid": "0.1.0",
+    "com.unity.collections": "2.0.0",
+    "com.unity.mathematics": "1.0.0"
+  }
+}

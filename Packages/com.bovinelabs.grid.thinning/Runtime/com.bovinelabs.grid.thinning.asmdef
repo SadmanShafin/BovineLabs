@@ -1,0 +1,18 @@
+{
+  "name": "com.bovinelabs.grid.thinning",
+  "rootNamespace": "BovineLabs.Grid.Thinning",
+  "references": [
+    "com.bovinelabs.grid",
+    "Unity.Collections",
+    "Unity.Mathematics"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": true,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

@@ -1,13 +1,273 @@
 {
   "dependencies": {
-    "com.bovinelabs.core": {
-      "version": "https://gitlab.com/tertle/com.bovinelabs.core.git#1.6.1",
+    "com.bovinelabs.grid": {
+      "version": "file:com.bovinelabs.grid",
       "depth": 0,
-      "source": "git",
+      "source": "embedded",
       "dependencies": {
-        "com.unity.entities": "1.4.5"
-      },
-      "hash": "d49052fed7b03c3f390a109d53051d1ec5f5d109"
+        "com.unity.collections": "2.0.0",
+        "com.unity.mathematics": "1.0.0"
+      }
+    },
+    "com.bovinelabs.grid.anya": {
+      "version": "file:com.bovinelabs.grid.anya",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.bovinelabs.grid": "0.1.0",
+        "com.unity.collections": "2.0.0",
+        "com.unity.mathematics": "1.0.0"
+      }
+    },
+    "com.bovinelabs.grid.belief": {
+      "version": "file:com.bovinelabs.grid.belief",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.bovinelabs.grid": "0.1.0",
+        "com.unity.collections": "2.0.0",
+        "com.unity.mathematics": "1.0.0"
+      }
+    },
+    "com.bovinelabs.grid.cbs": {
+      "version": "file:com.bovinelabs.grid.cbs",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.bovinelabs.grid": "0.1.0",
+        "com.unity.collections": "2.0.0",
+        "com.unity.mathematics": "1.0.0"
+      }
+    },
+    "com.bovinelabs.grid.cftp": {
+      "version": "file:com.bovinelabs.grid.cftp",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.bovinelabs.grid": "0.1.0",
+        "com.unity.collections": "2.0.0",
+        "com.unity.mathematics": "1.0.0"
+      }
+    },
+    "com.bovinelabs.grid.continuum": {
+      "version": "file:com.bovinelabs.grid.continuum",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.bovinelabs.grid": "0.1.0",
+        "com.unity.collections": "2.0.0",
+        "com.unity.mathematics": "1.0.0"
+      }
+    },
+    "com.bovinelabs.grid.cpd": {
+      "version": "file:com.bovinelabs.grid.cpd",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.bovinelabs.grid": "0.1.0",
+        "com.unity.collections": "2.0.0",
+        "com.unity.mathematics": "1.0.0"
+      }
+    },
+    "com.bovinelabs.grid.domino": {
+      "version": "file:com.bovinelabs.grid.domino",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.bovinelabs.grid": "0.1.0",
+        "com.unity.collections": "2.0.0",
+        "com.unity.mathematics": "1.0.0"
+      }
+    },
+    "com.bovinelabs.grid.dstarlite": {
+      "version": "file:com.bovinelabs.grid.dstarlite",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.bovinelabs.grid": "0.1.0",
+        "com.unity.collections": "2.0.0",
+        "com.unity.mathematics": "1.0.0"
+      }
+    },
+    "com.bovinelabs.grid.dynamiccut": {
+      "version": "file:com.bovinelabs.grid.dynamiccut",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.bovinelabs.grid": "0.1.0",
+        "com.unity.collections": "2.0.0",
+        "com.unity.mathematics": "1.0.0"
+      }
+    },
+    "com.bovinelabs.grid.edt": {
+      "version": "file:com.bovinelabs.grid.edt",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.bovinelabs.grid": "0.1.0",
+        "com.unity.collections": "2.0.0",
+        "com.unity.mathematics": "1.0.0"
+      }
+    },
+    "com.bovinelabs.grid.fastmarching": {
+      "version": "file:com.bovinelabs.grid.fastmarching",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.bovinelabs.grid": "0.1.0",
+        "com.unity.collections": "2.0.0",
+        "com.unity.mathematics": "1.0.0"
+      }
+    },
+    "com.bovinelabs.grid.fastsweeping": {
+      "version": "file:com.bovinelabs.grid.fastsweeping",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.bovinelabs.grid": "0.1.0",
+        "com.unity.collections": "2.0.0",
+        "com.unity.mathematics": "1.0.0"
+      }
+    },
+    "com.bovinelabs.grid.fielddstar": {
+      "version": "file:com.bovinelabs.grid.fielddstar",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.bovinelabs.grid": "0.1.0",
+        "com.unity.collections": "2.0.0",
+        "com.unity.mathematics": "1.0.0"
+      }
+    },
+    "com.bovinelabs.grid.graphcut": {
+      "version": "file:com.bovinelabs.grid.graphcut",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.bovinelabs.grid": "0.1.0",
+        "com.unity.collections": "2.0.0",
+        "com.unity.mathematics": "1.0.0"
+      }
+    },
+    "com.bovinelabs.grid.hashlife": {
+      "version": "file:com.bovinelabs.grid.hashlife",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.bovinelabs.grid": "0.1.0",
+        "com.unity.collections": "2.0.0",
+        "com.unity.mathematics": "1.0.0"
+      }
+    },
+    "com.bovinelabs.grid.jps": {
+      "version": "file:com.bovinelabs.grid.jps",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.bovinelabs.grid": "0.1.0",
+        "com.unity.collections": "2.0.0",
+        "com.unity.mathematics": "1.0.0"
+      }
+    },
+    "com.bovinelabs.grid.kasteleyn": {
+      "version": "file:com.bovinelabs.grid.kasteleyn",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.bovinelabs.grid": "0.1.0",
+        "com.unity.collections": "2.0.0",
+        "com.unity.mathematics": "1.0.0"
+      }
+    },
+    "com.bovinelabs.grid.morse": {
+      "version": "file:com.bovinelabs.grid.morse",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.bovinelabs.grid": "0.1.0",
+        "com.unity.collections": "2.0.0",
+        "com.unity.mathematics": "1.0.0"
+      }
+    },
+    "com.bovinelabs.grid.rsr": {
+      "version": "file:com.bovinelabs.grid.rsr",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.bovinelabs.grid": "0.1.0",
+        "com.unity.collections": "2.0.0",
+        "com.unity.mathematics": "1.0.0"
+      }
+    },
+    "com.bovinelabs.grid.sandpile": {
+      "version": "file:com.bovinelabs.grid.sandpile",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.bovinelabs.grid": "0.1.0",
+        "com.unity.collections": "2.0.0",
+        "com.unity.mathematics": "1.0.0"
+      }
+    },
+    "com.bovinelabs.grid.sipp": {
+      "version": "file:com.bovinelabs.grid.sipp",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.bovinelabs.grid": "0.1.0",
+        "com.unity.collections": "2.0.0",
+        "com.unity.mathematics": "1.0.0"
+      }
+    },
+    "com.bovinelabs.grid.subgoal": {
+      "version": "file:com.bovinelabs.grid.subgoal",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.bovinelabs.grid": "0.1.0",
+        "com.unity.collections": "2.0.0",
+        "com.unity.mathematics": "1.0.0"
+      }
+    },
+    "com.bovinelabs.grid.thinning": {
+      "version": "file:com.bovinelabs.grid.thinning",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.bovinelabs.grid": "0.1.0",
+        "com.unity.collections": "2.0.0",
+        "com.unity.mathematics": "1.0.0"
+      }
+    },
+    "com.bovinelabs.grid.watershed": {
+      "version": "file:com.bovinelabs.grid.watershed",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.bovinelabs.grid": "0.1.0",
+        "com.unity.collections": "2.0.0",
+        "com.unity.mathematics": "1.0.0"
+      }
+    },
+    "com.bovinelabs.grid.wfc": {
+      "version": "file:com.bovinelabs.grid.wfc",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.bovinelabs.grid": "0.1.0",
+        "com.unity.collections": "2.0.0",
+        "com.unity.mathematics": "1.0.0"
+      }
+    },
+    "com.bovinelabs.grid.wilson": {
+      "version": "file:com.bovinelabs.grid.wilson",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.bovinelabs.grid": "0.1.0",
+        "com.unity.collections": "2.0.0",
+        "com.unity.mathematics": "1.0.0"
+      }
     },
     "com.unity.burst": {
       "version": "1.8.28",
@@ -76,9 +336,18 @@
       },
       "url": "https://packages.unity.com"
     },
+    "com.unity.inputsystem": {
+      "version": "1.19.0",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {
+        "com.unity.modules.uielements": "1.0.0"
+      },
+      "url": "https://packages.unity.com"
+    },
     "com.unity.mathematics": {
       "version": "1.4.0",
-      "depth": 2,
+      "depth": 1,
       "source": "builtin",
       "dependencies": {}
     },
@@ -188,13 +457,13 @@
       "url": "https://packages.unity.com"
     },
     "com.youngwoocho02.unity-cli-connector": {
-      "version": "https://github.com/IAFahim/unity-cli.git?path=unity-connector#main",
+      "version": "https://github.com/youngwoocho02/unity-cli.git?path=unity-connector",
       "depth": 0,
       "source": "git",
       "dependencies": {
         "com.unity.nuget.newtonsoft-json": "3.2.1"
       },
-      "hash": "7e1709200535a03b952a570e503e77e2a21ea4a8"
+      "hash": "886058c1bd3fd5f005cf31155fef6726260ce63c"
     },
     "com.unity.modules.animation": {
       "version": "1.0.0",

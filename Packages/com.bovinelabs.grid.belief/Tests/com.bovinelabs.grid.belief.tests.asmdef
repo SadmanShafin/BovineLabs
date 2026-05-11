@@ -1,0 +1,21 @@
+{
+  "name": "com.bovinelabs.grid.belief.tests",
+  "rootNamespace": "",
+  "references": [
+    "com.bovinelabs.grid",
+    "com.bovinelabs.grid.belief",
+    "Unity.Collections",
+    "Unity.Mathematics"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": true,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [
+    "UNITY_INCLUDE_TESTS"
+  ],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

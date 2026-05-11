@@ -1,0 +1,11 @@
+{
+  "name": "com.bovinelabs.grid",
+  "version": "0.1.0",
+  "displayName": "BovineLabs Grid Core",
+  "description": "Core grid data structures and utilities for grid algorithms.",
+  "unity": "6000.0",
+  "dependencies": {
+    "com.unity.collections": "2.0.0",
+    "com.unity.mathematics": "1.0.0"
+  }
+}

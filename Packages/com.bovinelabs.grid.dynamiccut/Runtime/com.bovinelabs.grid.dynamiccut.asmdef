@@ -1,0 +1,19 @@
+{
+  "name": "com.bovinelabs.grid.dynamiccut",
+  "rootNamespace": "BovineLabs.Grid.DynamicCut",
+  "references": [
+    "com.bovinelabs.grid",
+    "com.bovinelabs.grid.graphcut",
+    "Unity.Collections",
+    "Unity.Mathematics"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": true,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}
