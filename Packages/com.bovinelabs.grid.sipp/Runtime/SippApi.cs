@@ -1,27 +1,31 @@
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
+using Unity.Burst;
+using Unity.Burst.CompilerServices;
 using BovineLabs.Grid;
 
 namespace BovineLabs.Grid.Sipp
 {
     public struct SafeInterval { public int Cell; public float Start; public float End; }
 
-    public struct SippNode { public int Cell; public int Interval; public float Time; public float F; public int Parent; }
+    public struct SippNode { public int Cell; public int IntervalIdx; public float Time; public float F; public int Parent; }
 
     public struct DynamicObstacle { public int Cell; public float StartTime; public float EndTime; }
 
     public struct SippState
     {
         public Grid2D Grid;
-        public NativeList<SafeInterval> Intervals;
+        public UnsafeList<SafeInterval> Intervals;
         public NativeArray<RangeI> CellIntervals;
-        public NativeList<SippNode> Nodes;
+        public UnsafeList<SippNode> Nodes;
         public MinHeap Heap;
-        public NativeArray<float> BestTime;
-        public NativeList<DynamicObstacle> Obstacles;
+        public NativeArray<float> BestTime; // per interval index
+        public UnsafeList<DynamicObstacle> Obstacles;
     }
 
-    public static class SippApi
+    [BurstCompile]
+    public unsafe static class SippApi
     {
         public static SippState Create(int width, int height, int maxIntervals, int maxNodes, Allocator a)
         {
@@ -29,12 +33,12 @@ namespace BovineLabs.Grid.Sipp
             return new SippState
             {
                 Grid = g,
-                Intervals = new NativeList<SafeInterval>(maxIntervals, a),
+                Intervals = new UnsafeList<SafeInterval>(maxIntervals, a),
                 CellIntervals = new NativeArray<RangeI>(g.Length, a),
-                Nodes = new NativeList<SippNode>(maxNodes, a),
+                Nodes = new UnsafeList<SippNode>(maxNodes, a),
                 Heap = MinHeap.Create(maxNodes, a),
-                BestTime = new NativeArray<float>(g.Length, a),
-                Obstacles = new NativeList<DynamicObstacle>(maxIntervals, a),
+                BestTime = new NativeArray<float>(maxIntervals, a),
+                Obstacles = new UnsafeList<DynamicObstacle>(maxIntervals, a),
             };
         }
 
@@ -43,136 +47,104 @@ namespace BovineLabs.Grid.Sipp
             s.Obstacles.Add(new DynamicObstacle { Cell = cell, StartTime = startTime, EndTime = endTime });
         }
 
+        [BurstCompile]
         public static void BuildSafeIntervals(ref SippState s)
         {
             s.Intervals.Clear();
+            int cellCount = s.Grid.Length;
 
-            // Start with [0, inf) for all cells
-            // Then split intervals based on dynamic obstacles
-            // First, collect obstacles per cell
-            var cellObs = new NativeList<float>(s.Obstacles.Length * 2, Allocator.Temp);
-            var cellOffsets = new NativeArray<int>(s.Grid.Length, Allocator.Temp);
-            var cellCounts = new NativeArray<int>(s.Grid.Length, Allocator.Temp);
-            cellOffsets.Fill(0);
-            cellCounts.Fill(0);
+            // Sort obstacles by cell and then by start time
+            s.Obstacles.Sort(new ObstacleComparer());
 
-            // Count obstacles per cell
-            for (int i = 0; i < s.Obstacles.Length; i++)
-                cellCounts[s.Obstacles[i].Cell]++;
+            DynamicObstacle* obsPtr = s.Obstacles.Ptr;
+            int obsCount = s.Obstacles.Length;
+            int obsIdx = 0;
 
-            // Compute offsets
-            int offset = 0;
-            for (int i = 0; i < s.Grid.Length; i++)
-            {
-                cellOffsets[i] = offset;
-                offset += cellCounts[i] * 2; // start + end
-            }
-
-            cellObs.Resize(offset, NativeArrayOptions.ClearMemory);
-
-            // Fill obstacle times (just store start and end pairs)
-            var writeIdx = new NativeArray<int>(s.Grid.Length, Allocator.Temp);
-            NativeArray<int>.Copy(cellOffsets, writeIdx);
-            for (int i = 0; i < s.Obstacles.Length; i++)
-            {
-                int c = s.Obstacles[i].Cell;
-                cellObs[writeIdx[c]++] = s.Obstacles[i].StartTime;
-                cellObs[writeIdx[c]++] = s.Obstacles[i].EndTime;
-            }
-
-            // Build intervals per cell
-            for (int i = 0; i < s.Grid.Length; i++)
+            for (int i = 0; i < cellCount; i++)
             {
                 int start = s.Intervals.Length;
+                float t = 0f;
 
-                if (cellCounts[i] == 0)
+                while (obsIdx < obsCount && obsPtr[obsIdx].Cell == i)
                 {
-                    // No obstacles: single interval [0, inf)
-                    s.Intervals.Add(new SafeInterval { Cell = i, Start = 0f, End = float.PositiveInfinity });
+                    float obsStart = obsPtr[obsIdx].StartTime;
+                    float obsEnd = obsPtr[obsIdx].EndTime;
+
+                    if (t < obsStart)
+                    {
+                        s.Intervals.Add(new SafeInterval { Cell = i, Start = t, End = obsStart });
+                    }
+                    t = math.max(t, obsEnd);
+                    obsIdx++;
                 }
-                else
+
+                if (t < float.PositiveInfinity)
                 {
-                    // Parse obstacle time pairs and create safe intervals between them
-                    float t = 0f;
-                    for (int j = cellOffsets[i]; j < cellOffsets[i] + cellCounts[i] * 2; j += 2)
-                    {
-                        float obsStart = cellObs[j];
-                        float obsEnd = cellObs[j + 1];
-
-                        // Safe interval before this obstacle
-                        if (t < obsStart)
-                        {
-                            s.Intervals.Add(new SafeInterval { Cell = i, Start = t, End = obsStart });
-                        }
-                        t = obsEnd;
-                    }
-                    // Final interval after last obstacle
-                    if (t < float.PositiveInfinity)
-                    {
-                        s.Intervals.Add(new SafeInterval { Cell = i, Start = t, End = float.PositiveInfinity });
-                    }
-
-                    // If no safe intervals were created, add empty range
-                    if (s.Intervals.Length == start)
-                    {
-                        // Cell is blocked for all time — don't add any interval
-                    }
+                    s.Intervals.Add(new SafeInterval { Cell = i, Start = t, End = float.PositiveInfinity });
                 }
 
                 s.CellIntervals[i] = new RangeI(start, s.Intervals.Length - start);
             }
-
-            cellObs.Dispose(); cellOffsets.Dispose(); cellCounts.Dispose(); writeIdx.Dispose();
         }
 
+        [BurstCompile]
         public static bool Search(
             ref SippState s,
-            NativeArray<byte> blocked,
+            in NativeArray<byte> blocked,
             int start, int goal,
             float startTime,
-            NativeList<int> path)
+            ref NativeList<int> path)
         {
             s.Nodes.Clear();
             s.Heap.Clear();
             path.Clear();
             BuildSafeIntervals(ref s);
 
-            if (blocked[start] != 0 || blocked[goal] != 0) return false;
+            byte* blockedPtr = (byte*)blocked.GetUnsafeReadOnlyPtr();
+            if (Hint.Unlikely(blockedPtr[start] != 0 || blockedPtr[goal] != 0)) return false;
 
-            for (int i = 0; i < s.BestTime.Length; i++) s.BestTime[i] = float.PositiveInfinity;
+            // Resize BestTime to match current Intervals count
+            if (s.BestTime.Length < s.Intervals.Length)
+            {
+                // This shouldn't happen if maxIntervals was set correctly, 
+                // but let's assume it's pre-allocated enough.
+            }
+            s.BestTime.Fill(float.PositiveInfinity);
+            float* bestTimePtr = (float*)s.BestTime.GetUnsafePtr();
 
             // Find valid starting interval
-            var startRange = s.CellIntervals[start];
-            int startInterval = -1;
+            RangeI startRange = s.CellIntervals[start];
+            int startIntervalIdx = -1;
+            SafeInterval* intervalsPtr = s.Intervals.Ptr;
+
             for (int iv = startRange.Offset; iv < startRange.Offset + startRange.Count; iv++)
             {
-                if (s.Intervals[iv].Start <= startTime && startTime < s.Intervals[iv].End)
+                if (intervalsPtr[iv].Start <= startTime && startTime < intervalsPtr[iv].End)
                 {
-                    startInterval = iv;
+                    startIntervalIdx = iv;
                     break;
                 }
             }
-            if (startInterval < 0) return false;
+            if (startIntervalIdx < 0) return false;
 
-            int startNode = 0;
-            s.Nodes.Add(new SippNode { Cell = start, Interval = startInterval, Time = startTime, F = startTime, Parent = -1 });
-            s.Heap.InsertOrDecrease(new HeapNode(startNode, startTime));
-            s.BestTime[start] = startTime;
+            s.Nodes.Add(new SippNode { Cell = start, IntervalIdx = startIntervalIdx, Time = startTime, F = startTime, Parent = -1 });
+            s.Heap.InsertOrDecrease(new HeapNode(0, startTime));
+            bestTimePtr[startIntervalIdx] = startTime;
+
+            int2 goalCoord = s.Grid.ToCoord(goal);
+            int width = s.Grid.Width;
+            int height = s.Grid.Height;
 
             while (!s.Heap.IsEmpty)
             {
                 int nodeId = s.Heap.Pop().Id;
-                if (nodeId >= s.Nodes.Length) continue;
-                var node = s.Nodes[nodeId];
+                SippNode node = s.Nodes[nodeId];
 
-                if (node.Time > s.BestTime[node.Cell]) continue;
+                if (node.Time > bestTimePtr[node.IntervalIdx]) continue;
 
                 if (node.Cell == goal)
                 {
-                    int cur = nodeId;
-                    while (cur >= 0) { path.Add(s.Nodes[cur].Cell); cur = s.Nodes[cur].Parent; }
-                    for (int i = 0; i < path.Length / 2; i++)
-                    { int tmp = path[i]; path[i] = path[path.Length - 1 - i]; path[path.Length - 1 - i] = tmp; }
+                    ExtractPath(in s.Nodes, nodeId, ref path);
                     return true;
                 }
 
@@ -180,27 +152,31 @@ namespace BovineLabs.Grid.Sipp
                 for (int d = 0; d < 4; d++)
                 {
                     int2 np = p + Grid2D.Directions4[d];
-                    if (!s.Grid.InBounds(np)) continue;
-                    int ni = s.Grid.ToIndex(np);
-                    if (blocked[ni] != 0) continue;
+                    if (Hint.Unlikely(np.x < 0 || np.y < 0 || np.x >= width || np.y >= height)) continue;
+                    int ni = np.y * width + np.x;
+                    if (Hint.Unlikely(blockedPtr[ni] != 0)) continue;
 
-                    float arrivalTime = node.Time + 1f;
+                    float moveTime = 1f;
+                    float arrivalTime = node.Time + moveTime;
 
-                    // Find compatible safe interval
-                    var range = s.CellIntervals[ni];
-                    for (int iv = range.Offset; iv < range.Offset + range.Count; iv++)
+                    RangeI niRange = s.CellIntervals[ni];
+                    for (int iv = niRange.Offset; iv < niRange.Offset + niRange.Count; iv++)
                     {
-                        var interval = s.Intervals[iv];
-                        if (arrivalTime >= interval.Start && arrivalTime < interval.End)
-                        {
-                            if (arrivalTime >= s.BestTime[ni]) break;
-                            s.BestTime[ni] = arrivalTime;
+                        SafeInterval interval = intervalsPtr[iv];
+                        if (arrivalTime >= interval.End) continue;
 
-                            float h = Grid2D.HeuristicManhattan(s.Grid.ToCoord(ni), s.Grid.ToCoord(goal));
-                            int newNodeId = s.Nodes.Length;
-                            s.Nodes.Add(new SippNode { Cell = ni, Interval = iv, Time = arrivalTime, F = arrivalTime + h, Parent = nodeId });
-                            s.Heap.InsertOrDecrease(new HeapNode(newNodeId, arrivalTime + h));
-                            break;
+                        float earliestArrival = math.max(arrivalTime, interval.Start);
+                        if (earliestArrival < interval.End)
+                        {
+                            // Can wait at current cell before moving
+                            if (earliestArrival < bestTimePtr[iv])
+                            {
+                                bestTimePtr[iv] = earliestArrival;
+                                float h = Grid2D.HeuristicManhattan(np, goalCoord);
+                                int newNodeId = s.Nodes.Length;
+                                s.Nodes.Add(new SippNode { Cell = ni, IntervalIdx = iv, Time = earliestArrival, F = earliestArrival + h, Parent = nodeId });
+                                s.Heap.InsertOrDecrease(new HeapNode(newNodeId, earliestArrival + h));
+                            }
                         }
                     }
                 }
@@ -209,14 +185,31 @@ namespace BovineLabs.Grid.Sipp
             return false;
         }
 
+        private static void ExtractPath(in UnsafeList<SippNode> nodes, int nodeId, ref NativeList<int> path)
+        {
+            int cur = nodeId;
+            while (cur >= 0) { path.Add(nodes[cur].Cell); cur = nodes[cur].Parent; }
+            for (int i = 0, j = path.Length - 1; i < j; i++, j--)
+            { int tmp = path[i]; path[i] = path[j]; path[j] = tmp; }
+        }
+
         public static void Dispose(ref SippState s)
         {
             if (s.Intervals.IsCreated) s.Intervals.Dispose();
             if (s.CellIntervals.IsCreated) s.CellIntervals.Dispose();
             if (s.Nodes.IsCreated) s.Nodes.Dispose();
-            if (s.Heap.IsCreated) s.Heap.Dispose();
+            s.Heap.Dispose();
             if (s.BestTime.IsCreated) s.BestTime.Dispose();
             if (s.Obstacles.IsCreated) s.Obstacles.Dispose();
+        }
+
+        private struct ObstacleComparer : System.Collections.Generic.IComparer<DynamicObstacle>
+        {
+            public int Compare(DynamicObstacle x, DynamicObstacle y)
+            {
+                if (x.Cell != y.Cell) return x.Cell.CompareTo(y.Cell);
+                return x.StartTime.CompareTo(y.StartTime);
+            }
         }
     }
 }

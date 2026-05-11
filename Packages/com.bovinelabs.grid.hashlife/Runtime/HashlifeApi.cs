@@ -1,5 +1,8 @@
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
+using Unity.Burst;
+using Unity.Burst.CompilerServices;
 using BovineLabs.Grid;
 
 namespace BovineLabs.Grid.Hashlife
@@ -7,83 +10,72 @@ namespace BovineLabs.Grid.Hashlife
     public struct HashlifeNode
     {
         public int Level;
-        public int Child00; // NW
-        public int Child10; // NE
-        public int Child01; // SW
-        public int Child11; // SE
+        public int ChildNW;
+        public int ChildNE;
+        public int ChildSW;
+        public int ChildSE;
         public ulong Hash;
-        public int Result; // cached result for one-step advance
     }
 
     public struct HashlifeState
     {
-        public NativeList<HashlifeNode> Nodes;
+        public UnsafeList<HashlifeNode> Nodes;
         public NativeParallelHashMap<ulong, int> Intern;
         public NativeParallelHashMap<ulong, int> ResultCache;
     }
 
-    public static class HashlifeApi
+    [BurstCompile]
+    public unsafe static class HashlifeApi
     {
         public static HashlifeState Create(int maxNodes, Allocator a)
         {
             var s = new HashlifeState
             {
-                Nodes = new NativeList<HashlifeNode>(maxNodes, a),
+                Nodes = new UnsafeList<HashlifeNode>(maxNodes, a),
                 Intern = new NativeParallelHashMap<ulong, int>(maxNodes, a),
                 ResultCache = new NativeParallelHashMap<ulong, int>(maxNodes, a),
             };
 
-            // Pre-create leaf nodes for dead (0) and alive (1)
-            CreateLeaf(ref s, 0);
-            CreateLeaf(ref s, 1);
+            // Level 0 nodes (1x1 cells)
+            CreateLeaf(ref s, 0); // Dead
+            CreateLeaf(ref s, 1); // Alive
             return s;
         }
 
-        public static void Clear(ref HashlifeState s)
-        {
-            s.Nodes.Clear();
-            s.Intern.Clear();
-            s.ResultCache.Clear();
-            // Re-create leaf nodes
-            CreateLeaf(ref s, 0);
-            CreateLeaf(ref s, 1);
-        }
-
-        public static int CreateLeaf(ref HashlifeState s, byte alive)
+        private static int CreateLeaf(ref HashlifeState s, byte alive)
         {
             var node = new HashlifeNode
             {
                 Level = 0,
-                Child00 = alive,
-                Child10 = 0,
-                Child01 = 0,
-                Child11 = 0,
+                ChildNW = alive,
+                ChildNE = 0,
+                ChildSW = 0,
+                ChildSE = 0,
                 Hash = 0,
-                Result = -1,
             };
             InternNode(ref s, node, out int id);
             return id;
         }
 
+        [BurstCompile]
         public static int MakeNode(ref HashlifeState s, int nw, int ne, int sw, int se)
         {
-            // All children must be same level
             int level = s.Nodes[nw].Level + 1;
             var node = new HashlifeNode
             {
                 Level = level,
-                Child00 = nw,
-                Child10 = ne,
-                Child01 = sw,
-                Child11 = se,
+                ChildNW = nw,
+                ChildNE = ne,
+                ChildSW = sw,
+                ChildSE = se,
                 Hash = 0,
-                Result = -1,
             };
             InternNode(ref s, node, out int id);
             return id;
         }
 
-        public static bool InternNode(ref HashlifeState s, HashlifeNode node, out int id)
+        [BurstCompile]
+        private static bool InternNode(ref HashlifeState s, HashlifeNode node, out int id)
         {
             ulong h = Hash(node);
             node.Hash = h;
@@ -103,158 +95,149 @@ namespace BovineLabs.Grid.Hashlife
         private static ulong Hash(HashlifeNode n)
         {
             ulong h = (ulong)n.Level * 2654435761UL;
-            h ^= (ulong)n.Child00 * 40503UL;
-            h ^= (ulong)n.Child10 * 40503UL * 2;
-            h ^= (ulong)n.Child01 * 40503UL * 3;
-            h ^= (ulong)n.Child11 * 40503UL * 4;
+            h ^= (ulong)n.ChildNW * 40503UL;
+            h ^= (ulong)n.ChildNE * 40503UL * 2;
+            h ^= (ulong)n.ChildSW * 40503UL * 3;
+            h ^= (ulong)n.ChildSE * 40503UL * 4;
             return h;
         }
 
-        public static bool StepPowerOfTwo(ref HashlifeState s, int node, int stepsPow2, out int resultNode)
+        [BurstCompile]
+        public static int GetResult(ref HashlifeState s, int nodeIdx)
         {
-            resultNode = -1;
-            if (node < 0 || node >= s.Nodes.Length) return false;
+            if (s.ResultCache.TryGetValue((ulong)nodeIdx, out int cached))
+                return cached;
 
-            ulong cacheKey = (ulong)node * 1000003UL ^ (ulong)stepsPow2;
-            if (s.ResultCache.TryGetValue(cacheKey, out int cached))
+            HashlifeNode* nodes = s.Nodes.Ptr;
+            HashlifeNode node = nodes[nodeIdx];
+
+            if (node.Level == 2)
             {
-                resultNode = cached;
-                return true;
+                // Base case: 4x4 block to 2x2 result after 1 step
+                int result = ComputeLevel2(ref s, nodeIdx);
+                s.ResultCache[(ulong)nodeIdx] = result;
+                return result;
             }
 
-            var n = s.Nodes[node];
+            // Recursive case: 9 sub-nodes construction
+            int nw = node.ChildNW, ne = node.ChildNE, sw = node.ChildSW, se = node.ChildSE;
+            HashlifeNode nwN = nodes[nw], neN = nodes[ne], swN = nodes[sw], seN = nodes[se];
 
-            if (n.Level == 0)
-            {
-                resultNode = node;
-                return true;
-            }
+            // 9 level-(k-1) nodes
+            int n11 = nwN.ChildNW; int n12 = nwN.ChildNE; int n13 = neN.ChildNW; int n14 = neN.ChildNE;
+            int n21 = nwN.ChildSW; int n22 = nwN.ChildSE; int n23 = neN.ChildSW; int n24 = neN.ChildSE;
+            int n31 = swN.ChildNW; int n32 = swN.ChildNE; int n33 = seN.ChildNW; int n34 = seN.ChildNE;
+            int n41 = swN.ChildSW; int n42 = swN.ChildSE; int n43 = seN.ChildSW; int n44 = seN.ChildSE;
 
-            if (n.Level == 1)
-            {
-                // 2x2 block — compute the single center result using Game of Life rule
-                // Children are single cells: nw=C00, ne=C10, sw=C01, se=C11
-                int alive = n.Child00 + n.Child10 + n.Child01 + n.Child11;
-                // Center of 2x2 has 4 cells, no center cell. For level 1, return a leaf.
-                // Use majority rule: alive >= 3 -> alive, else dead
-                resultNode = alive >= 3 ? 1 : 0;
-                s.ResultCache[cacheKey] = resultNode;
-                return true;
-            }
+            // 9 overlapping level-(k-1) nodes
+            int m00 = nw;
+            int m10 = MakeNode(ref s, nwN.ChildNE, neN.ChildNW, nwN.ChildSE, neN.ChildSW);
+            int m20 = ne;
+            int m01 = MakeNode(ref s, nwN.ChildSW, nwN.ChildSE, swN.ChildNW, swN.ChildNE);
+            int m11 = MakeNode(ref s, nwN.ChildSE, neN.ChildSW, swN.ChildNE, seN.ChildNW);
+            int m21 = MakeNode(ref s, neN.ChildSW, neN.ChildSE, seN.ChildNW, seN.ChildNE);
+            int m02 = sw;
+            int m12 = MakeNode(ref s, swN.ChildNE, seN.ChildNW, swN.ChildSE, seN.ChildNE);
+            int m22 = se;
 
-            // For level >= 2: recursively compute
-            // To advance a 2^n x 2^n node by 2^(k-1) steps, compute sub-results
-            if (stepsPow2 == 1)
-            {
-                // One step: compute 9 sub-blocks, then advance the center
-                resultNode = AdvanceOneStep(ref s, node);
-            }
-            else
-            {
-                // Multiple steps: advance in stages
-                int halfPow = stepsPow2 >> 1;
-                // First half-step
-                int mid = AdvanceOneStep(ref s, node);
-                // Then advance the result by the remaining steps
-                StepPowerOfTwo(ref s, mid, halfPow, out resultNode);
-            }
+            // 4 level-(k-2) result nodes
+            int rNW = GetResult(ref s, m00);
+            int rNE = GetResult(ref s, m10); // Wait, this is not quite right.
+            // Full 9-node algorithm is more involved. Let's implement the standard one.
+            
+            // Re-fetch pointers as MakeNode might have reallocated (if using NativeList, but we use UnsafeList)
+            // UnsafeList doesn't auto-resize unless we tell it to or it hits capacity.
+            
+            int c00 = GetResult(ref s, m00);
+            int c10 = GetResult(ref s, m10);
+            int c20 = GetResult(ref s, m20);
+            int c01 = GetResult(ref s, m01);
+            int c11 = GetResult(ref s, m11);
+            int c21 = GetResult(ref s, m21);
+            int c02 = GetResult(ref s, m02);
+            int c12 = GetResult(ref s, m12);
+            int c22 = GetResult(ref s, m22);
 
-            s.ResultCache[cacheKey] = resultNode;
-            return true;
+            int finalNW = GetResult(ref s, MakeNode(ref s, c00, c10, c01, c11));
+            int finalNE = GetResult(ref s, MakeNode(ref s, c10, c20, c11, c21));
+            int finalSW = GetResult(ref s, MakeNode(ref s, c01, c11, c02, c12));
+            int finalSE = GetResult(ref s, MakeNode(ref s, c11, c21, c12, c22));
+
+            int final = MakeNode(ref s, finalNW, finalNE, finalSW, finalSE);
+            s.ResultCache[(ulong)nodeIdx] = final;
+            return final;
         }
 
-        private static int AdvanceOneStep(ref HashlifeState s, int node)
+        private static int ComputeLevel2(ref HashlifeState s, int nodeIdx)
         {
-            var n = s.Nodes[node];
-            int nw = n.Child00, ne = n.Child10, sw = n.Child01, se = n.Child11;
+            // Extract 4x4 grid
+            byte* grid = stackalloc byte[16];
+            HashlifeNode* nodes = s.Nodes.Ptr;
+            HashlifeNode n = nodes[nodeIdx];
+            
+            Extract2x2(nodes, n.ChildNW, grid, 0, 0, 4);
+            Extract2x2(nodes, n.ChildNE, grid, 2, 0, 4);
+            Extract2x2(nodes, n.ChildSW, grid, 0, 2, 4);
+            Extract2x2(nodes, n.ChildSE, grid, 2, 2, 4);
 
-            // Build the 5x5 sub-structure from 4 children, advance the inner 2x2
-            // Each child is a (level-1) quadrant. Extract their sub-quadrants:
-            var nwN = s.Nodes[nw]; var neN = s.Nodes[ne];
-            var swN = s.Nodes[sw]; var seN = s.Nodes[se];
-
-            // 9 sub-squares (each level-2):
-            // We need the inner result of each 2x2 group formed by sub-quadrants
-            // This is the standard Hashlife recursion
-
-            // Build the 3x3 grid of level-(level-2) sub-nodes
-            // NW child's sub-quads: nw.Child00, nw.Child10, nw.Child01, nw.Child11
-            // etc.
-
-            // Construct the 4 inner sub-nodes (each composed of 4 sub-sub-quadrants)
-            int innerNW = MakeNode(ref s,
-                nwN.Child10, neN.Child00,
-                nwN.Child11, neN.Child01);
-            int innerNE = MakeNode(ref s,
-                neN.Child10, /* boundary */ neN.Child10,
-                neN.Child11, neN.Child11);
-            int innerSW = MakeNode(ref s,
-                swN.Child00, swN.Child10,
-                nwN.Child01, seN.Child00);
-            int innerSE = MakeNode(ref s,
-                swN.Child10, seN.Child00,
-                swN.Child11, seN.Child01);
-
-            // For each inner sub-node, advance one step recursively
-            int rNW = AdvanceOneStepInner(ref s, innerNW);
-            int rNE = AdvanceOneStepInner(ref s, innerNE);
-            int rSW = AdvanceOneStepInner(ref s, innerSW);
-            int rSE = AdvanceOneStepInner(ref s, innerSE);
+            // Compute 2x2 result (cells at (1,1), (2,1), (1,2), (2,2))
+            byte rNW = StepCell(grid, 1, 1, 4);
+            byte rNE = StepCell(grid, 2, 1, 4);
+            byte rSW = StepCell(grid, 1, 2, 4);
+            byte rSE = StepCell(grid, 2, 2, 4);
 
             return MakeNode(ref s, rNW, rNE, rSW, rSE);
         }
 
-        private static int AdvanceOneStepInner(ref HashlifeState s, int node)
+        private static void Extract2x2(HashlifeNode* nodes, int nodeIdx, byte* dst, int ox, int oy, int stride)
         {
-            if (node < 0 || node >= s.Nodes.Length) return 0;
-            var n = s.Nodes[node];
+            HashlifeNode n = nodes[nodeIdx];
+            dst[oy * stride + ox] = (byte)nodes[n.ChildNW].ChildNW;
+            dst[oy * stride + ox + 1] = (byte)nodes[n.ChildNE].ChildNW;
+            dst[(oy + 1) * stride + ox] = (byte)nodes[n.ChildSW].ChildNW;
+            dst[(oy + 1) * stride + ox + 1] = (byte)nodes[n.ChildSE].ChildNW;
+        }
 
-            if (n.Level <= 1)
-            {
-                // Base case: level 1 node
-                StepPowerOfTwo(ref s, node, 1, out int result);
-                return result;
-            }
+        private static byte StepCell(byte* grid, int x, int y, int stride)
+        {
+            int alive = 0;
+            for (int dy = -1; dy <= 1; dy++)
+                for (int dx = -1; dx <= 1; dx++)
+                    if (dx != 0 || dy != 0)
+                        alive += grid[(y + dy) * stride + (x + dx)];
 
-            // Check cache
-            ulong cacheKey = (ulong)node * 1000003UL ^ 1UL;
-            if (s.ResultCache.TryGetValue(cacheKey, out int cached))
-                return cached;
-
-            int result2 = AdvanceOneStep(ref s, node);
-            s.ResultCache[cacheKey] = result2;
-            return result2;
+            byte current = grid[y * stride + x];
+            if (current == 1) return (byte)(alive == 2 || alive == 3 ? 1 : 0);
+            return (byte)(alive == 3 ? 1 : 0);
         }
 
         public static void Decode(ref HashlifeState s, int root, NativeArray<byte> cells, Grid2D grid)
         {
             cells.Fill((byte)0);
             if (root < 0 || root >= s.Nodes.Length) return;
-            DecodeRecursive(s, root, 0, 0, cells, grid);
+            DecodeRecursive(s, root, 0, 0, (byte*)cells.GetUnsafePtr(), grid.Width, grid.Height);
         }
 
-        private static void DecodeRecursive(HashlifeState s, int node, int x, int y, NativeArray<byte> cells, Grid2D grid)
+        private static void DecodeRecursive(HashlifeState s, int nodeIdx, int x, int y, byte* cells, int width, int height)
         {
-            if (node < 0 || node >= s.Nodes.Length) return;
-            var n = s.Nodes[node];
-
+            HashlifeNode n = s.Nodes[nodeIdx];
             if (n.Level == 0)
             {
-                if (x < grid.Width && y < grid.Height)
-                    cells[y * grid.Width + x] = (byte)n.Child00;
+                if (x < width && y < height)
+                    cells[y * width + x] = (byte)n.ChildNW;
                 return;
             }
 
             int half = 1 << (n.Level - 1);
-            DecodeRecursive(s, n.Child00, x, y, cells, grid);
-            DecodeRecursive(s, n.Child10, x + half, y, cells, grid);
-            DecodeRecursive(s, n.Child01, x, y + half, cells, grid);
-            DecodeRecursive(s, n.Child11, x + half, y + half, cells, grid);
+            DecodeRecursive(s, n.ChildNW, x, y, cells, width, height);
+            DecodeRecursive(s, n.ChildNE, x + half, y, cells, width, height);
+            DecodeRecursive(s, n.ChildSW, x, y + half, cells, width, height);
+            DecodeRecursive(s, n.ChildSE, x + half, y + half, cells, width, height);
         }
 
         public static void Dispose(ref HashlifeState s)
         {
-            if (s.Nodes.IsCreated) s.Nodes.Dispose();
+            s.Nodes.Dispose();
             if (s.Intern.IsCreated) s.Intern.Dispose();
             if (s.ResultCache.IsCreated) s.ResultCache.Dispose();
         }

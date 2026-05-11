@@ -45,13 +45,14 @@ public class SubgoalTests
         SubgoalApi.Dispose(ref s); blocked.Dispose(); path.Dispose();
     }
 
-    [Test] public void LineOfSight()
+    [Test] public unsafe void LineOfSight()
     {
         var g = Grid2D.Create(10, 10);
         var blocked = new NativeArray<byte>(100, Allocator.Temp); blocked.Fill((byte)0);
-        Assert.IsTrue(SubgoalApi.LineOfSight(g, blocked, new int2(0, 0), new int2(5, 0)));
+        byte* blockedPtr = (byte*)blocked.GetUnsafeReadOnlyPtr();
+        Assert.IsTrue(SubgoalApi.LineOfSight(in g, blockedPtr, new int2(0, 0), new int2(5, 0)));
         blocked[g.ToIndex(3, 0)] = 1;
-        Assert.IsFalse(SubgoalApi.LineOfSight(g, blocked, new int2(0, 0), new int2(5, 0)));
+        Assert.IsFalse(SubgoalApi.LineOfSight(in g, blockedPtr, new int2(0, 0), new int2(5, 0)));
         blocked.Dispose();
     }
 

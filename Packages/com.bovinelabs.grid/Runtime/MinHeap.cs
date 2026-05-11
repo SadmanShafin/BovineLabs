@@ -1,43 +1,60 @@
 using System;
+using System.Diagnostics;
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
+using Unity.Burst;
+using Unity.Burst.CompilerServices;
 
 namespace BovineLabs.Grid
 {
-    /// <summary>Min-heap for A*/Dijkstra-style priority queues. Supports decrease-key via position array.</summary>
-    public struct MinHeap
+    /// <summary>Min-heap for A*/Dijkstra-style priority queues. Optimized with unsafe pointers and Burst hints.</summary>
+    [BurstCompile]
+    public unsafe struct MinHeap
     {
-        public NativeList<HeapNode> Data;
-        public NativeArray<int> Positions; // id -> index in Data, -1 if not present
-        public bool IsCreated => Data.IsCreated;
+        [NativeDisableUnsafePtrRestriction]
+        public HeapNode* Data;
+        [NativeDisableUnsafePtrRestriction]
+        public int* Positions; // id -> index in Data, -1 if not present
+        
+        public int Capacity;
+        public int Count;
+        public Allocator Allocator;
+
+        public bool IsCreated => Data != null;
 
         public static MinHeap Create(int maxId, Allocator allocator)
         {
             var h = new MinHeap
             {
-                Data = new NativeList<HeapNode>(maxId, allocator),
-                Positions = new NativeArray<int>(maxId, allocator),
+                Data = (HeapNode*)UnsafeUtility.Malloc(UnsafeUtility.SizeOf<HeapNode>() * maxId, UnsafeUtility.AlignOf<HeapNode>(), allocator),
+                Positions = (int*)UnsafeUtility.Malloc(UnsafeUtility.SizeOf<int>() * maxId, UnsafeUtility.AlignOf<int>(), allocator),
+                Capacity = maxId,
+                Count = 0,
+                Allocator = allocator
             };
-            h.Positions.Fill(-1);
+            
+            h.Clear();
             return h;
         }
 
-        public int Length => Data.Length;
+        public int Length => Count;
 
-        public bool IsEmpty => Data.Length == 0;
+        public bool IsEmpty => Count == 0;
 
         public void Clear()
         {
-            Data.Clear();
-            Positions.Fill(-1);
+            Count = 0;
+            UnsafeUtility.MemSet(Positions, 0xFF, (long)Capacity * UnsafeUtility.SizeOf<int>());
         }
 
-        public void InsertOrDecrease(HeapNode node)
+        [BurstCompile]
+        public void InsertOrDecrease([NoAlias] HeapNode node)
         {
+            CheckBounds(node.Id);
             int pos = Positions[node.Id];
             if (pos >= 0)
             {
-                // Decrease key if better
                 if (Less(node, Data[pos]))
                 {
                     Data[pos] = node;
@@ -46,28 +63,27 @@ namespace BovineLabs.Grid
             }
             else
             {
-                // Insert new
-                int idx = Data.Length;
-                Data.Add(node);
+                int idx = Count++;
+                Data[idx] = node;
                 Positions[node.Id] = idx;
                 SiftUp(idx);
             }
         }
 
+        [BurstCompile]
         public HeapNode Pop()
         {
             HeapNode root = Data[0];
             Positions[root.Id] = -1;
 
-            int last = Data.Length - 1;
-            if (last > 0)
+            int last = --Count;
+            if (Hint.Likely(last > 0))
             {
                 Data[0] = Data[last];
                 Positions[Data[0].Id] = 0;
                 SiftDown(0);
             }
 
-            Data.RemoveAt(last);
             return root;
         }
 
@@ -77,8 +93,13 @@ namespace BovineLabs.Grid
 
         public void Dispose()
         {
-            if (Data.IsCreated) Data.Dispose();
-            if (Positions.IsCreated) Positions.Dispose();
+            if (Data != null)
+            {
+                UnsafeUtility.Free(Data, Allocator);
+                UnsafeUtility.Free(Positions, Allocator);
+                Data = null;
+                Positions = null;
+            }
         }
 
         private void SiftUp(int i)
@@ -94,15 +115,14 @@ namespace BovineLabs.Grid
 
         private void SiftDown(int i)
         {
-            int n = Data.Length;
             while (true)
             {
                 int left = (i << 1) + 1;
                 int right = left + 1;
                 int smallest = i;
 
-                if (left < n && Less(Data[left], Data[smallest])) smallest = left;
-                if (right < n && Less(Data[right], Data[smallest])) smallest = right;
+                if (left < Count && Less(Data[left], Data[smallest])) smallest = left;
+                if (right < Count && Less(Data[right], Data[smallest])) smallest = right;
 
                 if (smallest == i) break;
                 Swap(i, smallest);
@@ -123,6 +143,13 @@ namespace BovineLabs.Grid
         {
             if (a.Key0 != b.Key0) return a.Key0 < b.Key0;
             return a.Key1 < b.Key1;
+        }
+
+        [Conditional("ENABLE_UNITY_COLLECTIONS_CHECKS")]
+        private void CheckBounds(int id)
+        {
+            if (Hint.Unlikely((uint)id >= (uint)Capacity))
+                throw new IndexOutOfRangeException($"Heap ID {id} out of capacity {Capacity}");
         }
     }
 

@@ -22,8 +22,8 @@ public class HashlifeTests
         // Leaf nodes 0 (dead) and 1 (alive) are pre-created
         int dead = 0; // index 0
         int alive = 1; // index 1
-        Assert.AreEqual(0, s.Nodes[dead].Child00);
-        Assert.AreEqual(1, s.Nodes[alive].Child00);
+        Assert.AreEqual(0, s.Nodes[dead].ChildNW);
+        Assert.AreEqual(1, s.Nodes[alive].ChildNW);
         HashlifeApi.Dispose(ref s);
     }
 

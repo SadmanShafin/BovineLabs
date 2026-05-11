@@ -21,7 +21,7 @@ public class GraphCutTests
         var u1 = MakeIntArray(9, 1, Allocator.Temp);
         var pw = MakeIntArray(9, 1, Allocator.Temp);
         GraphCutApi.BuildBinaryEnergy(ref s, u0, u1, pw);
-        Assert.Greater(s.Edges.Length, 0);
+        Assert.Greater(s.EdgeTo.Length, 0);
         GraphCutApi.Dispose(ref s); u0.Dispose(); u1.Dispose(); pw.Dispose();
     }
 
