@@ -29,20 +29,26 @@ namespace BovineLabs.Grid.Rsr
     [BurstCompile]
     public unsafe static class RsrApi
     {
-        public static RsrState Create(int width, int height, int maxRects, Allocator a)
+        public static bool TryCreate(int width, int height, int maxRects, Allocator a, out RsrState result)
         {
-            var g = Grid2D.Create(width, height);
-            return new RsrState
+            if (!Grid2D.TryCreate(width, height, out var g))
+            {
+                result = default;
+                return false;
+            }
+
+            result = new RsrState
             {
                 Grid = g,
                 RectOfCell = new NativeArray<int>(g.Length, a),
                 Rects = new UnsafeList<RsrRect>(maxRects, a),
                 PerimeterCells = new UnsafeList<int>(g.Length, a),
             };
+            return true;
         }
 
         [BurstCompile]
-        public static void Build(ref RsrState s, in NativeArray<byte> blocked)
+        public static bool TryBuild(ref RsrState s, in NativeArray<byte> blocked)
         {
             byte* blk = (byte*)blocked.GetUnsafeReadOnlyPtr();
             int* roc = (int*)s.RectOfCell.GetUnsafePtr();
@@ -116,7 +122,6 @@ namespace BovineLabs.Grid.Rsr
                 }
             }
 
-            // Handle remaining unassigned free cells
             for (int i = 0; i < len; i++)
             {
                 if (blk[i] != 0 || roc[i] >= 0) continue;
@@ -134,14 +139,15 @@ namespace BovineLabs.Grid.Rsr
             }
 
             used.Dispose();
+            return true;
         }
 
         [BurstCompile]
-        public static void GetSuccessors(ref RsrState s, int cell, in NativeArray<byte> blocked, ref NativeList<int> successors)
+        public static bool TryGetSuccessors(ref RsrState s, int cell, in NativeArray<byte> blocked, ref NativeList<int> successors)
         {
             successors.Clear();
             int rectId = s.RectOfCell[cell];
-            if (rectId < 0 || rectId >= s.Rects.Length) return;
+            if (rectId < 0 || rectId >= s.Rects.Length) return false;
 
             var rect = s.Rects.Ptr[rectId];
             int cx = cell % s.Grid.Width;
@@ -164,12 +170,12 @@ namespace BovineLabs.Grid.Rsr
                 }
 
                 byte* blk = (byte*)blocked.GetUnsafeReadOnlyPtr();
-                int2 p = new int2(cx, cy);
                 if (cx + 1 < w && blk[cy * w + cx + 1] == 0 && s.RectOfCell[cy * w + cx + 1] != rectId) successors.Add(cy * w + cx + 1);
                 if (cx > 0 && blk[cy * w + cx - 1] == 0 && s.RectOfCell[cy * w + cx - 1] != rectId) successors.Add(cy * w + cx - 1);
                 if (cy + 1 < h && blk[(cy + 1) * w + cx] == 0 && s.RectOfCell[(cy + 1) * w + cx] != rectId) successors.Add((cy + 1) * w + cx);
                 if (cy > 0 && blk[(cy - 1) * w + cx] == 0 && s.RectOfCell[(cy - 1) * w + cx] != rectId) successors.Add((cy - 1) * w + cx);
             }
+            return true;
         }
 
         public static void Dispose(ref RsrState s)

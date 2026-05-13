@@ -13,20 +13,20 @@ namespace BovineLabs.Grid.Wfc
         public int PatternCount;
         public NativeArray<ulong> PossibleBits;
         public NativeArray<int> Entropy;
-        public NativeArray<ulong> Compatibility; // pattern * 4 + dir -> bitset of compatible patterns
+        public NativeArray<ulong> Compatibility;
         public UnsafeQueue<int> Queue;
-        public NativeArray<byte> Dirty; // set when entropy changes during propagation
+        public NativeArray<byte> Dirty;
     }
 
     [BurstCompile]
     public unsafe static class WfcApi
     {
-        public static WfcState Create(int width, int height, int patternCount, Allocator a)
+        public static bool TryCreate(int width, int height, int patternCount, Allocator a, out WfcState s)
         {
-            if (patternCount > 64 || patternCount < 1)
-                throw new System.ArgumentException($"patternCount must be 1..64, got {patternCount}", nameof(patternCount));
-            var g = Grid2D.Create(width, height);
-            return new WfcState
+            s = default;
+            if (patternCount > 64 || patternCount < 1) return false;
+            if (!Grid2D.TryCreate(width, height, out var g)) return false;
+            s = new WfcState
             {
                 Grid = g,
                 PatternCount = patternCount,
@@ -36,10 +36,11 @@ namespace BovineLabs.Grid.Wfc
                 Queue = new UnsafeQueue<int>(a),
                 Dirty = new NativeArray<byte>(g.Length, a),
             };
+            return true;
         }
 
         [BurstCompile]
-        public static void InitializeAllPossible(ref WfcState s)
+        public static bool TryInitializeAllPossible(ref WfcState s)
         {
             ulong all = 0UL;
             if (s.PatternCount == 64) all = ulong.MaxValue;
@@ -55,10 +56,12 @@ namespace BovineLabs.Grid.Wfc
                 entropyPtr[i] = s.PatternCount;
             }
             s.Queue.Clear();
+            s.Dirty.Fill((byte)0);
+            return true;
         }
 
         [BurstCompile]
-        public static void LearnAdjacency(ref WfcState s, in NativeArray<int> sample, int sampleWidth, int sampleHeight)
+        public static bool TryLearnAdjacency(ref WfcState s, in NativeArray<int> sample, int sampleWidth, int sampleHeight)
         {
             s.Compatibility.Fill(0UL);
             int* samplePtr = (int*)sample.GetUnsafeReadOnlyPtr();
@@ -84,11 +87,13 @@ namespace BovineLabs.Grid.Wfc
                     }
                 }
             }
+            return true;
         }
 
         [BurstCompile]
-        public static bool Observe(ref WfcState s, int cell, int chosenPattern)
+        public static bool TryObserve(ref WfcState s, int cell, int chosenPattern)
         {
+            if (Hint.Unlikely(!s.Grid.InBounds(cell) || (uint)chosenPattern >= (uint)s.PatternCount)) return false;
             ulong mask = 1UL << chosenPattern;
             s.PossibleBits[cell] = mask;
             s.Entropy[cell] = 1;
@@ -97,7 +102,7 @@ namespace BovineLabs.Grid.Wfc
         }
 
         [BurstCompile]
-        public static bool Propagate(ref WfcState s)
+        public static bool TryPropagate(ref WfcState s)
         {
             int width = s.Grid.Width;
             int height = s.Grid.Height;
@@ -122,7 +127,6 @@ namespace BovineLabs.Grid.Wfc
                     int ni = ny * width + nx;
                     ulong niPossible = possiblePtr[ni];
 
-                    // Compute union of compatibilities
                     ulong unionPossible = 0UL;
                     ulong temp = cellPossible;
                     while (temp != 0)
@@ -148,26 +152,26 @@ namespace BovineLabs.Grid.Wfc
         }
 
         [BurstCompile]
-        public static bool Run(ref WfcState s, ref NativeArray<int> output, ref Unity.Mathematics.Random rng)
+        public static bool TryRun(ref WfcState s, ref NativeArray<int> output, ref Unity.Mathematics.Random rng)
         {
-            InitializeAllPossible(ref s);
+            if (!TryInitializeAllPossible(ref s)) return false;
             int len = s.Grid.Length;
             int* entropyPtr = (int*)s.Entropy.GetUnsafePtr();
             ulong* possiblePtr = (ulong*)s.PossibleBits.GetUnsafePtr();
             int* outputPtr = (int*)output.GetUnsafePtr();
 
-            // Build min-entropy heap
-            var heap = MinHeap.Create(len, Allocator.Temp);
+            if (!MinHeap.TryCreate(len, Allocator.Temp, out var heap)) return false;
             for (int i = 0; i < len; i++)
                 if (entropyPtr[i] > 1)
-                    heap.InsertOrDecrease(new HeapNode(i, entropyPtr[i]));
+                    if (!heap.TryInsertOrDecrease(new HeapNode(i, entropyPtr[i]))) { heap.Dispose(); return false; }
 
             while (!heap.IsEmpty)
             {
-                int bestCell = heap.Pop().Id;
+                if (!heap.TryPop(out var top)) { heap.Dispose(); return false; }
+                int bestCell = top.Id;
                 int e = entropyPtr[bestCell];
-                if (e <= 1) continue;           // already collapsed
-                if (possiblePtr[bestCell] == 0UL) continue; // contradiction
+                if (e <= 1) continue;
+                if (possiblePtr[bestCell] == 0UL) continue;
 
                 ulong possible = possiblePtr[bestCell];
                 int count = e;
@@ -181,10 +185,9 @@ namespace BovineLabs.Grid.Wfc
                     temp &= ~(1UL << pattern);
                 }
 
-                Observe(ref s, bestCell, pattern);
-                if (!Propagate(ref s)) { heap.Dispose(); return false; }
+                TryObserve(ref s, bestCell, pattern);
+                if (!TryPropagate(ref s)) { heap.Dispose(); return false; }
 
-                // Re-heap only cells whose entropy changed during propagation
                 byte* dirtyPtr = (byte*)s.Dirty.GetUnsafePtr();
                 for (int i = 0; i < len; i++)
                 {
@@ -192,14 +195,17 @@ namespace BovineLabs.Grid.Wfc
                     {
                         dirtyPtr[i] = 0;
                         if (entropyPtr[i] > 1)
-                            heap.InsertOrDecrease(new HeapNode(i, entropyPtr[i]));
+                            if (!heap.TryInsertOrDecrease(new HeapNode(i, entropyPtr[i]))) { heap.Dispose(); return false; }
                     }
                 }
             }
             heap.Dispose();
 
             for (int i = 0; i < len; i++)
-                outputPtr[i] = math.tzcnt(possiblePtr[i]);
+            {
+                ulong bits = possiblePtr[i];
+                outputPtr[i] = bits == 0 ? -1 : math.tzcnt(bits);
+            }
             return true;
         }
 
@@ -209,6 +215,7 @@ namespace BovineLabs.Grid.Wfc
             if (s.Entropy.IsCreated) s.Entropy.Dispose();
             if (s.Compatibility.IsCreated) s.Compatibility.Dispose();
             if (s.Queue.IsCreated) s.Queue.Dispose();
+            if (s.Dirty.IsCreated) s.Dirty.Dispose();
         }
     }
 }

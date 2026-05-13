@@ -11,20 +11,25 @@ namespace BovineLabs.Grid.Belief
     {
         public Grid2D Grid;
         public int LabelCount;
-        public NativeArray<float> Unary;     // cell * L + label
-        public NativeArray<float> Messages;  // cell * 4 * L + dir * L + label
+        public NativeArray<float> Unary;
+        public NativeArray<float> Messages;
         public NativeArray<float> MessagesNext;
-        public NativeArray<float> Belief;    // cell * L + label
+        public NativeArray<float> Belief;
         public NativeArray<float> Scratch;
     }
 
     [BurstCompile]
     public unsafe static class BeliefApi
     {
-        public static BeliefState Create(int width, int height, int labelCount, Allocator a)
+        public static bool TryCreate(int width, int height, int labelCount, Allocator a, out BeliefState result)
         {
-            var g = Grid2D.Create(width, height);
-            return new BeliefState
+            if (!Grid2D.TryCreate(width, height, out var g) || labelCount <= 0)
+            {
+                result = default;
+                return false;
+            }
+
+            result = new BeliefState
             {
                 Grid = g,
                 LabelCount = labelCount,
@@ -34,6 +39,7 @@ namespace BovineLabs.Grid.Belief
                 Belief = new NativeArray<float>(g.Length * labelCount, a),
                 Scratch = new NativeArray<float>(labelCount, a),
             };
+            return true;
         }
 
         public static void ClearMessages(ref BeliefState s)
@@ -48,8 +54,10 @@ namespace BovineLabs.Grid.Belief
         }
 
         [BurstCompile]
-        public static void Iterate(ref BeliefState s, in NativeArray<float> pairwise, int iterations)
+        public static bool TryIterate(ref BeliefState s, in NativeArray<float> pairwise, int iterations)
         {
+            if (!pairwise.IsCreated || iterations < 0) return false;
+
             int L = s.LabelCount;
             int cellCount = s.Grid.Length;
             int width = s.Grid.Width;
@@ -75,26 +83,24 @@ namespace BovineLabs.Grid.Belief
                         int ny = y + offset.y;
 
                         if (Hint.Unlikely(nx < 0 || ny < 0 || nx >= width || ny >= height)) continue;
-                        
+
                         int neighbor = ny * width + nx;
                         int oppDir = (dir + 2) % 4;
 
-                        // Compute message from cell to neighbor in direction dir
                         for (int lv = 0; lv < L; lv++)
                         {
                             float best = float.PositiveInfinity;
                             for (int lu = 0; lu < L; lu++)
                             {
                                 float cost = unaryPtr[cell * L + lu];
-                                
-                                // Sum messages from other directions
+
                                 for (int od = 0; od < 4; od++)
                                 {
                                     if (od == oppDir) continue;
                                     int2 oOffset = Grid2D.Dir4(od);
                                     int ox = x + oOffset.x;
                                     int oy = y + oOffset.y;
-                                    
+
                                     if (Hint.Likely(ox >= 0 && oy >= 0 && ox < width && oy < height))
                                         cost += messagesPtr[cell * 4 * L + od * L + lu];
                                 }
@@ -104,7 +110,6 @@ namespace BovineLabs.Grid.Belief
                             scratchPtr[lv] = best;
                         }
 
-                        // Normalize
                         float minVal = float.PositiveInfinity;
                         for (int lv = 0; lv < L; lv++)
                             if (scratchPtr[lv] < minVal) minVal = scratchPtr[lv];
@@ -115,20 +120,21 @@ namespace BovineLabs.Grid.Belief
                     }
                 }
 
-                // Swap pointers conceptually by swapping the NativeArray handles in the state
                 var tmp = s.Messages;
                 s.Messages = s.MessagesNext;
                 s.MessagesNext = tmp;
-                
-                // Update pointers for next iteration
+
                 messagesPtr = (float*)s.Messages.GetUnsafePtr();
                 nextMessagesPtr = (float*)s.MessagesNext.GetUnsafePtr();
             }
+            return true;
         }
 
         [BurstCompile]
-        public static void DecodeMap(ref BeliefState s, ref NativeArray<int> labels)
+        public static bool TryDecodeMap(ref BeliefState s, ref NativeArray<int> labels)
         {
+            if (!labels.IsCreated || labels.Length < s.Grid.Length) return false;
+
             int L = s.LabelCount;
             int cellCount = s.Grid.Length;
             float* unaryPtr = (float*)s.Unary.GetUnsafeReadOnlyPtr();
@@ -150,6 +156,7 @@ namespace BovineLabs.Grid.Belief
                 }
                 labelsPtr[cell] = bestLabel;
             }
+            return true;
         }
 
         public static void Dispose(ref BeliefState s)

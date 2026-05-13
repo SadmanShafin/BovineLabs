@@ -100,7 +100,7 @@ namespace BovineLabs.Grid.Tests
 
             heap.TryUpdate(0, 2f);
 
-            Assert.AreEqual(0, heap.Pop()); // now cheapest
+            Assert.AreEqual(0, heap.Pop());
             Assert.AreEqual(1, heap.Pop());
         }
 

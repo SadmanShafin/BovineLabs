@@ -15,11 +15,15 @@ namespace BovineLabs.Grid
             Length = width * height;
         }
 
-        public static Grid2D Create(int width, int height)
+        public static bool TryCreate(int width, int height, out Grid2D result)
         {
-            var g = new Grid2D();
-            g.Setup(width, height);
-            return g;
+            if (width < 0 || height < 0)
+            {
+                result = default;
+                return false;
+            }
+            result = new Grid2D { Width = width, Height = height, Length = width * height };
+            return true;
         }
 
         public int ToIndex(int2 p)
@@ -53,13 +57,9 @@ namespace BovineLabs.Grid
             return (uint)p.x < (uint)Width && (uint)p.y < (uint)Height;
         }
 
-        // Burst-compatible direction constants — use inlined instead of managed arrays.
-        // Right, Down, Left, Up
         public const int Dir4Count = 4;
-        // E, SE, S, SW, W, NW, N, NE
         public const int Dir8Count = 8;
 
-        /// <summary>4-connected neighbor offsets (right, down, left, up). Burst-compatible via fixed struct fields.</summary>
         public static int2 Dir4(int d)
         {
             switch (d)
@@ -71,7 +71,6 @@ namespace BovineLabs.Grid
             }
         }
 
-        /// <summary>8-connected neighbor offsets. Burst-compatible via fixed struct fields.</summary>
         public static int2 Dir8(int d)
         {
             switch (d)
@@ -87,19 +86,16 @@ namespace BovineLabs.Grid
             }
         }
 
-        /// <summary>Manhattan distance between two cells.</summary>
         public static float HeuristicManhattan(int2 a, int2 b)
         {
             return math.abs(a.x - b.x) + math.abs(a.y - b.y);
         }
 
-        /// <summary>Euclidean distance between two cells.</summary>
         public static float HeuristicEuclidean(int2 a, int2 b)
         {
             return math.length(new float2(a.x - b.x, a.y - b.y));
         }
 
-        /// <summary>Octile distance (8-dir grid heuristic).</summary>
         public static float HeuristicOctile(int2 a, int2 b)
         {
             int dx = math.abs(a.x - b.x);

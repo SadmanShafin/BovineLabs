@@ -6,62 +6,18 @@ using Unity.Mathematics;
 
 namespace BovineLabs.Grid.Wavestar
 {
-    /// <summary>
-    /// Extracts a smooth any-angle path from the Wavestar cost field.
-    ///
-    /// Steps:
-    /// 1. Find the goal subvolume in the cost field and trace predecessors back to start.
-    /// 2. Apply Theta*-style line-of-sight shortcutting to remove unnecessary waypoints.
-    /// 3. Output a NativeList of float3 waypoints.
-    ///
-    /// The result is a taut any-angle path: straight lines between waypoints that
-    /// cut corners wherever line-of-sight permits.
-    /// </summary>
     [BurstCompile]
     public struct WavestarPathExtractorJob : IJob
     {
-        // ─── Inputs ─────────────────────────────────────────────────────────────
-
-        /// <summary>
-        /// The cost field produced by MultiResThetaStarJob.
-        /// Maps morton codes to SubvolumeData.
-        /// </summary>
         public NativeParallelHashMap<int, SubvolumeData> costField;
-
-        /// <summary>
-        /// Start position in grid coordinates.
-        /// </summary>
         public int3 startPos;
-
-        /// <summary>
-        /// Goal position in grid coordinates.
-        /// </summary>
         public int3 goalPos;
-
-        /// <summary>
-        /// Obstacle grid for line-of-sight checks during smoothing.
-        /// </summary>
         public NativeArray<int> obstacleGrid;
-
         public int sizeX;
         public int sizeY;
         public int sizeZ;
-
-        // ─── Outputs ────────────────────────────────────────────────────────────
-
-        /// <summary>
-        /// Output path waypoints (float3 positions).
-        /// </summary>
         public NativeList<float3> path;
-
-        /// <summary>
-        /// Whether a valid path was found.
-        /// </summary>
         public NativeArray<bool> pathFound;
-
-        /// <summary>
-        /// Total path length.
-        /// </summary>
         public NativeArray<float> pathLength;
 
         public void Execute()
@@ -71,14 +27,12 @@ namespace BovineLabs.Grid.Wavestar
 
             var obstacleMap = new NativeObstacleMap(obstacleGrid, sizeX, sizeY, sizeZ);
 
-            // Step 1: Find the subvolume containing the goal and get its data
             SubvolumeData goalData;
             if (!FindGoalSubvolume(out goalData))
             {
                 return;
             }
 
-            // Step 2: Trace predecessor chain from goal back to start
             var rawPath = new NativeList<float3>(Allocator.Temp);
             var visited = new NativeHashSet<int>(256, Allocator.Temp);
 
@@ -94,14 +48,12 @@ namespace BovineLabs.Grid.Wavestar
             {
                 safety++;
 
-                // Check if we've reached the start
                 float distToStart = math.distance(currentPred, (float3)startPos + new float3(0.5f, 0.5f, 0.5f));
                 if (distToStart < 0.5f)
                 {
                     break;
                 }
 
-                // Find the subvolume containing currentPred and get its predecessor
                 int3 predGrid = new int3(
                     (int)math.floor(currentPred.x),
                     (int)math.floor(currentPred.y),
@@ -131,10 +83,8 @@ namespace BovineLabs.Grid.Wavestar
                     break;
             }
 
-            // Add start position
             rawPath.Add((float3)startPos + new float3(0.5f, 0.5f, 0.5f));
 
-            // Step 3: Reverse so path goes from start to goal
             var forwardPath = new NativeList<float3>(rawPath.Length, Allocator.Temp);
             for (int i = rawPath.Length - 1; i >= 0; i--)
             {
@@ -142,11 +92,9 @@ namespace BovineLabs.Grid.Wavestar
             }
             rawPath.Dispose();
 
-            // Step 4: Apply Theta*-style line-of-sight shortcutting (taut path smoothing)
             var smoothed = SmoothPath(forwardPath, obstacleMap);
             forwardPath.Dispose();
 
-            // Step 5: Output final path
             for (int i = 0; i < smoothed.Length; i++)
             {
                 path.Add(smoothed[i]);
@@ -167,10 +115,6 @@ namespace BovineLabs.Grid.Wavestar
             visited.Dispose();
         }
 
-        /// <summary>
-        /// Find the goal subvolume by searching the cost field for a subvolume
-        /// containing the goal position.
-        /// </summary>
         private bool FindGoalSubvolume(out SubvolumeData goalData)
         {
             goalData = default;
@@ -180,7 +124,6 @@ namespace BovineLabs.Grid.Wavestar
             {
                 for (int i = 0; i < keys.Length; i++)
                 {
-                    // Reconstruct the octree index from morton code
                     var sv = DecodeMortonCode(keys[i]);
                     if (sv.Contains(goalPos))
                     {
@@ -196,9 +139,6 @@ namespace BovineLabs.Grid.Wavestar
             return false;
         }
 
-        /// <summary>
-        /// Decode a morton code back into an OctreeIndex.
-        /// </summary>
         private OctreeIndex DecodeMortonCode(int mortonCode)
         {
             uint m = (uint)mortonCode;
@@ -222,14 +162,6 @@ namespace BovineLabs.Grid.Wavestar
             return new OctreeIndex((int)x, (int)y, (int)z, height);
         }
 
-        /// <summary>
-        /// Theta*-style path smoothing: iteratively remove waypoints that have
-        /// line-of-sight to a further waypoint (shortcutting).
-        ///
-        /// This produces a taut any-angle path by removing unnecessary turns.
-        /// Algorithm: for each waypoint, try to skip ahead to the furthest waypoint
-        /// that has line-of-sight.
-        /// </summary>
         private NativeList<float3> SmoothPath(NativeList<float3> inputPath, NativeObstacleMap obstacleMap)
         {
             if (inputPath.Length <= 2)
@@ -246,7 +178,6 @@ namespace BovineLabs.Grid.Wavestar
             int current = 0;
             while (current < inputPath.Length - 1)
             {
-                // Try to find the furthest visible waypoint from current
                 int furthest = current + 1;
 
                 for (int candidate = inputPath.Length - 1; candidate > current + 1; candidate--)
@@ -265,13 +196,8 @@ namespace BovineLabs.Grid.Wavestar
             return smoothed;
         }
 
-        /// <summary>
-        /// 3D line-of-sight check between two continuous points.
-        /// Uses Bresenham-style ray traversal through grid cells.
-        /// </summary>
         private bool HasLineOfSight(NativeObstacleMap obstacleMap, float3 from, float3 to)
         {
-            // Use a supercover line algorithm that visits all cells the line passes through
             int x0 = (int)math.floor(from.x);
             int y0 = (int)math.floor(from.y);
             int z0 = (int)math.floor(from.z);
@@ -287,17 +213,13 @@ namespace BovineLabs.Grid.Wavestar
             int sy = y0 < y1 ? 1 : (y0 > y1 ? -1 : 0);
             int sz = z0 < z1 ? 1 : (z0 > z1 ? -1 : 0);
 
-            // Supercover 3D: visit all cells touched by the line
-            // Use the 3D digital differential analyzer approach
             float fx0 = from.x, fy0 = from.y, fz0 = from.z;
             float fx1 = to.x, fy1 = to.y, fz1 = to.z;
 
-            // Simple approach: sample at small intervals along the line
             float dist = math.distance(from, to);
-            int steps = (int)math.ceil(dist * 2f); // 2 samples per unit distance
+            int steps = (int)math.ceil(dist * 2f);
             steps = math.max(steps, 1);
 
-            int prevX = x0, prevY = y0, prevZ = z0;
             for (int i = 0; i <= steps; i++)
             {
                 float t = (float)i / steps;
@@ -317,22 +239,16 @@ namespace BovineLabs.Grid.Wavestar
         }
     }
 
-    /// <summary>
-    /// High-level API for extracting paths from a Wavestar cost field.
-    /// </summary>
     public static class WavestarPathExtractor
     {
-        /// <summary>
-        /// Extract a smooth any-angle path from the cost field.
-        /// </summary>
-        public static NativeList<float3> Extract(
+        public static bool TryExtract(
             NativeParallelHashMap<int, SubvolumeData> costField,
             int3 startPos, int3 goalPos,
             NativeArray<int> obstacleGrid,
             int sizeX, int sizeY, int sizeZ,
-            out bool found, out float length)
+            ref NativeList<float3> path,
+            out float length)
         {
-            var path = new NativeList<float3>(Allocator.Persistent);
             var foundArr = new NativeArray<bool>(1, Allocator.TempJob);
             var lengthArr = new NativeArray<float>(1, Allocator.TempJob);
 
@@ -353,13 +269,13 @@ namespace BovineLabs.Grid.Wavestar
             var handle = job.Schedule();
             handle.Complete();
 
-            found = foundArr[0];
+            bool found = foundArr[0];
             length = lengthArr[0];
 
             foundArr.Dispose();
             lengthArr.Dispose();
 
-            return path;
+            return found;
         }
     }
 }

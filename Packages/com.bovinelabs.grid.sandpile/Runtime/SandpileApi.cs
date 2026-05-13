@@ -20,16 +20,22 @@ namespace BovineLabs.Grid.Sandpile
     [BurstCompile]
     public unsafe static class SandpileApi
     {
-        public static SandpileState Create(int width, int height, Allocator allocator)
+        public static bool TryCreate(int width, int height, Allocator allocator, out SandpileState result)
         {
-            var g = Grid2D.Create(width, height);
-            return new SandpileState
+            if (!Grid2D.TryCreate(width, height, out var g))
+            {
+                result = default;
+                return false;
+            }
+
+            result = new SandpileState
             {
                 Grid = g,
                 Grains = new NativeArray<int>(g.Length, allocator),
                 Queue = new UnsafeQueue<int>(allocator),
                 InQueue = new NativeArray<byte>(g.Length, allocator),
             };
+            return true;
         }
 
         [BurstCompile]
@@ -60,7 +66,7 @@ namespace BovineLabs.Grid.Sandpile
         }
 
         [BurstCompile]
-        public static bool RelaxStep(ref SandpileState s)
+        public static bool TryRelaxStep(ref SandpileState s)
         {
             if (!s.Queue.TryDequeue(out int cell)) return false;
 
@@ -74,29 +80,24 @@ namespace BovineLabs.Grid.Sandpile
             int toppleCount = grains[cell] / 4;
             grains[cell] %= 4;
 
-            // Unrolled 4-direction neighbors with inlined bounds
-            // Right
             if (Hint.Likely(cp.x + 1 < w))
             {
                 int ni = cell + 1;
                 grains[ni] += toppleCount;
                 if (grains[ni] >= 4 && inQueue[ni] == 0) { s.Queue.Enqueue(ni); inQueue[ni] = 1; }
             }
-            // Up
             if (Hint.Likely(cp.y + 1 < h))
             {
                 int ni = cell + w;
                 grains[ni] += toppleCount;
                 if (grains[ni] >= 4 && inQueue[ni] == 0) { s.Queue.Enqueue(ni); inQueue[ni] = 1; }
             }
-            // Left
             if (Hint.Likely(cp.x > 0))
             {
                 int ni = cell - 1;
                 grains[ni] += toppleCount;
                 if (grains[ni] >= 4 && inQueue[ni] == 0) { s.Queue.Enqueue(ni); inQueue[ni] = 1; }
             }
-            // Down
             if (Hint.Likely(cp.y > 0))
             {
                 int ni = cell - w;
@@ -108,9 +109,10 @@ namespace BovineLabs.Grid.Sandpile
         }
 
         [BurstCompile]
-        public static void RelaxAll(ref SandpileState s)
+        public static bool TryRelaxAll(ref SandpileState s)
         {
-            while (RelaxStep(ref s)) { }
+            while (TryRelaxStep(ref s)) { }
+            return true;
         }
 
         [BurstCompile]

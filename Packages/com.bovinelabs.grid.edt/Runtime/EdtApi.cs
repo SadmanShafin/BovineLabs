@@ -21,16 +21,22 @@ namespace BovineLabs.Grid.Edt
     [BurstCompile]
     public unsafe static class EdtApi
     {
-        public static EdtState Create(int width, int height, Allocator allocator)
+        public static bool TryCreate(int width, int height, Allocator allocator, out EdtState result)
         {
-            var s = new EdtState
+            if (!Grid2D.TryCreate(width, height, out var grid))
             {
-                Grid = Grid2D.Create(width, height),
+                result = default;
+                return false;
+            }
+
+            result = new EdtState
+            {
+                Grid = grid,
                 Temp = new NativeArray<float>(width * height, allocator),
                 V = new NativeArray<int>(math.max(width, height), allocator),
                 Z = new NativeArray<float>(math.max(width, height) + 1, allocator),
             };
-            return s;
+            return true;
         }
 
         [BurstCompile]
@@ -98,7 +104,7 @@ namespace BovineLabs.Grid.Edt
         }
 
         [BurstCompile]
-        public static void Build(ref EdtState s, in NativeArray<byte> blocked, ref NativeArray<float> dist2)
+        public static bool TryBuild(ref EdtState s, in NativeArray<byte> blocked, ref NativeArray<float> dist2)
         {
             InitFromBlocked(in blocked, ref dist2);
 
@@ -109,7 +115,6 @@ namespace BovineLabs.Grid.Edt
             int w = s.Grid.Width;
             int h = s.Grid.Height;
 
-            // Row pass
             for (int y = 0; y < h; y++)
             {
                 int rowStart = y * w;
@@ -122,7 +127,6 @@ namespace BovineLabs.Grid.Edt
                     dist2Ptr[rowStart + x] = temp[x];
             }
 
-            // Column pass
             for (int x = 0; x < w; x++)
             {
                 for (int y = 0; y < h; y++)
@@ -133,6 +137,8 @@ namespace BovineLabs.Grid.Edt
                 for (int y = 0; y < h; y++)
                     dist2Ptr[y * w + x] = temp[y];
             }
+
+            return true;
         }
 
         [BurstCompile]

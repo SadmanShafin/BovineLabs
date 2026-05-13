@@ -27,16 +27,22 @@ namespace BovineLabs.Grid.Cftp
     [BurstCompile]
     public unsafe static class CftpApi
     {
-        public static CftpState Create(int width, int height, int maxUpdates, Allocator a)
+        public static bool TryCreate(int width, int height, int maxUpdates, Allocator a, out CftpState result)
         {
-            var g = Grid2D.Create(width, height);
-            return new CftpState
+            if (!Grid2D.TryCreate(width, height, out var g))
+            {
+                result = default;
+                return false;
+            }
+
+            result = new CftpState
             {
                 Grid = g,
                 Low = new NativeArray<byte>(g.Length, a),
                 High = new NativeArray<byte>(g.Length, a),
                 Updates = new UnsafeList<CftpUpdate>(maxUpdates, a),
             };
+            return true;
         }
 
         [BurstCompile]
@@ -53,7 +59,7 @@ namespace BovineLabs.Grid.Cftp
         }
 
         [BurstCompile]
-        public static void GeneratePastUpdates(ref CftpState s, ref Unity.Mathematics.Random rng, int count)
+        public static bool TryGeneratePastUpdates(ref CftpState s, ref Unity.Mathematics.Random rng, int count)
         {
             s.Updates.Clear();
             int len = s.Grid.Length;
@@ -72,6 +78,7 @@ namespace BovineLabs.Grid.Cftp
                     });
                 }
             }
+            return true;
         }
 
         [BurstCompile]
@@ -94,13 +101,9 @@ namespace BovineLabs.Grid.Cftp
                 int cy = cell / w;
 
                 int lowN = 0, highN = 0;
-                // Right
                 if (cx + 1 < w) { lowN += low[cell + 1]; highN += high[cell + 1]; }
-                // Up
                 if (cy + 1 < h) { lowN += low[cell + w]; highN += high[cell + w]; }
-                // Left
                 if (cx > 0) { lowN += low[cell - 1]; highN += high[cell - 1]; }
-                // Down
                 if (cy > 0) { lowN += low[cell - w]; highN += high[cell - w]; }
 
                 low[cell] = (byte)((bit & math.select(0, 1, lowN >= 2)) & 1);
@@ -120,11 +123,13 @@ namespace BovineLabs.Grid.Cftp
         }
 
         [BurstCompile]
-        public static bool SampleExact(ref CftpState s, ref Unity.Mathematics.Random rng, ref NativeArray<byte> sample)
+        public static bool TrySampleExact(ref CftpState s, ref Unity.Mathematics.Random rng, ref NativeArray<byte> sample)
         {
+            if (!sample.IsCreated || sample.Length < s.Grid.Length) return false;
+
             for (int attempt = 0; attempt < 20; attempt++)
             {
-                GeneratePastUpdates(ref s, ref rng, 1 << attempt);
+                TryGeneratePastUpdates(ref s, ref rng, 1 << attempt);
                 Replay(ref s);
                 if (Coalesced(ref s))
                 {
@@ -139,7 +144,7 @@ namespace BovineLabs.Grid.Cftp
         {
             if (s.Low.IsCreated) s.Low.Dispose();
             if (s.High.IsCreated) s.High.Dispose();
-            s.Updates.Dispose();
+            if (s.Updates.IsCreated) s.Updates.Dispose();
         }
     }
 }

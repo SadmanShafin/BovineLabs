@@ -5,12 +5,12 @@ using Unity.Mathematics;
 
 namespace BovineLabs.Grid.Wavestar
 {
-    /// <summary>
-    /// Identifies a subvolume in the multi-resolution octree.
-    /// (x, y, z) is the integer position at the given height (resolution level).
-    /// height=0 is finest resolution; larger height = coarser (larger subvolume).
-    /// Side length of a subvolume at height h = 2^h.
-    /// </summary>
+
+
+
+
+
+
     public struct OctreeIndex : IEquatable<OctreeIndex>
     {
         public int x;
@@ -26,35 +26,35 @@ namespace BovineLabs.Grid.Wavestar
             this.height = height;
         }
 
-        /// <summary>
-        /// Side length of this subvolume: 2^height.
-        /// </summary>
+
+
+
         public int Size => 1 << height;
 
-        /// <summary>
-        /// Center of this subvolume in world coordinates (assuming cell size = 1).
-        /// </summary>
+
+
+
         public float3 Center => new float3(
             x * Size + Size * 0.5f,
             y * Size + Size * 0.5f,
             z * Size + Size * 0.5f);
 
-        /// <summary>
-        /// Minimum corner of this subvolume.
-        /// </summary>
+
+
+
         public int3 MinCorner => new int3(x * Size, y * Size, z * Size);
 
-        /// <summary>
-        /// Maximum corner (exclusive) of this subvolume.
-        /// </summary>
+
+
+
         public int3 MaxCornerExclusive => new int3(
             (x + 1) * Size,
             (y + 1) * Size,
             (z + 1) * Size);
 
-        /// <summary>
-        /// Check if a point (in grid coordinates) is contained within this subvolume.
-        /// </summary>
+
+
+
         public bool Contains(int3 point)
         {
             int s = Size;
@@ -63,9 +63,9 @@ namespace BovineLabs.Grid.Wavestar
                    point.z >= z * s && point.z < (z + 1) * s;
         }
 
-        /// <summary>
-        /// Check if a point (continuous) is inside the subvolume bounds.
-        /// </summary>
+
+
+
         public bool Contains(float3 point)
         {
             float s = Size;
@@ -77,10 +77,10 @@ namespace BovineLabs.Grid.Wavestar
                    point.z >= minZ && point.z <= maxZ;
         }
 
-        /// <summary>
-        /// Compute the child index at the given child position (0-7).
-        /// Child positions are determined by the low bits of the coordinates.
-        /// </summary>
+
+
+
+
         public OctreeIndex Child(int childIndex)
         {
             int cx = (childIndex & 1);
@@ -89,21 +89,21 @@ namespace BovineLabs.Grid.Wavestar
             return new OctreeIndex(x * 2 + cx, y * 2 + cy, z * 2 + cz, height - 1);
         }
 
-        /// <summary>
-        /// Get the parent of this subvolume (one level coarser).
-        /// </summary>
+
+
+
         public OctreeIndex Parent => new OctreeIndex(x >> 1, y >> 1, z >> 1, height + 1);
 
-        /// <summary>
-        /// Compute a Morton/Z-order code for this subvolume.
-        /// Encodes (x, y, z, height) into a single int for hashing.
-        /// We interleave bits of x, y, z and use the top bits for height.
-        /// </summary>
+
+
+
+
+
         public int MortonCode
         {
             get
             {
-                // Spread bits for x, y, z and combine
+
                 uint spread(uint v)
                 {
                     v = (v | (v << 16)) & 0x030000FF;
@@ -117,7 +117,7 @@ namespace BovineLabs.Grid.Wavestar
                 uint my = spread((uint)y);
                 uint mz = spread((uint)z);
                 uint morton = mx | (my << 1) | (mz << 2);
-                // Encode height in upper bits
+
                 return (int)(morton | ((uint)height << 24));
             }
         }
@@ -137,10 +137,10 @@ namespace BovineLabs.Grid.Wavestar
         public static bool operator !=(OctreeIndex a, OctreeIndex b) => !a.Equals(b);
     }
 
-    /// <summary>
-    /// Search state stored per subvolume in the cost field.
-    /// Records the predecessor position and the g-cost to reach the center of this subvolume.
-    /// </summary>
+
+
+
+
     public struct SubvolumeData
     {
         public int predecessorX;
@@ -156,25 +156,25 @@ namespace BovineLabs.Grid.Wavestar
             this.gCost = gCost;
         }
 
-        /// <summary>
-        /// The predecessor position as int3 (grid coordinates of predecessor center).
-        /// </summary>
+
+
+
         public int3 Predecessor => new int3(predecessorX, predecessorY, predecessorZ);
 
-        /// <summary>
-        /// Predecessor center in continuous coordinates.
-        /// </summary>
+
+
+
         public float3 PredecessorCenter => new float3(predecessorX, predecessorY, predecessorZ);
 
         public static SubvolumeData Invalid => new SubvolumeData(0, 0, 0, float.PositiveInfinity);
     }
 
-    /// <summary>
-    /// Result of comparing two candidate g-costs during UpdateSubvolume.
-    /// StrictlyBetter: new cost is strictly less than old by more than epsilon threshold.
-    /// Ambiguous: new cost is within epsilon of old - need to refine.
-    /// NotBetter: new cost is strictly worse.
-    /// </summary>
+
+
+
+
+
+
     public enum ComparisonResult : byte
     {
         StrictlyBetter,
@@ -182,11 +182,11 @@ namespace BovineLabs.Grid.Wavestar
         NotBetter
     }
 
-    /// <summary>
-    /// Multi-resolution cost field backed by a NativeHashMap.
-    /// Maps morton codes of OctreeIndex subvolumes to their SubvolumeData.
-    /// Provides compressed storage since large subvolumes share a single predecessor.
-    /// </summary>
+
+
+
+
+
     public struct MultiResCostField : IDisposable
     {
         private NativeHashMap<int, SubvolumeData> data;
@@ -218,9 +218,9 @@ namespace BovineLabs.Grid.Wavestar
             data.Remove(idx.MortonCode);
         }
 
-        /// <summary>
-        /// Get the raw NativeHashMap for iteration in Burst jobs.
-        /// </summary>
+
+
+
         public NativeHashMap<int, SubvolumeData> RawData => data;
 
         public NativeArray<int> GetKeyArray(Allocator allocator)
@@ -247,35 +247,35 @@ namespace BovineLabs.Grid.Wavestar
         public bool IsCreated => data.IsCreated;
     }
 
-    /// <summary>
-    /// Interface for checking if a subvolume is traversable.
-    /// Implementations provide obstacle data from different sources.
-    /// </summary>
+
+
+
+
     public interface IObstacleMap
     {
-        /// <summary>
-        /// Check if a single cell at grid coordinates (x, y, z) is traversable.
-        /// </summary>
+
+
+
         bool IsTraversable(int x, int y, int z);
 
-        /// <summary>
-        /// Check if an entire subvolume (all cells within it) is traversable.
-        /// A subvolume is traversable only if ALL cells within it are traversable.
-        /// </summary>
+
+
+
+
         bool IsSubvolumeTraversable(OctreeIndex idx);
 
-        /// <summary>
-        /// Grid dimensions.
-        /// </summary>
+
+
+
         int SizeX { get; }
         int SizeY { get; }
         int SizeZ { get; }
     }
 
-    /// <summary>
-    /// Burst-compatible obstacle map backed by a NativeArray of CellState.
-    /// Compatible with BovineLabs.Grid.CellState.
-    /// </summary>
+
+
+
+
     [BurstCompile]
     public struct NativeObstacleMap : IObstacleMap
     {
@@ -284,9 +284,9 @@ namespace BovineLabs.Grid.Wavestar
         private int sizeY;
         private int sizeZ;
 
-        /// <summary>
-        /// Cell state value indicating an obstacle/blocked cell.
-        /// </summary>
+
+
+
         public const int BlockedCellState = 1;
 
         public NativeObstacleMap(NativeArray<int> grid, int sizeX, int sizeY, int sizeZ)
@@ -335,10 +335,10 @@ namespace BovineLabs.Grid.Wavestar
         }
     }
 
-    /// <summary>
-    /// Priority queue element for the open set.
-    /// Stores an OctreeIndex and its f-score for sorting.
-    /// </summary>
+
+
+
+
     public struct OpenSetElement : IComparable<OpenSetElement>
     {
         public OctreeIndex index;
@@ -356,9 +356,9 @@ namespace BovineLabs.Grid.Wavestar
         }
     }
 
-    /// <summary>
-    /// Simple min-heap priority queue for Burst compatibility.
-    /// </summary>
+
+
+
     public struct NativeMinPQ : IDisposable
     {
         private NativeList<OpenSetElement> heap;

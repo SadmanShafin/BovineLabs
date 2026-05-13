@@ -20,7 +20,7 @@ namespace BovineLabs.Grid.Anya
         public Interval Interval;
         public float2 Root;
         public float G;
-        public int Parent; // Index in the pool
+        public int Parent;
     }
 
     public struct AnyaState
@@ -33,19 +33,25 @@ namespace BovineLabs.Grid.Anya
     [BurstCompile]
     public unsafe static class AnyaApi
     {
-        public static AnyaState Create(int width, int height, int maxNodes, Allocator a)
+        public static bool TryCreate(int width, int height, int maxNodes, Allocator a, out AnyaState result)
         {
-            var g = Grid2D.Create(width, height);
-            return new AnyaState
+            if (!Grid2D.TryCreate(width, height, out var g) || !MinHeap.TryCreate(maxNodes, a, out var heap))
+            {
+                result = default;
+                return false;
+            }
+
+            result = new AnyaState
             {
                 Grid = g,
-                Heap = MinHeap.Create(maxNodes, a),
+                Heap = heap,
                 Pool = new UnsafeList<AnyaNode>(maxNodes, a),
             };
+            return true;
         }
 
         [BurstCompile]
-        public static bool Search(
+        public static bool TrySearch(
             ref AnyaState s,
             in NativeArray<byte> blocked,
             ref int2 start,
@@ -79,11 +85,12 @@ namespace BovineLabs.Grid.Anya
 
             int startIdx = s.Pool.Length;
             s.Pool.Add(startNode);
-            s.Heap.InsertOrDecrease(new HeapNode(startIdx, Grid2D.HeuristicEuclidean(start, goal)));
+            if (!s.Heap.TryInsertOrDecrease(new HeapNode(startIdx, Grid2D.HeuristicEuclidean(start, goal)))) return false;
 
             while (!s.Heap.IsEmpty)
             {
-                int uIdx = s.Heap.Pop().Id;
+                if (!s.Heap.TryPop(out var heapNode)) return false;
+                int uIdx = heapNode.Id;
                 AnyaNode* u = s.Pool.Ptr + uIdx;
 
                 if (u->Interval.Y == goal.y && u->Interval.Contains(goal.x))
@@ -96,30 +103,33 @@ namespace BovineLabs.Grid.Anya
                     }
                 }
                 
-                Expand(ref s, uIdx, blockedPtr, ref goal);
+                if (!TryExpand(ref s, uIdx, blockedPtr, ref goal)) return false;
             }
 
             return false;
         }
 
         [BurstCompile]
-        private static void Expand(ref AnyaState s, int uIdx, [NoAlias] byte* blocked, ref int2 goal)
+        private static bool TryExpand(ref AnyaState s, int uIdx, [NoAlias] byte* blocked, ref int2 goal)
         {
             AnyaNode* u = s.Pool.Ptr + uIdx;
             
-            if (u->Interval.Y >= u->Root.y) ExpandNextRow(ref s, uIdx, 1, blocked, ref goal);
-            if (u->Interval.Y <= u->Root.y) ExpandNextRow(ref s, uIdx, -1, blocked, ref goal);
+            if (u->Interval.Y >= u->Root.y)
+                if (!TryExpandNextRow(ref s, uIdx, 1, blocked, ref goal)) return false;
+            if (u->Interval.Y <= u->Root.y)
+                if (!TryExpandNextRow(ref s, uIdx, -1, blocked, ref goal)) return false;
+            return true;
         }
 
         [BurstCompile]
-        private static void ExpandNextRow(ref AnyaState s, int uIdx, int dy, [NoAlias] byte* blocked, ref int2 goal)
+        private static bool TryExpandNextRow(ref AnyaState s, int uIdx, int dy, [NoAlias] byte* blocked, ref int2 goal)
         {
             AnyaNode* u = s.Pool.Ptr + uIdx;
             int nextY = u->Interval.Y + dy;
             int width = s.Grid.Width;
             int height = s.Grid.Height;
 
-            if (Hint.Unlikely(nextY < 0 || nextY > height)) return;
+            if (Hint.Unlikely(nextY < 0 || nextY > height)) return true;
 
             float h1 = u->Interval.Y - u->Root.y;
             float h2 = nextY - u->Root.y;
@@ -127,9 +137,6 @@ namespace BovineLabs.Grid.Anya
             float projL, projR;
             if (Hint.Unlikely(math.abs(h1) < 0.001f))
             {
-                // Root is on the same row as the interval.
-                // If it's the start node (XL=XR=Rx), we can see the entire next row (clipping happens below).
-                // If it's a corner node, we can only see into the quadrant that is "opened up".
                 if (math.abs(u->Interval.XL - u->Root.x) < 0.001f && math.abs(u->Interval.XR - u->Root.x) < 0.001f)
                 {
                     projL = 0; projR = width;
@@ -150,7 +157,7 @@ namespace BovineLabs.Grid.Anya
             if (projL > projR) { float tmp = projL; projL = projR; projR = tmp; }
 
             int cellY = (dy > 0) ? u->Interval.Y : u->Interval.Y - 1;
-            if (Hint.Unlikely(cellY < 0 || cellY >= height)) return;
+            if (Hint.Unlikely(cellY < 0 || cellY >= height)) return true;
 
             int xMin = (int)math.floor(projL);
             int xMax = (int)math.ceil(projR);
@@ -168,21 +175,22 @@ namespace BovineLabs.Grid.Anya
                 {
                     if (currentL >= 0)
                     {
-                        AddSuccessor(ref s, uIdx, nextY, math.max(projL, currentL), math.min(projR, x), ref goal);
+                        if (!TryAddSuccessor(ref s, uIdx, nextY, math.max(projL, currentL), math.min(projR, x), ref goal)) return false;
                         currentL = -1;
                     }
                 }
             }
             if (currentL >= 0)
             {
-                AddSuccessor(ref s, uIdx, nextY, math.max(projL, currentL), math.min(projR, xMax), ref goal);
+                if (!TryAddSuccessor(ref s, uIdx, nextY, math.max(projL, currentL), math.min(projR, xMax), ref goal)) return false;
             }
+            return true;
         }
 
         [BurstCompile]
-        private static void AddSuccessor(ref AnyaState s, int parentIdx, int y, float xl, float xr, ref int2 goal)
+        private static bool TryAddSuccessor(ref AnyaState s, int parentIdx, int y, float xl, float xr, ref int2 goal)
         {
-            if (xl >= xr) return;
+            if (xl >= xr) return true;
             
             AnyaNode* parent = s.Pool.Ptr + parentIdx;
             var node = new AnyaNode
@@ -196,10 +204,11 @@ namespace BovineLabs.Grid.Anya
             float2 mid = new float2((xl + xr) * 0.5f, y);
             node.G = parent->G + math.distance(parent->Root, mid);
 
+            if (Hint.Unlikely(s.Pool.Length >= s.Pool.Capacity)) return false;
             int idx = s.Pool.Length;
             s.Pool.Add(node);
             float f = node.G + Grid2D.HeuristicEuclidean(new int2((int)math.round(mid.x), y), goal);
-            s.Heap.InsertOrDecrease(new HeapNode(idx, f));
+            return s.Heap.TryInsertOrDecrease(new HeapNode(idx, f));
         }
 
         [BurstCompile]

@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
@@ -8,14 +7,13 @@ using Unity.Burst.CompilerServices;
 
 namespace BovineLabs.Grid
 {
-    /// <summary>Min-heap for A*/Dijkstra-style priority queues. Optimized with unsafe pointers and Burst hints.</summary>
     [BurstCompile]
     public unsafe struct MinHeap
     {
         [NativeDisableUnsafePtrRestriction]
         public HeapNode* Data;
         [NativeDisableUnsafePtrRestriction]
-        public int* Positions; // id -> index in Data, -1 if not present
+        public int* Positions;
         
         public int Capacity;
         public int Count;
@@ -23,9 +21,15 @@ namespace BovineLabs.Grid
 
         public bool IsCreated => Data != null;
 
-        public static MinHeap Create(int maxId, Allocator allocator)
+        public static bool TryCreate(int maxId, Allocator allocator, out MinHeap result)
         {
-            var h = new MinHeap
+            if (maxId <= 0)
+            {
+                result = default;
+                return false;
+            }
+
+            result = new MinHeap
             {
                 Data = (HeapNode*)UnsafeUtility.Malloc(UnsafeUtility.SizeOf<HeapNode>() * maxId, UnsafeUtility.AlignOf<HeapNode>(), allocator),
                 Positions = (int*)UnsafeUtility.Malloc(UnsafeUtility.SizeOf<int>() * maxId, UnsafeUtility.AlignOf<int>(), allocator),
@@ -34,8 +38,8 @@ namespace BovineLabs.Grid
                 Allocator = allocator
             };
             
-            h.Clear();
-            return h;
+            result.Clear();
+            return true;
         }
 
         public int Length => Count;
@@ -49,9 +53,10 @@ namespace BovineLabs.Grid
         }
 
         [BurstCompile]
-        public void InsertOrDecrease([NoAlias] HeapNode node)
+        public bool TryInsertOrDecrease([NoAlias] HeapNode node)
         {
-            CheckBounds(node.Id);
+            if (Hint.Unlikely((uint)node.Id >= (uint)Capacity)) return false;
+
             int pos = Positions[node.Id];
             if (pos >= 0)
             {
@@ -63,18 +68,26 @@ namespace BovineLabs.Grid
             }
             else
             {
+                if (Hint.Unlikely(Count >= Capacity)) return false;
                 int idx = Count++;
                 Data[idx] = node;
                 Positions[node.Id] = idx;
                 SiftUp(idx);
             }
+            return true;
         }
 
         [BurstCompile]
-        public HeapNode Pop()
+        public bool TryPop(out HeapNode result)
         {
-            HeapNode root = Data[0];
-            Positions[root.Id] = -1;
+            if (Hint.Unlikely(Count == 0))
+            {
+                result = default;
+                return false;
+            }
+
+            result = Data[0];
+            Positions[result.Id] = -1;
 
             int last = --Count;
             if (Hint.Likely(last > 0))
@@ -84,12 +97,40 @@ namespace BovineLabs.Grid
                 SiftDown(0);
             }
 
-            return root;
+            return true;
         }
 
-        public bool Contains(int id) => Positions[id] >= 0;
+        [BurstCompile]
+        public bool TryRemove(int id)
+        {
+            if (Hint.Unlikely((uint)id >= (uint)Capacity)) return false;
+            int pos = Positions[id];
+            if (pos < 0) return false;
 
-        public HeapNode Peek() => Data[0];
+            Positions[id] = -1;
+            int last = --Count;
+            if (pos < last)
+            {
+                Data[pos] = Data[last];
+                Positions[Data[pos].Id] = pos;
+                SiftUp(pos);
+                SiftDown(pos);
+            }
+            return true;
+        }
+
+        public bool Contains(int id) => (uint)id < (uint)Capacity && Positions[id] >= 0;
+
+        public bool TryPeek(out HeapNode result)
+        {
+            if (Hint.Unlikely(Count == 0))
+            {
+                result = default;
+                return false;
+            }
+            result = Data[0];
+            return true;
+        }
 
         public void Dispose()
         {
@@ -143,13 +184,6 @@ namespace BovineLabs.Grid
         {
             if (a.Key0 != b.Key0) return a.Key0 < b.Key0;
             return a.Key1 < b.Key1;
-        }
-
-        [Conditional("ENABLE_UNITY_COLLECTIONS_CHECKS")]
-        private void CheckBounds(int id)
-        {
-            if (Hint.Unlikely((uint)id >= (uint)Capacity))
-                throw new IndexOutOfRangeException($"Heap ID {id} out of capacity {Capacity}");
         }
     }
 

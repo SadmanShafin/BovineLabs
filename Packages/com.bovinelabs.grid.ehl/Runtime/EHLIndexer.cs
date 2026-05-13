@@ -7,46 +7,29 @@ using Unity.Mathematics;
 
 namespace BovineLabs.Grid.EHL
 {
-    /// <summary>
-    /// Phase 3 and 4 of EHL*: Build the EHL grid overlay and apply memory-budgeted compression.
-    ///
-    /// Phase 3: Overlay a uniform grid on the map. For each grid cell c, determine which
-    /// convex vertices can "see into" c (visibility list Lc). Compute via-labels VL(c) from
-    /// the hub labels of visible vertices.
-    ///
-    /// Phase 4 (EHL* innovation): Memory-budgeted compression. Compute label overlap between
-    /// adjacent cells. Use a max-heap to greedily merge cells with highest overlap until
-    /// total memory usage falls within budget B.
-    /// </summary>
     [BurstCompile]
     public struct EHLIndexerJob : IJob
     {
         public NativeArray<ConvexVertex> ConvexVertices;
         public NativeArray<ObstacleEdge> ObstacleEdges;
 
-        // Hub labels
         public NativeArray<int> HubOffsets;
         public NativeArray<int> HubCounts;
         public NativeArray<VisibilityLabel> HubLabels;
 
-        // Visibility graph adjacency
         public NativeArray<int> AdjOffsets;
         public NativeArray<int> AdjCounts;
         public NativeArray<AdjEdge> AdjEdges;
 
-        // Grid parameters
         public float2 MapMin;
         public float2 MapMax;
         public int2 GridDims;
         public float2 CellSize;
 
-        /// <summary>Memory budget in bytes for the via-label array.</summary>
         public long MemoryBudgetBytes;
 
-        /// <summary>Output: grid cells.</summary>
         public NativeList<GridCell> CellsOut;
 
-        /// <summary>Output: via-labels (concatenated for all cells).</summary>
         public NativeList<ViaLabel> ViaLabelsOut;
 
         public void Execute()
@@ -54,8 +37,6 @@ namespace BovineLabs.Grid.EHL
             int numCells = GridDims.x * GridDims.y;
             int numVertices = ConvexVertices.Length;
 
-            // Phase 3: Compute via-labels for each cell
-            // For each cell, determine which convex vertices can see into it
             var cellLabels = new NativeArray<NativeList<ViaLabel>>(numCells, Allocator.Temp);
 
             for (int cy = 0; cy < GridDims.y; cy++)
@@ -69,17 +50,13 @@ namespace BovineLabs.Grid.EHL
                     float2 cellMax = cellMin + CellSize;
                     float2 cellCenter = (cellMin + cellMax) * 0.5f;
 
-                    // Sample points within the cell for visibility checking
-                    // Use cell center as primary sample
                     var samplePoints = new NativeList<float2>(Allocator.Temp);
                     samplePoints.Add(cellCenter);
-                    // Add corner samples for robustness
                     samplePoints.Add(cellMin + CellSize * new float2(0.25f, 0.25f));
                     samplePoints.Add(cellMin + CellSize * new float2(0.75f, 0.25f));
                     samplePoints.Add(cellMin + CellSize * new float2(0.25f, 0.75f));
                     samplePoints.Add(cellMin + CellSize * new float2(0.75f, 0.75f));
 
-                    // For each convex vertex, check if it can see into this cell
                     var visibleVertices = new NativeList<int>(Allocator.Temp);
 
                     for (int v = 0; v < numVertices; v++)
@@ -102,9 +79,6 @@ namespace BovineLabs.Grid.EHL
                         }
                     }
 
-                    // Compute via-labels from visible vertices' hub labels
-                    // For each visible vertex v, add all of v's hub labels as via-labels
-                    // vdist(cellPoint, hub) = |cellCenter - v| + dist(v, hub)
                     var labelSet = new NativeHashMap<int, ViaLabel>(64, Allocator.Temp);
 
                     for (int vi = 0; vi < visibleVertices.Length; vi++)
@@ -121,12 +95,11 @@ namespace BovineLabs.Grid.EHL
                             var label = HubLabels[hubStart + h];
                             float totalDist = distToCell + label.Distance;
 
-                            // Keep the via-label with minimum total distance for each hub
                             var viaLabel = new ViaLabel(
                                 label.HubVertexId,
                                 totalDist,
                                 label.ViaVertexId,
-                                v  // the visible vertex
+                                v
                             );
 
                             if (labelSet.TryGetValue(label.HubVertexId, out var existing))
@@ -143,7 +116,6 @@ namespace BovineLabs.Grid.EHL
                         }
                     }
 
-                    // Extract and sort by hub ID
                     var values = labelSet.GetValueArray(Allocator.Temp);
                     values.Sort();
 
@@ -159,15 +131,12 @@ namespace BovineLabs.Grid.EHL
                 }
             }
 
-            // Phase 4: Memory-budgeted compression
-            // Calculate current memory usage
             long currentMemory = 0;
             for (int i = 0; i < numCells; i++)
             {
                 currentMemory += cellLabels[i].Length * UnsafeUtility.SizeOf<ViaLabel>();
             }
 
-            // Track which cells are still active (not merged into a neighbor)
             var activeCells = new NativeArray<bool>(numCells, Allocator.Temp);
             var cellMergedInto = new NativeArray<int>(numCells, Allocator.Temp);
             for (int i = 0; i < numCells; i++)
@@ -176,15 +145,13 @@ namespace BovineLabs.Grid.EHL
                 cellMergedInto[i] = i;
             }
 
-            // Build merge candidate heap (pairs of adjacent cells with overlap scores)
             if (currentMemory > MemoryBudgetBytes)
             {
-                int maxIterations = numCells; // safety bound
+                int maxIterations = numCells;
                 int iter = 0;
 
                 while (currentMemory > MemoryBudgetBytes && iter < maxIterations)
                 {
-                    // Find the pair of adjacent active cells with highest label overlap
                     int bestA = -1, bestB = -1;
                     float bestOverlap = -1f;
 
@@ -195,7 +162,6 @@ namespace BovineLabs.Grid.EHL
                             int idx = cy * GridDims.x + cx;
                             if (!activeCells[idx]) continue;
 
-                            // Check right neighbor
                             if (cx + 1 < GridDims.x)
                             {
                                 int right = cy * GridDims.x + (cx + 1);
@@ -211,7 +177,6 @@ namespace BovineLabs.Grid.EHL
                                 }
                             }
 
-                            // Check top neighbor
                             if (cy + 1 < GridDims.y)
                             {
                                 int top = (cy + 1) * GridDims.x + cx;
@@ -232,10 +197,8 @@ namespace BovineLabs.Grid.EHL
                     if (bestA < 0 || bestOverlap <= 0f)
                         break;
 
-                    // Merge bestB into bestA: union of labels, keeping minimum distance per hub
                     var merged = MergeLabels(cellLabels[bestA], cellLabels[bestB]);
 
-                    // Update memory accounting
                     currentMemory -= cellLabels[bestA].Length * UnsafeUtility.SizeOf<ViaLabel>();
                     currentMemory -= cellLabels[bestB].Length * UnsafeUtility.SizeOf<ViaLabel>();
 
@@ -245,7 +208,6 @@ namespace BovineLabs.Grid.EHL
 
                     currentMemory += merged.Length * UnsafeUtility.SizeOf<ViaLabel>();
 
-                    // Expand bestA's cell bounds to encompass bestB
                     activeCells[bestB] = false;
                     cellMergedInto[bestB] = bestA;
 
@@ -253,7 +215,6 @@ namespace BovineLabs.Grid.EHL
                 }
             }
 
-            // Write output: flatten cell labels into output arrays
             int labelOffset = 0;
             for (int cy = 0; cy < GridDims.y; cy++)
             {
@@ -261,14 +222,12 @@ namespace BovineLabs.Grid.EHL
                 {
                     int cellIdx = cy * GridDims.x + cx;
 
-                    // Find the actual active cell (follow merge chain)
                     int actualCell = cellIdx;
                     while (!activeCells[actualCell])
                     {
                         actualCell = cellMergedInto[actualCell];
                     }
 
-                    // Compute merged cell bounds
                     float2 cellMin = MapMin + new float2(cx * CellSize.x, cy * CellSize.y);
                     float2 cellMax = cellMin + CellSize;
 
@@ -282,13 +241,9 @@ namespace BovineLabs.Grid.EHL
                     {
                         ViaLabelsOut.Add(labels[i]);
                     }
-
-                    // Only dispose the list from the actual active cell owner
-                    // (cellIdx == actualCell means this is the owner)
                 }
             }
 
-            // Cleanup
             for (int i = 0; i < numCells; i++)
             {
                 if (cellLabels[i].IsCreated)
@@ -300,9 +255,6 @@ namespace BovineLabs.Grid.EHL
             cellMergedInto.Dispose();
         }
 
-        /// <summary>
-        /// Check if point b is visible from point a (no obstacle edge blocks line of sight).
-        /// </summary>
         private bool IsVisible(float2 a, float2 b, NativeArray<ObstacleEdge> edges)
         {
             float2 ab = b - a;
@@ -333,10 +285,6 @@ namespace BovineLabs.Grid.EHL
             return true;
         }
 
-        /// <summary>
-        /// Compute overlap score between two sorted via-label lists.
-        /// Score = fraction of shared hub IDs (Jaccard-like).
-        /// </summary>
         private float ComputeOverlap(NativeList<ViaLabel> a, NativeList<ViaLabel> b)
         {
             if (a.Length == 0 || b.Length == 0) return 0f;
@@ -365,9 +313,6 @@ namespace BovineLabs.Grid.EHL
             return total > 0 ? (float)shared / total : 0f;
         }
 
-        /// <summary>
-        /// Merge two sorted via-label lists, keeping the minimum distance per hub ID.
-        /// </summary>
         private NativeList<ViaLabel> MergeLabels(NativeList<ViaLabel> a, NativeList<ViaLabel> b)
         {
             var result = new NativeList<ViaLabel>(Allocator.Temp);
@@ -377,7 +322,6 @@ namespace BovineLabs.Grid.EHL
             {
                 if (a[i].HubVertexId == b[j].HubVertexId)
                 {
-                    // Keep the one with smaller distance
                     result.Add(a[i].HubDistance <= b[j].HubDistance ? a[i] : b[j]);
                     i++;
                     j++;
@@ -410,12 +354,9 @@ namespace BovineLabs.Grid.EHL
         }
     }
 
-    /// <summary>
-    /// High-level wrapper for EHL index construction.
-    /// </summary>
     public static class EHLIndexer
     {
-        public static JobHandle Build(
+        public static bool TryBuild(
             NativeArray<ConvexVertex> convexVertices,
             NativeArray<ObstacleEdge> obstacleEdges,
             NativeArray<int> hubOffsets,
@@ -430,6 +371,7 @@ namespace BovineLabs.Grid.EHL
             long memoryBudgetBytes,
             out NativeList<GridCell> cells,
             out NativeList<ViaLabel> viaLabels,
+            out JobHandle result,
             JobHandle dependency = default)
         {
             cells = new NativeList<GridCell>(Allocator.Persistent);
@@ -456,13 +398,11 @@ namespace BovineLabs.Grid.EHL
                 ViaLabelsOut = viaLabels,
             };
 
-            return job.Schedule(dependency);
+            result = job.Schedule(dependency);
+            return true;
         }
 
-        /// <summary>
-        /// Assemble the final EHLIndex struct from all computed data.
-        /// </summary>
-        public static EHLIndex AssembleIndex(
+        public static bool TryAssembleIndex(
             float2 mapMin,
             float2 mapMax,
             int2 gridDims,
@@ -477,7 +417,8 @@ namespace BovineLabs.Grid.EHL
             NativeList<int> hubCounts,
             NativeList<VisibilityLabel> hubLabels,
             NativeList<long> succKeys,
-            NativeList<int> succValues)
+            NativeList<int> succValues,
+            out EHLIndex result)
         {
             float2 cellSize = (mapMax - mapMin) / new float2(gridDims.x, gridDims.y);
 
@@ -487,7 +428,7 @@ namespace BovineLabs.Grid.EHL
                 successorMap.TryAdd(succKeys[i], succValues[i]);
             }
 
-            return new EHLIndex
+            result = new EHLIndex
             {
                 MapMin = mapMin,
                 MapMax = mapMax,
@@ -505,6 +446,7 @@ namespace BovineLabs.Grid.EHL
                 HubLabels = hubLabels.ToNativeArray(Allocator.Persistent),
                 SuccessorMap = successorMap,
             };
+            return true;
         }
     }
 

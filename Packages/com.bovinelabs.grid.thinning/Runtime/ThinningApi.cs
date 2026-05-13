@@ -17,28 +17,32 @@ namespace BovineLabs.Grid.Thinning
     [BurstCompile]
     public unsafe static class ThinningApi
     {
-        public static ThinningState Create(int width, int height, Allocator a)
+        public static bool TryCreate(int width, int height, Allocator a, out ThinningState s)
         {
-            var g = Grid2D.Create(width, height);
-            return new ThinningState
+            s = default;
+            if (!Grid2D.TryCreate(width, height, out var g)) return false;
+            s = new ThinningState
             {
                 Grid = g,
                 Mark = new NativeArray<byte>(g.Length, a),
                 Frontier = new UnsafeList<int>(g.Length, a),
             };
+            return true;
         }
 
         [BurstCompile]
-        public static int Iterate(ref ThinningState s, ref NativeArray<byte> solid)
+        public static bool TryIterate(ref ThinningState s, ref NativeArray<byte> solid, out int changed)
         {
-            int changed = 0;
-            changed += SubIterate(ref s, ref solid, 0);
-            changed += SubIterate(ref s, ref solid, 1);
-            return changed;
+            changed = 0;
+            if (!TrySubIterate(ref s, ref solid, 0, out int c1)) return false;
+            if (!TrySubIterate(ref s, ref solid, 1, out int c2)) return false;
+            changed = c1 + c2;
+            return true;
         }
 
-        private static int SubIterate(ref ThinningState s, ref NativeArray<byte> solid, int step)
+        private static bool TrySubIterate(ref ThinningState s, ref NativeArray<byte> solid, int step, out int changed)
         {
+            changed = 0;
             int width = s.Grid.Width;
             int height = s.Grid.Height;
             byte* solidPtr = (byte*)solid.GetUnsafePtr();
@@ -54,9 +58,6 @@ namespace BovineLabs.Grid.Thinning
                     int i = y * width + x;
                     if (solidPtr[i] == 0) continue;
 
-                    // P2 P3 P4
-                    // P9 P1 P5
-                    // P8 P7 P6
                     byte p2 = solidPtr[(y - 1) * width + x];
                     byte p3 = solidPtr[(y - 1) * width + (x + 1)];
                     byte p4 = solidPtr[y * width + (x + 1)];
@@ -102,9 +103,9 @@ namespace BovineLabs.Grid.Thinning
                 solidPtr[toDelete[i]] = 0;
             }
 
-            int count = toDelete.Length;
+            changed = toDelete.Length;
             toDelete.Dispose();
-            return count;
+            return true;
         }
 
         public static void Dispose(ref ThinningState s)

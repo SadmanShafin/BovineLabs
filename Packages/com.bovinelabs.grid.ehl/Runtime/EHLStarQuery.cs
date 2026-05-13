@@ -6,17 +6,17 @@ using Unity.Mathematics;
 
 namespace BovineLabs.Grid.EHL
 {
-    /// <summary>
-    /// EHL* query: given arbitrary source s and target t, find shortest Euclidean path
-    /// among polygonal obstacles in O(|VL(cs)| + |VL(ct)|) time.
-    ///
-    /// Algorithm:
-    /// 1. Look up grid cells cs, ct for s and t.
-    /// 2. Scan sorted via-labels VL(cs) and VL(ct) to find common hubs.
-    /// 3. For each common hub h: d(s,t) = min over h of (vdist(s,h) + vdist(t,h))
-    ///    where vdist(s,h) = |s - visibleVertex_s| + d(visibleVertex_s, h) from via-label.
-    /// 4. Return shortest distance and path waypoints.
-    /// </summary>
+
+
+
+
+
+
+
+
+
+
+
     [BurstCompile]
     public struct EHLStarQueryJob : IJob
     {
@@ -24,7 +24,7 @@ namespace BovineLabs.Grid.EHL
         public float2 Source;
         public float2 Target;
 
-        /// <summary>Output: query result with distance and waypoints.</summary>
+
         public NativeList<float> ResultDistance;
         public NativeList<float2> ResultWaypoints;
         public NativeList<int> ResultPathFound;
@@ -33,11 +33,11 @@ namespace BovineLabs.Grid.EHL
         {
             float bestDist = float.MaxValue;
             int bestHubId = -1;
-            int bestViaSource = -1;   // visible vertex for source side
-            int bestViaTarget = -1;   // visible vertex for target side
+            int bestViaSource = -1;
+            int bestViaTarget = -1;
 
-            // Check direct visibility first: if source and target can see each other,
-            // the shortest path is the straight line.
+
+
             if (IsDirectlyVisible(Source, Target, Index.ObstacleEdges))
             {
                 bestDist = math.distance(Source, Target);
@@ -47,18 +47,18 @@ namespace BovineLabs.Grid.EHL
             }
             else
             {
-                // Look up grid cells for source and target
+
                 int cs = Index.CellIndex(Source);
                 int ct = Index.CellIndex(Target);
 
                 var cellS = Index.Cells[cs];
                 var cellT = Index.Cells[ct];
 
-                // Get via-label slices
+
                 var labelsS = new NativeSlice<ViaLabel>(Index.ViaLabels, cellS.LabelStart, cellS.LabelCount);
                 var labelsT = new NativeSlice<ViaLabel>(Index.ViaLabels, cellT.LabelStart, cellT.LabelCount);
 
-                // Merge-style scan to find common hubs (both sorted by HubVertexId)
+
                 int i = 0, j = 0;
                 while (i < labelsS.Length && j < labelsT.Length)
                 {
@@ -67,14 +67,14 @@ namespace BovineLabs.Grid.EHL
 
                     if (hubS == hubT)
                     {
-                        // Common hub found
+
                         var labelS = labelsS[i];
                         var labelT = labelsT[j];
 
-                        // vdist(Source, hub) = |Source - visibleVertex_s| + d(visibleVertex_s, hub)
-                        // HubDistance = |cellCenter - visibleVertex| + d(visibleVertex, hub)
-                        // So: d(visibleVertex, hub) = HubDistance - |cellCenter - visibleVertex|
-                        // vdist_s = |Source - visibleVertex_s| + (labelS.HubDistance - |cellCenterS - visibleVertex_s|)
+
+
+
+
 
                         float2 visVertS = Index.ConvexVertices[labelS.VisibleVertexId].Position;
                         float distSrcToVis = math.distance(Source, visVertS);
@@ -112,25 +112,25 @@ namespace BovineLabs.Grid.EHL
                 }
             }
 
-            // Output result
+
             ResultDistance.Add(bestDist);
 
             if (bestDist < float.MaxValue)
             {
                 ResultPathFound.Add(1);
 
-                // Build path
+
                 var waypoints = new NativeList<float2>(Allocator.Temp);
                 waypoints.Add(Source);
 
                 if (bestViaSource >= 0)
                 {
-                    // Add source-side visible vertex if different from source
+
                     float2 viaSPos = Index.ConvexVertices[bestViaSource].Position;
                     if (math.lengthsq(viaSPos - Source) > 1e-6f)
                         waypoints.Add(viaSPos);
 
-                    // Walk from viaSource toward hub using successor map
+
                     if (bestViaSource != bestHubId && bestHubId >= 0)
                     {
                         var path = new NativeList<int>(Allocator.Temp);
@@ -158,7 +158,7 @@ namespace BovineLabs.Grid.EHL
                         for (int p = 0; p < path.Length; p++)
                         {
                             float2 wp = Index.ConvexVertices[path[p]].Position;
-                            // Avoid duplicates
+
                             if (math.lengthsq(wp - waypoints[waypoints.Length - 1]) > 1e-6f)
                                 waypoints.Add(wp);
                         }
@@ -166,7 +166,7 @@ namespace BovineLabs.Grid.EHL
                         path.Dispose();
                     }
 
-                    // Add hub vertex
+
                     if (bestHubId >= 0)
                     {
                         float2 hubPos = Index.ConvexVertices[bestHubId].Position;
@@ -174,7 +174,7 @@ namespace BovineLabs.Grid.EHL
                             waypoints.Add(hubPos);
                     }
 
-                    // Walk from hub toward viaTarget
+
                     if (bestHubId != bestViaTarget && bestHubId >= 0)
                     {
                         var path2 = new NativeList<int>(Allocator.Temp);
@@ -209,13 +209,13 @@ namespace BovineLabs.Grid.EHL
                         path2.Dispose();
                     }
 
-                    // Add target-side visible vertex if different
+
                     float2 viaTPos = Index.ConvexVertices[bestViaTarget].Position;
                     if (math.lengthsq(viaTPos - waypoints[waypoints.Length - 1]) > 1e-6f)
                         waypoints.Add(viaTPos);
                 }
 
-                // Add target
+
                 if (math.lengthsq(Target - waypoints[waypoints.Length - 1]) > 1e-6f)
                     waypoints.Add(Target);
 
@@ -230,9 +230,9 @@ namespace BovineLabs.Grid.EHL
             }
         }
 
-        /// <summary>
-        /// Check if source and target are directly visible (no obstacle edge blocks line of sight).
-        /// </summary>
+
+
+
         private bool IsDirectlyVisible(float2 a, float2 b, NativeArray<ObstacleEdge> edges)
         {
             float2 ab = b - a;
@@ -264,18 +264,18 @@ namespace BovineLabs.Grid.EHL
         }
     }
 
-    /// <summary>
-    /// High-level query interface for EHL* shortest path.
-    /// </summary>
+
+
+
     public static class EHLStarQuery
     {
-        /// <summary>
-        /// Execute a synchronous EHL* shortest path query.
-        /// </summary>
-        /// <param name="index">The preprocessed EHL index.</param>
-        /// <param name="source">Source point (any point in the map).</param>
-        /// <param name="target">Target point (any point in the map).</param>
-        /// <returns>Query result with distance and waypoints.</returns>
+
+
+
+
+
+
+
         public static EHLQueryResult Query(ref EHLIndex index, float2 source, float2 target)
         {
             var resultDist = new NativeList<float>(Allocator.Temp);
@@ -292,7 +292,7 @@ namespace BovineLabs.Grid.EHL
                 ResultPathFound = resultFound,
             };
 
-            // Run synchronously for immediate query
+
             job.Execute();
 
             var result = new EHLQueryResult(Allocator.Persistent);
@@ -316,9 +316,9 @@ namespace BovineLabs.Grid.EHL
             return result;
         }
 
-        /// <summary>
-        /// Schedule an async EHL* query as a Burst job.
-        /// </summary>
+
+
+
         public static JobHandle ScheduleQuery(
             ref EHLIndex index,
             float2 source,

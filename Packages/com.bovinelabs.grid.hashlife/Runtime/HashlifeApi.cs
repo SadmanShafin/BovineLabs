@@ -27,22 +27,21 @@ namespace BovineLabs.Grid.Hashlife
     [BurstCompile]
     public unsafe static class HashlifeApi
     {
-        public static HashlifeState Create(int maxNodes, Allocator a)
+        public static bool TryCreate(int maxNodes, Allocator a, out HashlifeState result)
         {
-            var s = new HashlifeState
+            result = new HashlifeState
             {
                 Nodes = new UnsafeList<HashlifeNode>(maxNodes, a),
                 Intern = new NativeParallelHashMap<ulong, int>(maxNodes, a),
                 ResultCache = new NativeParallelHashMap<ulong, int>(maxNodes, a),
             };
 
-            // Level 0 nodes (1x1 cells)
-            CreateLeaf(ref s, 0); // Dead
-            CreateLeaf(ref s, 1); // Alive
-            return s;
+            CreateLeaf(ref result, 0, out _);
+            CreateLeaf(ref result, 1, out _);
+            return true;
         }
 
-        private static int CreateLeaf(ref HashlifeState s, byte alive)
+        private static bool CreateLeaf(ref HashlifeState s, byte alive, out int id)
         {
             var node = new HashlifeNode
             {
@@ -53,12 +52,11 @@ namespace BovineLabs.Grid.Hashlife
                 ChildSE = 0,
                 Hash = 0,
             };
-            InternNode(ref s, ref node, out int id);
-            return id;
+            return TryInternNode(ref s, ref node, out id);
         }
 
         [BurstCompile]
-        public static int MakeNode(ref HashlifeState s, int nw, int ne, int sw, int se)
+        public static bool TryMakeNode(ref HashlifeState s, int nw, int ne, int sw, int se, out int id)
         {
             int level = s.Nodes[nw].Level + 1;
             var node = new HashlifeNode
@@ -70,12 +68,11 @@ namespace BovineLabs.Grid.Hashlife
                 ChildSE = se,
                 Hash = 0,
             };
-            InternNode(ref s, ref node, out int id);
-            return id;
+            return TryInternNode(ref s, ref node, out id);
         }
 
         [BurstCompile]
-        private static bool InternNode(ref HashlifeState s, ref HashlifeNode node, out int id)
+        private static bool TryInternNode(ref HashlifeState s, ref HashlifeNode node, out int id)
         {
             ulong h = Hash(node);
             node.Hash = h;
@@ -83,7 +80,7 @@ namespace BovineLabs.Grid.Hashlife
             if (s.Intern.TryGetValue(h, out int existing))
             {
                 id = existing;
-                return false;
+                return true;
             }
 
             id = s.Nodes.Length;
@@ -103,66 +100,61 @@ namespace BovineLabs.Grid.Hashlife
         }
 
         [BurstCompile]
-        public static int GetResult(ref HashlifeState s, int nodeIdx)
+        public static bool TryGetResult(ref HashlifeState s, int nodeIdx, out int result)
         {
-            if (s.ResultCache.TryGetValue((ulong)nodeIdx, out int cached))
-                return cached;
+            if (s.ResultCache.TryGetValue((ulong)nodeIdx, out result))
+                return true;
 
             HashlifeNode* nodes = s.Nodes.Ptr;
             HashlifeNode node = nodes[nodeIdx];
 
             if (node.Level == 2)
             {
-                // Base case: 4x4 block to 2x2 result after 1 step
-                int result = ComputeLevel2(ref s, nodeIdx);
+                if (!ComputeLevel2(ref s, nodeIdx, out result)) return false;
                 s.ResultCache[(ulong)nodeIdx] = result;
-                return result;
+                return true;
             }
 
-            // Recursive case: 9 overlapping level-(k-1) nodes
             HashlifeNode nNW = nodes[node.ChildNW], nNE = nodes[node.ChildNE], nSW = nodes[node.ChildSW], nSE = nodes[node.ChildSE];
 
             int m00 = node.ChildNW;
-            int m10 = MakeNode(ref s, nNW.ChildNE, nNE.ChildNW, nNW.ChildSE, nNE.ChildSW);
+            TryMakeNode(ref s, nNW.ChildNE, nNE.ChildNW, nNW.ChildSE, nNE.ChildSW, out int m10);
             int m20 = node.ChildNE;
-            int m01 = MakeNode(ref s, nNW.ChildSW, nNW.ChildSE, nSW.ChildNW, nSW.ChildNE);
-            int m11 = MakeNode(ref s, nNW.ChildSE, nNE.ChildSW, nSW.ChildNE, nSE.ChildNW);
-            int m21 = MakeNode(ref s, nNE.ChildSW, nNE.ChildSE, nSE.ChildNW, nSE.ChildNE);
+            TryMakeNode(ref s, nNW.ChildSW, nNW.ChildSE, nSW.ChildNW, nSW.ChildNE, out int m01);
+            TryMakeNode(ref s, nNW.ChildSE, nNE.ChildSW, nSW.ChildNE, nSE.ChildNW, out int m11);
+            TryMakeNode(ref s, nNE.ChildSW, nNE.ChildSE, nSE.ChildNW, nSE.ChildNE, out int m21);
             int m02 = node.ChildSW;
-            int m12 = MakeNode(ref s, nSW.ChildNE, nSE.ChildNW, nSW.ChildSE, nSE.ChildNE);
+            TryMakeNode(ref s, nSW.ChildNE, nSE.ChildNW, nSW.ChildSE, nSE.ChildNE, out int m12);
             int m22 = node.ChildSE;
 
-            // 9 level-(k-2) result nodes
-            int c00 = GetResult(ref s, m00);
-            int c10 = GetResult(ref s, m10);
-            int c20 = GetResult(ref s, m20);
-            int c01 = GetResult(ref s, m01);
-            int c11 = GetResult(ref s, m11);
-            int c21 = GetResult(ref s, m21);
-            int c02 = GetResult(ref s, m02);
-            int c12 = GetResult(ref s, m12);
-            int c22 = GetResult(ref s, m22);
+            TryGetResult(ref s, m00, out int c00);
+            TryGetResult(ref s, m10, out int c10);
+            TryGetResult(ref s, m20, out int c20);
+            TryGetResult(ref s, m01, out int c01);
+            TryGetResult(ref s, m11, out int c11);
+            TryGetResult(ref s, m21, out int c21);
+            TryGetResult(ref s, m02, out int c02);
+            TryGetResult(ref s, m12, out int c12);
+            TryGetResult(ref s, m22, out int c22);
 
-            // 4 level-(k-1) nodes combined from level-(k-2) results
-            int n00 = MakeNode(ref s, c00, c10, c01, c11);
-            int n10 = MakeNode(ref s, c10, c20, c11, c21);
-            int n01 = MakeNode(ref s, c01, c11, c02, c12);
-            int n11 = MakeNode(ref s, c11, c21, c12, c22);
+            TryMakeNode(ref s, c00, c10, c01, c11, out int n00);
+            TryMakeNode(ref s, c10, c20, c11, c21, out int n10);
+            TryMakeNode(ref s, c01, c11, c02, c12, out int n01);
+            TryMakeNode(ref s, c11, c21, c12, c22, out int n11);
 
-            // Final level-(k-1) result
-            int final = MakeNode(ref s,
-                GetResult(ref s, n00),
-                GetResult(ref s, n10),
-                GetResult(ref s, n01),
-                GetResult(ref s, n11));
+            TryGetResult(ref s, n00, out int r00);
+            TryGetResult(ref s, n10, out int r10);
+            TryGetResult(ref s, n01, out int r01);
+            TryGetResult(ref s, n11, out int r11);
 
-            s.ResultCache[(ulong)nodeIdx] = final;
-            return final;
+            TryMakeNode(ref s, r00, r10, r01, r11, out result);
+
+            s.ResultCache[(ulong)nodeIdx] = result;
+            return true;
         }
 
-        private static int ComputeLevel2(ref HashlifeState s, int nodeIdx)
+        private static bool ComputeLevel2(ref HashlifeState s, int nodeIdx, out int result)
         {
-            // Extract 4x4 grid
             byte* grid = stackalloc byte[16];
             HashlifeNode* nodes = s.Nodes.Ptr;
             HashlifeNode n = nodes[nodeIdx];
@@ -172,13 +164,12 @@ namespace BovineLabs.Grid.Hashlife
             Extract2x2(nodes, n.ChildSW, grid, 0, 2, 4);
             Extract2x2(nodes, n.ChildSE, grid, 2, 2, 4);
 
-            // Compute 2x2 result (cells at (1,1), (2,1), (1,2), (2,2))
             byte rNW = StepCell(grid, 1, 1, 4);
             byte rNE = StepCell(grid, 2, 1, 4);
             byte rSW = StepCell(grid, 1, 2, 4);
             byte rSE = StepCell(grid, 2, 2, 4);
 
-            return MakeNode(ref s, rNW, rNE, rSW, rSE);
+            return TryMakeNode(ref s, rNW, rNE, rSW, rSE, out result);
         }
 
         private static void Extract2x2(HashlifeNode* nodes, int nodeIdx, byte* dst, int ox, int oy, int stride)

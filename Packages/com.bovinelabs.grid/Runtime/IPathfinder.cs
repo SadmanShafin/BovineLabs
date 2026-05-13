@@ -5,19 +5,19 @@ using Unity.Mathematics;
 
 namespace BovineLabs.Grid
 {
-    /// <summary>
-    /// Interface for all pathfinding algorithms in the grid system.
-    /// Burst-compatible via struct-based job pattern.
-    /// </summary>
+
+
+
+
     public interface IPathfinder : IDisposable
     {
         PathResult FindPath(int2 start, int2 goal, Allocator allocator);
     }
 
-    /// <summary>
-    /// Min-heap priority queue for A*-style searches.
-    /// Stores integer node IDs with float priorities.
-    /// </summary>
+
+
+
+
     [Obsolete("Use MinHeap from BovineLabs.Grid instead — it uses raw pointers and is Burst-optimized.")]
     public struct NativeMinHeap : IDisposable
     {

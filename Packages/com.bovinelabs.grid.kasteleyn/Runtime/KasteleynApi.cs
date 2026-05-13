@@ -23,10 +23,15 @@ namespace BovineLabs.Grid.Kasteleyn
     [BurstCompile]
     public unsafe static class KasteleynApi
     {
-        public static KasteleynState Create(int width, int height, int maxEdges, Allocator a)
+        public static bool TryCreate(int width, int height, int maxEdges, Allocator a, out KasteleynState result)
         {
-            var g = Grid2D.Create(width, height);
-            return new KasteleynState
+            if (!Grid2D.TryCreate(width, height, out var g))
+            {
+                result = default;
+                return false;
+            }
+
+            result = new KasteleynState
             {
                 Grid = g,
                 Region = new NativeArray<byte>(g.Length, a),
@@ -36,6 +41,7 @@ namespace BovineLabs.Grid.Kasteleyn
                 VertexCount = 0,
                 CellToVertex = new NativeArray<int>(g.Length, a),
             };
+            return true;
         }
 
         [BurstCompile]
@@ -45,7 +51,7 @@ namespace BovineLabs.Grid.Kasteleyn
         }
 
         [BurstCompile]
-        public static void BuildPlanarGraph(ref KasteleynState s)
+        public static bool TryBuildPlanarGraph(ref KasteleynState s)
         {
             s.Edges.Clear();
             s.EdgeCoords.Clear();
@@ -65,23 +71,22 @@ namespace BovineLabs.Grid.Kasteleyn
                 if (c2v[i] < 0) continue;
                 int x = i % w;
                 int y = i / w;
-                // Right
                 if (x + 1 < w && c2v[i + 1] >= 0)
                 {
                     s.Edges.Add(new int2(c2v[i], c2v[i + 1]));
                     s.EdgeCoords.Add(new int2(i, i + 1));
                 }
-                // Up
                 if (y + 1 < h && c2v[i + w] >= 0)
                 {
                     s.Edges.Add(new int2(c2v[i], c2v[i + w]));
                     s.EdgeCoords.Add(new int2(i, i + w));
                 }
             }
+            return true;
         }
 
         [BurstCompile]
-        public static void OrientKasteleyn(ref KasteleynState s)
+        public static bool TryOrientKasteleyn(ref KasteleynState s)
         {
             double* mat = (double*)s.Matrix.GetUnsafePtr();
             int n = s.VertexCount;
@@ -108,10 +113,11 @@ namespace BovineLabs.Grid.Kasteleyn
                 mat[eA * n + eB] = sign;
                 mat[eB * n + eA] = -sign;
             }
+            return true;
         }
 
         [BurstCompile]
-        public static bool CountPerfectMatchings(ref KasteleynState s, out double count)
+        public static bool TryCountPerfectMatchings(ref KasteleynState s, out double count)
         {
             count = 0.0;
             if (s.VertexCount == 0) return false;

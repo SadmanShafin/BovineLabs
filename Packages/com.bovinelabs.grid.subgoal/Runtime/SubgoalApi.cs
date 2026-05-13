@@ -21,18 +21,11 @@ namespace BovineLabs.Grid.Subgoal
     [BurstCompile]
     public unsafe static class SubgoalApi
     {
-        private static readonly int2* DiagOffsets;
-
-        static SubgoalApi()
+        public static bool TryCreate(int width, int height, int maxSubgoals, int maxEdges, Allocator a, out SubgoalState s)
         {
-            // Initialized in a way that's Burst-compatible if needed, 
-            // but for simplicity we'll just use the logic in the methods.
-        }
-
-        public static SubgoalState Create(int width, int height, int maxSubgoals, int maxEdges, Allocator a)
-        {
-            var g = Grid2D.Create(width, height);
-            return new SubgoalState
+            s = default;
+            if (!Grid2D.TryCreate(width, height, out var g)) return false;
+            s = new SubgoalState
             {
                 Grid = g,
                 Subgoals = new UnsafeList<int>(maxSubgoals, a),
@@ -40,10 +33,11 @@ namespace BovineLabs.Grid.Subgoal
                 Edges = new UnsafeList<SubgoalEdge>(maxEdges, a),
                 EdgeRanges = new UnsafeList<RangeI>(maxSubgoals, a),
             };
+            return true;
         }
 
         [BurstCompile]
-        public static void Build(ref SubgoalState s, in NativeArray<byte> blocked)
+        public static bool TryBuild(ref SubgoalState s, in NativeArray<byte> blocked)
         {
             s.Subgoals.Clear();
             s.SubgoalOfCell.Fill(-1);
@@ -55,7 +49,6 @@ namespace BovineLabs.Grid.Subgoal
             byte* blockedPtr = (byte*)blocked.GetUnsafeReadOnlyPtr();
             int* subgoalOfCellPtr = (int*)s.SubgoalOfCell.GetUnsafePtr();
 
-            // 1. Identify subgoals (corners)
             for (int i = 0; i < s.Grid.Length; i++)
             {
                 if (blockedPtr[i] != 0) continue;
@@ -71,7 +64,6 @@ namespace BovineLabs.Grid.Subgoal
                     
                     if (blockedPtr[np.y * width + np.x] != 0)
                     {
-                        // Check diagonals
                         for (int dy = -1; dy <= 1; dy += 2)
                         {
                             for (int dx = -1; dx <= 1; dx += 2)
@@ -79,9 +71,6 @@ namespace BovineLabs.Grid.Subgoal
                                 int2 dp = p + new int2(dx, dy);
                                 if (dp.x >= 0 && dp.y >= 0 && dp.x < width && dp.y < height && blockedPtr[dp.y * width + dp.x] == 0)
                                 {
-                                    // If dp is a diagonal neighbor and the cardinal neighbor np is blocked, 
-                                    // we might have a corner. Standard Subgoal logic is more specific,
-                                    // but this is a reasonable approximation for "corner".
                                     isCorner = true;
                                     break;
                                 }
@@ -100,7 +89,6 @@ namespace BovineLabs.Grid.Subgoal
                 }
             }
 
-            // 2. Build edges (line-of-sight between subgoals)
             for (int i = 0; i < s.Subgoals.Length; i++)
             {
                 int edgeStart = s.Edges.Length;
@@ -117,10 +105,11 @@ namespace BovineLabs.Grid.Subgoal
                 }
                 s.EdgeRanges.Add(new RangeI(edgeStart, s.Edges.Length - edgeStart));
             }
+            return true;
         }
 
         [BurstCompile]
-        public static bool Search(
+        public static bool TrySearch(
             ref SubgoalState s,
             in NativeArray<byte> blocked,
             int start, int goal,
@@ -148,13 +137,27 @@ namespace BovineLabs.Grid.Subgoal
             gArr.Fill(float.PositiveInfinity);
             parentArr.Fill(-1);
 
-            var heap = MinHeap.Create(totalNodes, Allocator.Temp);
+            if (!MinHeap.TryCreate(totalNodes, Allocator.Temp, out var heap))
+            {
+                gArr.Dispose(); parentArr.Dispose();
+                return false;
+            }
+
             gArr[startNode] = 0f;
-            heap.InsertOrDecrease(new HeapNode(startNode, math.distance(startCoord, goalCoord)));
+            if (!heap.TryInsertOrDecrease(new HeapNode(startNode, math.distance(startCoord, goalCoord))))
+            {
+                gArr.Dispose(); parentArr.Dispose(); heap.Dispose();
+                return false;
+            }
 
             while (!heap.IsEmpty)
             {
-                int u = heap.Pop().Id;
+                if (!heap.TryPop(out var top))
+                {
+                    gArr.Dispose(); parentArr.Dispose(); heap.Dispose();
+                    return false;
+                }
+                int u = top.Id;
                 if (u == goalNode)
                 {
                     ExtractPath(in s, start, goal, parentArr, goalNode, ref path);
@@ -164,31 +167,44 @@ namespace BovineLabs.Grid.Subgoal
 
                 int2 pu = (u < n) ? s.Grid.ToCoord(s.Subgoals[u]) : (u == startNode ? startCoord : goalCoord);
 
-                // Successors:
                 if (u == startNode)
                 {
-                    // Start can reach any visible subgoal or the goal
                     for (int v = 0; v < n; v++)
                     {
                         int2 pv = s.Grid.ToCoord(s.Subgoals[v]);
                         if (LineOfSight(in s.Grid, blockedPtr, ref pu, ref pv))
-                            TryRelax(v, pu, pv, u, ref gArr, ref parentArr, ref heap, goalCoord);
+                            if (!TryRelax(v, pu, pv, u, ref gArr, ref parentArr, ref heap, goalCoord))
+                            {
+                                gArr.Dispose(); parentArr.Dispose(); heap.Dispose();
+                                return false;
+                            }
                     }
                     if (LineOfSight(in s.Grid, blockedPtr, ref pu, ref goalCoord))
-                        TryRelax(goalNode, pu, goalCoord, u, ref gArr, ref parentArr, ref heap, goalCoord);
+                        if (!TryRelax(goalNode, pu, goalCoord, u, ref gArr, ref parentArr, ref heap, goalCoord))
+                        {
+                            gArr.Dispose(); parentArr.Dispose(); heap.Dispose();
+                            return false;
+                        }
                 }
                 else if (u < n)
                 {
-                    // Subgoal can reach precomputed neighbors or the goal if visible
                     RangeI range = s.EdgeRanges[u];
                     for (int i = range.Offset; i < range.Offset + range.Count; i++)
                     {
                         SubgoalEdge edge = s.Edges[i];
                         int2 pv = s.Grid.ToCoord(s.Subgoals[edge.To]);
-                        TryRelax(edge.To, pu, pv, u, ref gArr, ref parentArr, ref heap, goalCoord);
+                        if (!TryRelax(edge.To, pu, pv, u, ref gArr, ref parentArr, ref heap, goalCoord))
+                        {
+                            gArr.Dispose(); parentArr.Dispose(); heap.Dispose();
+                            return false;
+                        }
                     }
                     if (LineOfSight(in s.Grid, blockedPtr, ref pu, ref goalCoord))
-                        TryRelax(goalNode, pu, goalCoord, u, ref gArr, ref parentArr, ref heap, goalCoord);
+                        if (!TryRelax(goalNode, pu, goalCoord, u, ref gArr, ref parentArr, ref heap, goalCoord))
+                        {
+                            gArr.Dispose(); parentArr.Dispose(); heap.Dispose();
+                            return false;
+                        }
                 }
             }
 
@@ -196,7 +212,7 @@ namespace BovineLabs.Grid.Subgoal
             return false;
         }
 
-        private static void TryRelax(int v, int2 pu, int2 pv, int u, ref NativeArray<float> gArr, ref NativeArray<int> parentArr, ref MinHeap heap, int2 goalCoord)
+        private static bool TryRelax(int v, int2 pu, int2 pv, int u, ref NativeArray<float> gArr, ref NativeArray<int> parentArr, ref MinHeap heap, int2 goalCoord)
         {
             float d = math.distance(pu, pv);
             float newG = gArr[u] + d;
@@ -204,8 +220,9 @@ namespace BovineLabs.Grid.Subgoal
             {
                 gArr[v] = newG;
                 parentArr[v] = u;
-                heap.InsertOrDecrease(new HeapNode(v, newG + math.distance(pv, goalCoord)));
+                return heap.TryInsertOrDecrease(new HeapNode(v, newG + math.distance(pv, goalCoord)));
             }
+            return true;
         }
 
         private static void ExtractPath(in SubgoalState s, int start, int goal, in NativeArray<int> parentArr, int goalNode, ref NativeList<int> path)

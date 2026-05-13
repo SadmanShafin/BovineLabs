@@ -4,7 +4,7 @@ using Unity.Collections.LowLevel.Unsafe;
 
 namespace BovineLabs.Grid
 {
-    /// <summary>Extremely fast, non-thread-safe queue for BFS algorithms.</summary>
+
     public unsafe struct UnsafeFastQueue<T> : IDisposable where T : unmanaged
     {
         [NativeDisableUnsafePtrRestriction]

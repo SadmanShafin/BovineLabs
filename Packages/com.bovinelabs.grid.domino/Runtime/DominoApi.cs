@@ -20,16 +20,22 @@ namespace BovineLabs.Grid.Domino
     [BurstCompile]
     public unsafe static class DominoApi
     {
-        public static DominoState Create(int width, int height, Allocator a)
+        public static bool TryCreate(int width, int height, Allocator a, out DominoState result)
         {
-            var g = Grid2D.Create(width, height);
-            return new DominoState
+            if (!Grid2D.TryCreate(width, height, out var g))
+            {
+                result = default;
+                return false;
+            }
+
+            result = new DominoState
             {
                 Grid = g,
                 Region = new NativeArray<byte>(g.Length, a),
                 Height = new NativeArray<int>(g.Length, a),
                 MatchingDir = new NativeArray<byte>(g.Length, a),
             };
+            return true;
         }
 
         [BurstCompile]
@@ -57,7 +63,7 @@ namespace BovineLabs.Grid.Domino
         }
 
         [BurstCompile]
-        public static bool BuildTilingByMatching(ref DominoState s)
+        public static bool TryBuildTilingByMatching(ref DominoState s)
         {
             byte* region = (byte*)s.Region.GetUnsafePtr();
             byte* matchDir = (byte*)s.MatchingDir.GetUnsafePtr();
@@ -71,7 +77,6 @@ namespace BovineLabs.Grid.Domino
             int* mPtr = (int*)matchTo.GetUnsafePtr();
             for (int i = 0; i < len; i++) mPtr[i] = -1;
 
-            // Greedy matching: black cells to white neighbors
             for (int i = 0; i < len; i++)
             {
                 if (region[i] == 0) continue;
@@ -80,9 +85,6 @@ namespace BovineLabs.Grid.Domino
                 if ((cx + cy) % 2 != 0) continue;
                 if (mPtr[i] >= 0) continue;
 
-                // Right (0), Up (1), Left (2), Down (3)
-                int d = 0;
-                // Right
                 if (cx + 1 < w)
                 {
                     int ni = i + 1;
@@ -93,7 +95,6 @@ namespace BovineLabs.Grid.Domino
                         continue;
                     }
                 }
-                // Up
                 if (cy + 1 < h)
                 {
                     int ni = i + w;
@@ -104,7 +105,6 @@ namespace BovineLabs.Grid.Domino
                         continue;
                     }
                 }
-                // Left
                 if (cx > 0)
                 {
                     int ni = i - 1;
@@ -115,7 +115,6 @@ namespace BovineLabs.Grid.Domino
                         continue;
                     }
                 }
-                // Down
                 if (cy > 0)
                 {
                     int ni = i - w;
@@ -139,7 +138,7 @@ namespace BovineLabs.Grid.Domino
         }
 
         [BurstCompile]
-        public static void BuildHeightFunction(ref DominoState s)
+        public static bool TryBuildHeightFunction(ref DominoState s)
         {
             int w = s.Grid.Width;
             int h = s.Grid.Height;
@@ -161,28 +160,24 @@ namespace BovineLabs.Grid.Domino
                 int cx = cell % w;
                 int cy = cell / w;
 
-                // Right
                 if (cx + 1 < w)
                 {
                     int ni = cell + 1;
                     if (vPtr[ni] == 0 && region[ni] != 0)
                     { height[ni] = height[cell] + 1; vPtr[ni] = 1; queue.Enqueue(ni); }
                 }
-                // Up
                 if (cy + 1 < h)
                 {
                     int ni = cell + w;
                     if (vPtr[ni] == 0 && region[ni] != 0)
                     { height[ni] = height[cell] + 1; vPtr[ni] = 1; queue.Enqueue(ni); }
                 }
-                // Left
                 if (cx > 0)
                 {
                     int ni = cell - 1;
                     if (vPtr[ni] == 0 && region[ni] != 0)
                     { height[ni] = height[cell] - 1; vPtr[ni] = 1; queue.Enqueue(ni); }
                 }
-                // Down
                 if (cy > 0)
                 {
                     int ni = cell - w;
@@ -193,9 +188,10 @@ namespace BovineLabs.Grid.Domino
 
             vis.Dispose();
             queue.Dispose();
+            return true;
         }
 
-        public static bool FlipAt(ref DominoState s, int cell)
+        public static bool TryFlipAt(ref DominoState s, int cell)
         {
             if (s.MatchingDir[cell] == 0) return false;
             return false;

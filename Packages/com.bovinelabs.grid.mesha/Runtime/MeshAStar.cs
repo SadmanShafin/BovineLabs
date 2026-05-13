@@ -7,13 +7,6 @@ using Unity.Mathematics;
 
 namespace BovineLabs.Grid.MeshA
 {
-    /// <summary>
-    /// MeshA* search algorithm (AAAI 2026).
-    /// Searches over extended cells (grid position + configuration) instead of lattice states.
-    /// For this implementation with simplified mesh graph, it reduces to weighted A* with
-    /// heading-aware state space, but preserves the full API for future extension to
-    /// multi-cell swept primitives with intermediate configurations.
-    /// </summary>
     [BurstCompile]
     public struct MeshAStarJob : IJob
     {
@@ -40,12 +33,10 @@ namespace BovineLabs.Grid.MeshA
             int searchSpace = gridW * Grid.Height * MeshGraphBuilder.NumHeadings;
             var heap = new NativeMinHeap(searchSpace, Allocator.Temp);
 
-            // Start: push all possible initial configurations (all headings) at the start position
             for (int h = 0; h < MeshGraphBuilder.NumHeadings; ++h)
             {
                 int startConfig = MeshGraph.InitialConfigByTheta[h];
                 int startKey = EncodeKey(Start.x, Start.y, startConfig, gridW);
-                // Initialize cost for each start config (all zero)
                 if (!gCosts.ContainsKey(startKey))
                     gCosts[startKey] = 0f;
                 heap.Push(startKey, GridHeuristics.Octile(Start, Goal) * Weight);
@@ -64,10 +55,8 @@ namespace BovineLabs.Grid.MeshA
                 int cx, cy, cConfig;
                 DecodeKey(currentKey, out cx, out cy, out cConfig, gridW);
 
-                // Goal check: position close to goal with any heading
                 if (cx == Goal.x && cy == Goal.y)
                 {
-                    // Reconstruct path
                     int key = currentKey;
                     var reversePath = new NativeList<int2>(Allocator.Temp);
                     while (parentMap.TryGetValue(key, out int parentKey))
@@ -77,14 +66,12 @@ namespace BovineLabs.Grid.MeshA
                         reversePath.Add(new int2(px, py));
                         key = parentKey;
                     }
-                    // Add start
                     {
                         int sx, sy, sc;
                         DecodeKey(key, out sx, out sy, out sc, gridW);
                         reversePath.Add(new int2(sx, sy));
                     }
 
-                    // Write in forward order
                     for (int i = reversePath.Length - 1; i >= 0; i--)
                     {
                         Path.AddNoResize(reversePath[i]);
@@ -104,7 +91,6 @@ namespace BovineLabs.Grid.MeshA
 
                 float currentG = gCosts[currentKey];
 
-                // Expand successors from mesh graph (flat array lookup)
                 if (cConfig < 0 || cConfig >= MeshGraph.MaxConfigs) continue;
                 int succOff = MeshGraph.SuccOffsets[cConfig];
                 int succCnt = MeshGraph.SuccCounts[cConfig];
@@ -117,21 +103,18 @@ namespace BovineLabs.Grid.MeshA
                     int ny = cy + succ.Dj;
                     int nConfig = succ.NextConfigId;
 
-                    // Bounds and traversability check
                     if (!Grid.InBounds(new int2(nx, ny))) continue;
                     if (!Grid.IsFree(new int2(nx, ny))) continue;
 
                     int nKey = EncodeKey(nx, ny, nConfig, gridW);
                     if (closed.ContainsKey(nKey)) continue;
 
-                    // Get transition cost from primitive
                     float transCost = 0f;
                     if (succ.ConnectingPrimId >= 0)
                     {
                         transCost = PrimSet.Primitives[succ.ConnectingPrimId].ArcLength;
                     }
 
-                    // Collision check for the primitive's swept cells
                     bool collisionFree = true;
                     if (succ.ConnectingPrimId >= 0)
                     {
@@ -154,7 +137,6 @@ namespace BovineLabs.Grid.MeshA
                 }
             }
 
-            // No path found
             Found.Value = false;
             PathCost.Value = -1f;
             NodesExplored.Value = explored;
@@ -181,26 +163,21 @@ namespace BovineLabs.Grid.MeshA
         }
     }
 
-    /// <summary>
-    /// High-level API for MeshA* search.
-    /// </summary>
     [BurstCompile]
     public static class MeshAStar
     {
-        /// <summary>
-        /// Run MeshA* on the given grid with the provided primitives and mesh graph.
-        /// </summary>
-        public static PathResult FindPath(
+        public static bool TryFindPath(
             in NativeGrid2D grid,
             in PrimitiveSet primSet,
             in MeshGraphData meshGraph,
             int2 start,
             int2 goal,
+            out PathResult result,
             int startTheta = 0,
             float weight = 1.0f,
             Allocator allocator = Allocator.Temp)
         {
-            var result = new PathResult(allocator);
+            result = new PathResult(allocator);
             var found = new NativeReference<bool>(allocator);
             var pathCost = new NativeReference<float>(allocator);
             var nodesExplored = new NativeReference<int>(allocator);
@@ -226,11 +203,13 @@ namespace BovineLabs.Grid.MeshA
             result.PathCost = pathCost.Value;
             result.NodesExplored = nodesExplored.Value;
 
+            bool success = found.Value;
+
             found.Dispose();
             pathCost.Dispose();
             nodesExplored.Dispose();
 
-            return result;
+            return success;
         }
     }
 }

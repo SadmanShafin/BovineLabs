@@ -20,16 +20,28 @@ namespace BovineLabs.Grid.FastMarching
     [BurstCompile]
     public unsafe static class FastMarchingApi
     {
-        public static FastMarchingState Create(int width, int height, Allocator a)
+        public static bool TryCreate(int width, int height, Allocator a, out FastMarchingState result)
         {
-            var g = Grid2D.Create(width, height);
-            return new FastMarchingState
+            if (!Grid2D.TryCreate(width, height, out var g))
+            {
+                result = default;
+                return false;
+            }
+
+            if (!MinHeap.TryCreate(g.Length, a, out var heap))
+            {
+                result = default;
+                return false;
+            }
+
+            result = new FastMarchingState
             {
                 Grid = g,
                 T = new NativeArray<float>(g.Length, a),
                 State = new NativeArray<byte>(g.Length, a),
-                Heap = MinHeap.Create(g.Length, a),
+                Heap = heap,
             };
+            return true;
         }
 
         [BurstCompile]
@@ -46,16 +58,17 @@ namespace BovineLabs.Grid.FastMarching
             {
                 t[src[i]] = 0f;
                 st[src[i]] = 1;
-                s.Heap.InsertOrDecrease(new HeapNode(src[i], 0f));
+                s.Heap.TryInsertOrDecrease(new HeapNode(src[i], 0f));
             }
         }
 
         [BurstCompile]
-        public static bool PropagateStep(ref FastMarchingState s, in NativeArray<float> speed)
+        public static bool TryPropagateStep(ref FastMarchingState s, in NativeArray<float> speed)
         {
             if (s.Heap.IsEmpty) return false;
 
-            int u = s.Heap.Pop().Id;
+            if (!s.Heap.TryPop(out var node)) return false;
+            int u = node.Id;
             s.State[u] = 2;
 
             float* t = (float*)s.T.GetUnsafePtr();
@@ -66,13 +79,9 @@ namespace BovineLabs.Grid.FastMarching
             int ux = u % w;
             int uy = u / w;
 
-            // Right
             if (ux + 1 < w) TryAccept(t, st, spd, w, h, u + 1, ref s);
-            // Up
             if (uy + 1 < h) TryAccept(t, st, spd, w, h, u + w, ref s);
-            // Left
             if (ux > 0) TryAccept(t, st, spd, w, h, u - 1, ref s);
-            // Down
             if (uy > 0) TryAccept(t, st, spd, w, h, u - w, ref s);
 
             return !s.Heap.IsEmpty;
@@ -86,14 +95,15 @@ namespace BovineLabs.Grid.FastMarching
             {
                 t[ni] = tNew;
                 st[ni] = 1;
-                s.Heap.InsertOrDecrease(new HeapNode(ni, tNew));
+                s.Heap.TryInsertOrDecrease(new HeapNode(ni, tNew));
             }
         }
 
         [BurstCompile]
-        public static void PropagateAll(ref FastMarchingState s, in NativeArray<float> speed)
+        public static bool TryPropagateAll(ref FastMarchingState s, in NativeArray<float> speed)
         {
-            while (PropagateStep(ref s, in speed)) { }
+            while (TryPropagateStep(ref s, in speed)) { }
+            return true;
         }
 
         private static float SolveEikonal(float* t, byte* st, float* spd, int w, int h, int idx)

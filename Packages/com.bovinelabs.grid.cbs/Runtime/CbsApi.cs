@@ -15,8 +15,8 @@ namespace BovineLabs.Grid.Cbs
     {
         public int ConstraintOffset;
         public int ConstraintCount;
-        public int PathOffset;   // Offset in FlatPaths
-        public int LengthOffset; // Offset in PathLengths
+        public int PathOffset;
+        public int LengthOffset;
         public float Cost;
         public int Parent;
     }
@@ -26,30 +26,36 @@ namespace BovineLabs.Grid.Cbs
         public Grid2D Grid;
         public UnsafeList<CbsNode> Nodes;
         public UnsafeList<CbsConstraint> Constraints;
-        public UnsafeList<int> FlatPaths;      // All paths for all nodes concatenated
-        public UnsafeList<int> PathLengths;    // Lengths of each agent's path for each node
+        public UnsafeList<int> FlatPaths;
+        public UnsafeList<int> PathLengths;
         public MinHeap Heap;
     }
 
     [BurstCompile]
     public unsafe static class CbsApi
     {
-        public static CbsState Create(int width, int height, int maxNodes, Allocator a)
+        public static bool TryCreate(int width, int height, int maxNodes, Allocator a, out CbsState result)
         {
-            var g = Grid2D.Create(width, height);
-            return new CbsState
+            if (!Grid2D.TryCreate(width, height, out var g) || !MinHeap.TryCreate(maxNodes, a, out var heap))
+            {
+                result = default;
+                return false;
+            }
+
+            result = new CbsState
             {
                 Grid = g,
                 Nodes = new UnsafeList<CbsNode>(maxNodes, a),
                 Constraints = new UnsafeList<CbsConstraint>(maxNodes * 10, a),
                 FlatPaths = new UnsafeList<int>(maxNodes * 100, a),
                 PathLengths = new UnsafeList<int>(maxNodes * 10, a),
-                Heap = MinHeap.Create(maxNodes, a),
+                Heap = heap,
             };
+            return true;
         }
 
         [BurstCompile]
-        public static bool Solve(
+        public static bool TrySolve(
             ref CbsState s,
             in NativeArray<byte> blocked,
             in NativeArray<AgentTask> agents,
@@ -70,7 +76,6 @@ namespace BovineLabs.Grid.Cbs
             byte* blockedPtr = (byte*)blocked.GetUnsafeReadOnlyPtr();
             AgentTask* agentsPtr = (AgentTask*)agents.GetUnsafeReadOnlyPtr();
 
-            // Root node
             var root = new CbsNode
             {
                 ConstraintOffset = 0,
@@ -82,11 +87,12 @@ namespace BovineLabs.Grid.Cbs
 
             int rootIdx = s.Nodes.Length;
             s.Nodes.Add(root);
-            s.Heap.InsertOrDecrease(new HeapNode(rootIdx, root.Cost));
+            if (!s.Heap.TryInsertOrDecrease(new HeapNode(rootIdx, root.Cost))) return false;
 
             while (!s.Heap.IsEmpty)
             {
-                int PIdx = s.Heap.Pop().Id;
+                if (!s.Heap.TryPop(out var heapNode)) return false;
+                int PIdx = heapNode.Id;
                 CbsNode P = s.Nodes[PIdx];
 
                 if (!FindConflict(in s, in P, agentCount, out int a1, out int a2, out int cell, out int t))
@@ -95,8 +101,8 @@ namespace BovineLabs.Grid.Cbs
                     return true;
                 }
 
-                ExpandChild(ref s, PIdx, a1, cell, t, blockedPtr, agentsPtr, agentCount);
-                ExpandChild(ref s, PIdx, a2, cell, t, blockedPtr, agentsPtr, agentCount);
+                if (!TryExpandChild(ref s, PIdx, a1, cell, t, blockedPtr, agentsPtr, agentCount)) return false;
+                if (!TryExpandChild(ref s, PIdx, a2, cell, t, blockedPtr, agentsPtr, agentCount)) return false;
             }
 
             return false;
@@ -124,15 +130,19 @@ namespace BovineLabs.Grid.Cbs
             for (int a = 0; a < agentCount; a++)
             {
                 var path = new NativeList<int>(Allocator.Temp);
-                if (!AStar(ref s, blocked, a, agents[a].Start, agents[a].Goal, in nodeConstraints, ref path))
+                if (!TryAStar(ref s, blocked, a, agents[a].Start, agents[a].Goal, in nodeConstraints, ref path))
                 {
                     path.Dispose();
                     nodeConstraints.Dispose();
                     return false;
                 }
 
+                if (Hint.Unlikely(s.FlatPaths.Length + path.Length > s.FlatPaths.Capacity)) { path.Dispose(); nodeConstraints.Dispose(); return false; }
                 for (int i = 0; i < path.Length; i++) s.FlatPaths.Add(path[i]);
+                
+                if (Hint.Unlikely(s.PathLengths.Length >= s.PathLengths.Capacity)) { path.Dispose(); nodeConstraints.Dispose(); return false; }
                 s.PathLengths.Add(path.Length);
+                
                 node.Cost += (path.Length - 1);
                 path.Dispose();
             }
@@ -179,8 +189,10 @@ namespace BovineLabs.Grid.Cbs
         }
 
         [BurstCompile]
-        private static void ExpandChild(ref CbsState s, int parentIdx, int agent, int cell, int time, byte* blocked, AgentTask* agents, int agentCount)
+        private static bool TryExpandChild(ref CbsState s, int parentIdx, int agent, int cell, int time, byte* blocked, AgentTask* agents, int agentCount)
         {
+            if (Hint.Unlikely(s.Constraints.Length >= s.Constraints.Capacity)) return false;
+
             var child = new CbsNode
             {
                 ConstraintOffset = s.Constraints.Length,
@@ -191,10 +203,12 @@ namespace BovineLabs.Grid.Cbs
 
             if (PlanNode(ref s, ref child, blocked, agents, agentCount))
             {
+                if (Hint.Unlikely(s.Nodes.Length >= s.Nodes.Capacity)) return false;
                 int childIdx = s.Nodes.Length;
                 s.Nodes.Add(child);
-                s.Heap.InsertOrDecrease(new HeapNode(childIdx, child.Cost));
+                return s.Heap.TryInsertOrDecrease(new HeapNode(childIdx, child.Cost));
             }
+            return true;
         }
 
         [BurstCompile]
@@ -213,7 +227,7 @@ namespace BovineLabs.Grid.Cbs
         }
 
         [BurstCompile]
-        public static bool AStar(ref CbsState s, byte* blocked, int agentId, int start, int goal,
+        public static bool TryAStar(ref CbsState s, byte* blocked, int agentId, int start, int goal,
             in UnsafeList<CbsConstraint> constraints, ref NativeList<int> path)
         {
             path.Clear();
@@ -230,12 +244,21 @@ namespace BovineLabs.Grid.Cbs
             int* parentPtr = (int*)parent.GetUnsafePtr();
 
             gPtr[start] = 0f;
-            var heap = MinHeap.Create(gridLen * timeHorizon, Allocator.Temp);
-            heap.InsertOrDecrease(new HeapNode(start, Grid2D.HeuristicManhattan(s.Grid.ToCoord(start), s.Grid.ToCoord(goal))));
+            if (!MinHeap.TryCreate(gridLen * timeHorizon, Allocator.Temp, out var heap))
+            {
+                g.Dispose(); parent.Dispose();
+                return false;
+            }
+            if (!heap.TryInsertOrDecrease(new HeapNode(start, Grid2D.HeuristicManhattan(s.Grid.ToCoord(start), s.Grid.ToCoord(goal)))))
+            {
+                g.Dispose(); parent.Dispose(); heap.Dispose();
+                return false;
+            }
 
             while (!heap.IsEmpty)
             {
-                int stateIdx = heap.Pop().Id;
+                if (!heap.TryPop(out var heapNode)) break;
+                int stateIdx = heapNode.Id;
                 int u = stateIdx % gridLen;
                 int time = stateIdx / gridLen;
 
@@ -256,7 +279,7 @@ namespace BovineLabs.Grid.Cbs
                 {
                     int2 np = (d == -1) ? up : up + Grid2D.Dir4(d);
                     if (Hint.Unlikely(np.x < 0 || np.y < 0 || np.x >= width || np.y >= s.Grid.Height)) continue;
-                    
+
                     int ni = np.y * width + np.x;
                     if (Hint.Unlikely(blocked[ni] != 0)) continue;
 
@@ -276,7 +299,7 @@ namespace BovineLabs.Grid.Cbs
                         gPtr[nextStateIdx] = newG;
                         parentPtr[nextStateIdx] = stateIdx;
                         float f = newG + Grid2D.HeuristicManhattan(np, s.Grid.ToCoord(goal));
-                        heap.InsertOrDecrease(new HeapNode(nextStateIdx, f));
+                        if (!heap.TryInsertOrDecrease(new HeapNode(nextStateIdx, f))) break;
                     }
                 }
             }

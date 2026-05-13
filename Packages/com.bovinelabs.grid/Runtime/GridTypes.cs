@@ -6,19 +6,19 @@ using Unity.Mathematics;
 
 namespace BovineLabs.Grid
 {
-    /// <summary>
-    /// A cell in a 2D grid. 0 = free, 1 = blocked.
-    /// </summary>
+
+
+
     public enum CellState : byte
     {
         Free = 0,
         Blocked = 1,
     }
 
-    /// <summary>
-    /// Burst-compatible 2D grid stored as a flat NativeArray.
-    /// Row-major: index = y * width + x.
-    /// </summary>
+
+
+
+
     public struct NativeGrid2D : IDisposable
     {
         public NativeArray<CellState> Cells;
@@ -61,25 +61,25 @@ namespace BovineLabs.Grid
         }
     }
 
-    /// <summary>
-    /// A single node in a pathfinding search.
-    /// Stores position, cost, and parent for path reconstruction.
-    /// </summary>
+
+
+
+
     public struct PathNode : IEquatable<PathNode>, IComparable<PathNode>
     {
         public int2 Position;
-        public float GCost;       // Cost from start
-        public float FCost;       // G + heuristic
-        public int ParentIndex;   // Index in the node array (-1 = none)
+        public float GCost;
+        public float FCost;
+        public int ParentIndex;
 
         public int CompareTo(PathNode other) => FCost.CompareTo(other.FCost);
         public bool Equals(PathNode other) => Position.Equals(other.Position);
         public override int GetHashCode() => Position.GetHashCode();
     }
 
-    /// <summary>
-    /// Result of a pathfinding query.
-    /// </summary>
+
+
+
     public struct PathResult : IDisposable
     {
         public NativeList<int2> Path;
@@ -101,29 +101,29 @@ namespace BovineLabs.Grid
         }
     }
 
-    /// <summary>
-    /// 8-directional grid neighbor offsets (cardinal + diagonal).
-    /// </summary>
+
+
+
     public static class GridNeighbors
     {
         public static readonly int2[] Cardinal = {
-            new int2(0, -1),  // N
-            new int2(1, 0),   // E
-            new int2(0, 1),   // S
-            new int2(-1, 0),  // W
+            new int2(0, -1),
+            new int2(1, 0),
+            new int2(0, 1),
+            new int2(-1, 0),
         };
 
         public static readonly int2[] Diagonal = {
-            new int2(1, -1),   // NE
-            new int2(1, 1),    // SE
-            new int2(-1, 1),   // SW
-            new int2(-1, -1),  // NW
+            new int2(1, -1),
+            new int2(1, 1),
+            new int2(-1, 1),
+            new int2(-1, -1),
         };
 
         public const float CardinalCost = 1f;
-        public const float DiagonalCost = 1.4142135f; // sqrt(2)
+        public const float DiagonalCost = 1.4142135f;
 
-        /// <summary>Iterate 4-connected neighbors. Returns count of valid neighbors written.</summary>
+
         public static int GetNeighbors4(in Grid2D grid, int cell, NativeArray<int> neighbors, NativeArray<byte> blocked)
         {
             int count = 0;
@@ -143,7 +143,7 @@ namespace BovineLabs.Grid
             return count;
         }
 
-        /// <summary>Iterate 8-connected neighbors. Returns count of valid neighbors written.</summary>
+
         public static int GetNeighbors8(in Grid2D grid, int cell, NativeArray<int> neighbors, NativeArray<byte> blocked)
         {
             int count = 0;
@@ -163,7 +163,7 @@ namespace BovineLabs.Grid
             return count;
         }
 
-        /// <summary>Check diagonal passability (no corner cutting).</summary>
+
         public static bool IsDiagonalPassable(in Grid2D grid, int2 from, int2 dir, NativeArray<byte> blocked)
         {
             int2 adjA = new int2(from.x + dir.x, from.y);
@@ -174,9 +174,9 @@ namespace BovineLabs.Grid
         }
     }
 
-    /// <summary>
-    /// Common heuristic functions for pathfinding.
-    /// </summary>
+
+
+
     [BurstCompile]
     public static class GridHeuristics
     {

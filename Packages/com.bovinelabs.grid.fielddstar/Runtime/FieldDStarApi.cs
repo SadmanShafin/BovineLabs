@@ -20,43 +20,63 @@ namespace BovineLabs.Grid.FieldDStar
     [BurstCompile]
     public unsafe static class FieldDStarApi
     {
-        public static FieldDStarState Create(int width, int height, Allocator a)
+        public static bool TryCreate(int width, int height, Allocator a, out FieldDStarState result)
         {
-            var g = Grid2D.Create(width, height);
-            return new FieldDStarState
+            if (!Grid2D.TryCreate(width, height, out var g))
+            {
+                result = default;
+                return false;
+            }
+
+            if (!MinHeap.TryCreate(g.Length, a, out var heap))
+            {
+                result = default;
+                return false;
+            }
+
+            result = new FieldDStarState
             {
                 Grid = g,
                 G = new NativeArray<float>(g.Length, a),
                 RHS = new NativeArray<float>(g.Length, a),
                 Flow = new NativeArray<float2>(g.Length, a),
-                Heap = MinHeap.Create(g.Length, a),
+                Heap = heap,
             };
+            return true;
         }
 
-        public static void Reset(ref FieldDStarState s)
+        public static bool TryReset(ref FieldDStarState s)
         {
             s.Heap.Clear();
             s.G.Fill(float.PositiveInfinity);
             s.RHS.Fill(float.PositiveInfinity);
             s.Flow.Fill(float2.zero);
+            return true;
         }
 
-        public static void SetGoal(ref FieldDStarState s, int goal)
+        public static bool TrySetGoal(ref FieldDStarState s, int goal)
         {
             s.Goal = goal;
             s.RHS[goal] = 0f;
-            s.Heap.InsertOrDecrease(new HeapNode(goal, 0f));
+            return s.Heap.TryInsertOrDecrease(new HeapNode(goal, 0f));
         }
 
         [BurstCompile]
-        public static bool Step(ref FieldDStarState s, in NativeArray<float> cost)
+        public static bool TryStep(ref FieldDStarState s, in NativeArray<float> cost)
         {
+            while (!s.Heap.IsEmpty)
+            {
+                if (!s.Heap.TryPeek(out var top)) return false;
+                if (s.G[top.Id] != s.RHS[top.Id]) break;
+                if (!s.Heap.TryPop(out _)) return false;
+            }
+
             if (s.Heap.IsEmpty) return false;
 
-            int u = s.Heap.Pop().Id;
+            if (!s.Heap.TryPop(out var node)) return false;
+            int u = node.Id;
             float* gPtr = (float*)s.G.GetUnsafePtr();
             float* rhsPtr = (float*)s.RHS.GetUnsafePtr();
-            float* costPtr = (float*)cost.GetUnsafeReadOnlyPtr();
 
             if (gPtr[u] > rhsPtr[u])
             {
@@ -68,7 +88,6 @@ namespace BovineLabs.Grid.FieldDStar
                 UpdateRHS(ref s, in cost, u);
             }
 
-            // Update neighbors
             int2 p = s.Grid.ToCoord(u);
             int width = s.Grid.Width;
             int height = s.Grid.Height;
@@ -118,7 +137,11 @@ namespace BovineLabs.Grid.FieldDStar
             if (gPtr[cell] != rhsPtr[cell])
             {
                 float key = math.min(gPtr[cell], rhsPtr[cell]);
-                s.Heap.InsertOrDecrease(new HeapNode(cell, key));
+                s.Heap.TryInsertOrDecrease(new HeapNode(cell, key));
+            }
+            else
+            {
+                s.Heap.TryRemove(cell);
             }
         }
 
@@ -157,7 +180,7 @@ namespace BovineLabs.Grid.FieldDStar
         }
 
         [BurstCompile]
-        public static void ExtractFlow(ref FieldDStarState s, in NativeArray<float> cost)
+        public static bool TryExtractFlow(ref FieldDStarState s, in NativeArray<float> cost)
         {
             int cellCount = s.Grid.Length;
             int width = s.Grid.Width;
@@ -189,6 +212,7 @@ namespace BovineLabs.Grid.FieldDStar
                 float len = math.length(grad);
                 flowPtr[i] = len > 0f ? grad / len : float2.zero;
             }
+            return true;
         }
 
         public static void Dispose(ref FieldDStarState s)

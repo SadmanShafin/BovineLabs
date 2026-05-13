@@ -22,10 +22,15 @@ namespace BovineLabs.Grid.Continuum
     [BurstCompile]
     public unsafe static class ContinuumCrowdApi
     {
-        public static ContinuumCrowdState Create(int width, int height, Allocator a)
+        public static bool TryCreate(int width, int height, Allocator a, out ContinuumCrowdState result)
         {
-            var g = Grid2D.Create(width, height);
-            return new ContinuumCrowdState
+            if (!Grid2D.TryCreate(width, height, out var g))
+            {
+                result = default;
+                return false;
+            }
+
+            result = new ContinuumCrowdState
             {
                 Grid = g,
                 Density = new NativeArray<float>(g.Length, a),
@@ -34,6 +39,7 @@ namespace BovineLabs.Grid.Continuum
                 Flow = new NativeArray<float2>(g.Length, a),
                 Divergence = new NativeArray<float>(g.Length, a),
             };
+            return true;
         }
 
         [BurstCompile]
@@ -62,8 +68,10 @@ namespace BovineLabs.Grid.Continuum
         }
 
         [BurstCompile]
-        public static void SolvePotential(ref ContinuumCrowdState s, in NativeArray<byte> blocked, int goal, int iterations)
+        public static bool TrySolvePotential(ref ContinuumCrowdState s, in NativeArray<byte> blocked, int goal, int iterations)
         {
+            if (!s.Grid.InBounds(goal) || !blocked.IsCreated) return false;
+
             float* pot = (float*)s.Potential.GetUnsafePtr();
             float* spd = (float*)s.Speed.GetUnsafePtr();
             float* dens = (float*)s.Density.GetUnsafePtr();
@@ -92,6 +100,7 @@ namespace BovineLabs.Grid.Continuum
                     for (int x = w - 1; x >= 0; x--)
                         RelaxCellCore(pot, blk, spd, x, y, w, h);
             }
+            return true;
         }
 
         private static void RelaxCellCore(float* pot, byte* blk, float* spd, int x, int y, int w, int h)
@@ -125,7 +134,7 @@ namespace BovineLabs.Grid.Continuum
         }
 
         [BurstCompile]
-        public static void BuildFlow(ref ContinuumCrowdState s)
+        public static bool TryBuildFlow(ref ContinuumCrowdState s)
         {
             float* pot = (float*)s.Potential.GetUnsafePtr();
             float2* flow = (float2*)s.Flow.GetUnsafePtr();
@@ -156,6 +165,7 @@ namespace BovineLabs.Grid.Continuum
                 float lenSq = math.lengthsq(grad);
                 flow[i] = lenSq > 0f ? -grad * math.rsqrt(lenSq) : float2.zero;
             }
+            return true;
         }
 
         [BurstCompile]

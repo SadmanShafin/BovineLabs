@@ -22,21 +22,33 @@ namespace BovineLabs.Grid.Jps
     [BurstCompile]
     public unsafe static class JpsApi
     {
-        public static JpsState Create(int width, int height, Allocator allocator)
+        public static bool TryCreate(int width, int height, Allocator allocator, out JpsState result)
         {
-            var g = Grid2D.Create(width, height);
-            return new JpsState
+            if (!Grid2D.TryCreate(width, height, out var g))
+            {
+                result = default;
+                return false;
+            }
+
+            if (!MinHeap.TryCreate(g.Length, allocator, out var open))
+            {
+                result = default;
+                return false;
+            }
+
+            result = new JpsState
             {
                 Grid = g,
                 G = new NativeArray<float>(g.Length, allocator),
                 Parent = new NativeArray<int>(g.Length, allocator),
                 Closed = new NativeArray<byte>(g.Length, allocator),
-                Open = MinHeap.Create(g.Length, allocator),
+                Open = open,
             };
+            return true;
         }
 
         [BurstCompile]
-        public static bool Search(ref JpsState s, in NativeArray<byte> blocked, int start, int goal, ref NativeList<int> path)
+        public static bool TrySearch(ref JpsState s, in NativeArray<byte> blocked, int start, int goal, ref NativeList<int> path)
         {
             path.Clear();
             float* g = (float*)s.G.GetUnsafePtr();
@@ -54,17 +66,17 @@ namespace BovineLabs.Grid.Jps
             if (start == goal) { path.Add(start); return true; }
 
             g[start] = 0f;
-            s.Open.InsertOrDecrease(new HeapNode(start, Octile(0, 0, s.Grid.ToCoord(start), s.Grid.ToCoord(goal))));
+            s.Open.TryInsertOrDecrease(new HeapNode(start, Octile(0, 0, s.Grid.ToCoord(start), s.Grid.ToCoord(goal))));
 
             while (!s.Open.IsEmpty)
             {
-                HeapNode current = s.Open.Pop();
+                if (!s.Open.TryPop(out var current)) return false;
                 int cid = current.Id;
                 closed[cid] = 1;
 
                 if (cid == goal)
                 {
-                    ExtractPath(in s.Parent, goal, start, ref path);
+                    TryExtractPath(in s.Parent, goal, start, ref path);
                     return true;
                 }
 
@@ -73,7 +85,7 @@ namespace BovineLabs.Grid.Jps
                 for (int d = 0; d < 8; d++)
                 {
                     int2 dir = Grid2D.Dir8(d);
-                    if (Jump(blk, w, h, cp, dir, goal, out int jumpIdx))
+                    if (TryJump(blk, w, h, cp, dir, goal, out int jumpIdx))
                     {
                         if (closed[jumpIdx] != 0) continue;
                         int2 jp = s.Grid.ToCoord(jumpIdx);
@@ -83,7 +95,7 @@ namespace BovineLabs.Grid.Jps
                             g[jumpIdx] = cost;
                             parent[jumpIdx] = cid;
                             float f = cost + Octile(0, 0, jp, s.Grid.ToCoord(goal));
-                            s.Open.InsertOrDecrease(new HeapNode(jumpIdx, f));
+                            s.Open.TryInsertOrDecrease(new HeapNode(jumpIdx, f));
                         }
                     }
                 }
@@ -92,13 +104,13 @@ namespace BovineLabs.Grid.Jps
             return false;
         }
 
-        public static bool Jump(in JpsState s, in NativeArray<byte> blocked, int2 pos, int2 dir, int goal, out int jumpIdx)
+        public static bool TryJump(in JpsState s, in NativeArray<byte> blocked, int2 pos, int2 dir, int goal, out int jumpIdx)
         {
             byte* blk = (byte*)blocked.GetUnsafeReadOnlyPtr();
-            return Jump(blk, s.Grid.Width, s.Grid.Height, pos, dir, goal, out jumpIdx);
+            return TryJump(blk, s.Grid.Width, s.Grid.Height, pos, dir, goal, out jumpIdx);
         }
 
-        private static bool Jump(byte* blk, int w, int h, int2 pos, int2 dir, int goal, out int jumpIdx)
+        private static bool TryJump(byte* blk, int w, int h, int2 pos, int2 dir, int goal, out int jumpIdx)
         {
             jumpIdx = -1;
             int nx = pos.x + dir.x;
@@ -113,15 +125,15 @@ namespace BovineLabs.Grid.Jps
 
             if (dir.x != 0 && dir.y != 0)
             {
-                if (Jump(blk, w, h, new int2(nx, ny), new int2(dir.x, 0), goal, out _)) { jumpIdx = nIdx; return true; }
-                if (Jump(blk, w, h, new int2(nx, ny), new int2(0, dir.y), goal, out _)) { jumpIdx = nIdx; return true; }
+                if (TryJump(blk, w, h, new int2(nx, ny), new int2(dir.x, 0), goal, out _)) { jumpIdx = nIdx; return true; }
+                if (TryJump(blk, w, h, new int2(nx, ny), new int2(0, dir.y), goal, out _)) { jumpIdx = nIdx; return true; }
             }
 
-            return Jump(blk, w, h, new int2(nx, ny), dir, goal, out jumpIdx);
+            return TryJump(blk, w, h, new int2(nx, ny), dir, goal, out jumpIdx);
         }
 
         [BurstCompile]
-        public static void ExtractPath(in NativeArray<int> parent, int goal, int start, ref NativeList<int> path)
+        public static bool TryExtractPath(in NativeArray<int> parent, int goal, int start, ref NativeList<int> path)
         {
             path.Clear();
             int current = goal;
@@ -129,13 +141,14 @@ namespace BovineLabs.Grid.Jps
             {
                 path.Add(current);
                 current = parent[current];
-                if (current < 0) return;
+                if (current < 0) return false;
             }
             path.Add(start);
 
             int* p = (int*)path.GetUnsafePtr();
             int lo = 0, hi = path.Length - 1;
             while (lo < hi) { int tmp = p[lo]; p[lo] = p[hi]; p[hi] = tmp; lo++; hi--; }
+            return true;
         }
 
         public static void Dispose(ref JpsState s)

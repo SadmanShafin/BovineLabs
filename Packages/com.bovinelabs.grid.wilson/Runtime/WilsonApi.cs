@@ -21,10 +21,11 @@ namespace BovineLabs.Grid.Wilson
     [BurstCompile]
     public unsafe static class WilsonApi
     {
-        public static WilsonState Create(int width, int height, Allocator a)
+        public static bool TryCreate(int width, int height, Allocator a, out WilsonState s)
         {
-            var g = Grid2D.Create(width, height);
-            return new WilsonState
+            s = default;
+            if (!Grid2D.TryCreate(width, height, out var g)) return false;
+            s = new WilsonState
             {
                 Grid = g,
                 InTree = new NativeArray<byte>(g.Length, a),
@@ -32,10 +33,11 @@ namespace BovineLabs.Grid.Wilson
                 WalkNext = new NativeArray<int>(g.Length, a),
                 Walk = new UnsafeList<int>(g.Length, a),
             };
+            return true;
         }
 
         [BurstCompile]
-        public static void Initialize(ref WilsonState s, int root)
+        public static bool TryInitialize(ref WilsonState s, int root)
         {
             byte* inTree = (byte*)s.InTree.GetUnsafePtr();
             int* parent = (int*)s.Parent.GetUnsafePtr();
@@ -45,10 +47,11 @@ namespace BovineLabs.Grid.Wilson
             for (int i = 0; i < len; i++) { parent[i] = -1; walkNext[i] = -1; }
             s.Walk.Clear();
             inTree[root] = 1;
+            return true;
         }
 
         [BurstCompile]
-        public static void AddRandomWalk(ref WilsonState s, ref Unity.Mathematics.Random rng, int start)
+        public static bool TryAddRandomWalk(ref WilsonState s, ref Unity.Mathematics.Random rng, int start)
         {
             s.Walk.Clear();
             int w = s.Grid.Width;
@@ -76,7 +79,6 @@ namespace BovineLabs.Grid.Wilson
                 current = next;
             }
 
-            // Trace loop-erased path
             int* parent = (int*)s.Parent.GetUnsafePtr();
             current = start;
             while (inTree[current] == 0)
@@ -90,22 +92,24 @@ namespace BovineLabs.Grid.Wilson
 
             for (int i = 0; i < s.Walk.Length; i++)
                 walkNext[s.Walk[i]] = -1;
+            return true;
         }
 
         [BurstCompile]
-        public static void BuildTree(ref WilsonState s, ref Unity.Mathematics.Random rng)
+        public static bool TryBuildTree(ref WilsonState s, ref Unity.Mathematics.Random rng)
         {
             byte* inTree = (byte*)s.InTree.GetUnsafePtr();
             int len = s.Grid.Length;
             for (int i = 0; i < len; i++)
             {
                 if (inTree[i] == 0)
-                    AddRandomWalk(ref s, ref rng, i);
+                    if (!TryAddRandomWalk(ref s, ref rng, i)) return false;
             }
+            return true;
         }
 
         [BurstCompile]
-        public static void ExtractMazeWalls(ref WilsonState s, ref NativeArray<byte> walls)
+        public static bool TryExtractMazeWalls(ref WilsonState s, ref NativeArray<byte> walls)
         {
             byte* wPtr = (byte*)walls.GetUnsafePtr();
             int* parent = (int*)s.Parent.GetUnsafePtr();
@@ -116,6 +120,7 @@ namespace BovineLabs.Grid.Wilson
                 if (parent[i] < 0) continue;
                 wPtr[i] = 0;
             }
+            return true;
         }
 
         public static void Dispose(ref WilsonState s)

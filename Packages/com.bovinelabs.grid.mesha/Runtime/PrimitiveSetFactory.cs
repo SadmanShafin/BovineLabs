@@ -6,31 +6,31 @@ using Unity.Mathematics;
 
 namespace BovineLabs.Grid.MeshA
 {
-    /// <summary>
-    /// Builds a simple set of motion primitives for 8-directional grid movement.
-    /// Each primitive moves 1-2 cells in a cardinal or diagonal direction.
-    /// For production use, replace with your own kinodynamically-feasible primitives.
-    /// </summary>
+
+
+
+
+
     [BurstCompile]
     public static class PrimitiveSetFactory
     {
-        /// <summary>
-        /// Create a basic 8-direction primitive set with 1-cell moves.
-        /// Each heading maps to one primitive.
-        /// 8 headings: N=0, NE=1, E=2, SE=3, S=4, SW=5, W=6, NW=7
-        /// </summary>
+
+
+
+
+
         public static PrimitiveSet CreateCardinal8(Allocator allocator)
         {
             var set = new PrimitiveSet(8, allocator);
             int2[] offsets = {
-                new int2(0, -1),   // N
-                new int2(1, -1),   // NE
-                new int2(1, 0),    // E
-                new int2(1, 1),    // SE
-                new int2(0, 1),    // S
-                new int2(-1, 1),   // SW
-                new int2(-1, 0),   // W
-                new int2(-1, -1),  // NW
+                new int2(0, -1),
+                new int2(1, -1),
+                new int2(1, 0),
+                new int2(1, 1),
+                new int2(0, 1),
+                new int2(-1, 1),
+                new int2(-1, 0),
+                new int2(-1, -1),
             };
 
             for (int theta = 0; theta < 8; theta++)
@@ -58,11 +58,11 @@ namespace BovineLabs.Grid.MeshA
             return set;
         }
 
-        /// <summary>
-        /// Create a richer primitive set: 8 headings × 3 primitives each (short/medium/long).
-        /// Short = 1 cell, Medium = 2 cells straight, Long = 2 cells with slight turn.
-        /// Total: 24 primitives.
-        /// </summary>
+
+
+
+
+
         public static PrimitiveSet CreateExtended8(Allocator allocator)
         {
             var set = new PrimitiveSet(24, allocator);
@@ -77,20 +77,20 @@ namespace BovineLabs.Grid.MeshA
                 var dir = dirs[theta];
                 float baseLen = math.length(new float2(dir.x, dir.y));
 
-                // Short: 1-cell move in current heading
+
                 var si1 = new NativeArray<int>(1, allocator);
                 var sj1 = new NativeArray<int>(1, allocator);
                 si1[0] = dir.x; sj1[0] = dir.y;
                 set.Add(new MotionPrimitive(primId++, theta, dir, theta, baseLen, 0f, si1, sj1));
 
-                // Medium: 2-cell straight move
+
                 var si2 = new NativeArray<int>(2, allocator);
                 var sj2 = new NativeArray<int>(2, allocator);
                 si2[0] = dir.x; sj2[0] = dir.y;
                 si2[1] = dir.x * 2; sj2[1] = dir.y * 2;
                 set.Add(new MotionPrimitive(primId++, theta, dir * 2, theta, baseLen * 2, 0f, si2, sj2));
 
-                // Long: 2-cell move ending one heading CW from current
+
                 int nextTheta = (theta + 1) % 8;
                 var nextDir = dirs[nextTheta];
                 var endOff = dir + nextDir;

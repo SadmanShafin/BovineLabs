@@ -14,8 +14,10 @@ namespace BovineLabs.Grid.MeshA.Tests
         [SetUp]
         public void Setup()
         {
-            prims = PrimitiveSetFactory.CreateCardinal8(Allocator.Persistent);
-            mesh = MeshGraphBuilder.Build(prims, Allocator.Persistent);
+            Assert.IsTrue(PrimitiveSetFactory.TryCreateCardinal8(Allocator.Persistent, out var p));
+            prims = p;
+            Assert.IsTrue(MeshGraphBuilder.TryBuild(prims, Allocator.Persistent, out var m));
+            mesh = m;
         }
 
         [TearDown]
@@ -45,7 +47,7 @@ namespace BovineLabs.Grid.MeshA.Tests
             using var result = MeshAStar.FindPath(grid, prims, mesh,
                 new int2(2, 2), new int2(2, 2), 0, 1.0f, Allocator.Temp);
 
-            // Start = goal, path should be found with just the start node
+
             Assert.IsTrue(result.Found);
             Assert.AreEqual(1, result.Path.Length);
             Assert.AreEqual(new int2(2, 2), result.Path[0]);
@@ -56,7 +58,7 @@ namespace BovineLabs.Grid.MeshA.Tests
         public void MeshAStar_BlockedPath_GoesAround()
         {
             using var grid = new NativeGrid2D(10, 10, Allocator.Temp);
-            // Create a horizontal wall at y=5, x=0..8
+
             for (int x = 0; x < 9; x++) grid.Set(x, 5, CellState.Blocked);
 
             using var result = MeshAStar.FindPath(grid, prims, mesh,
@@ -65,7 +67,7 @@ namespace BovineLabs.Grid.MeshA.Tests
             Assert.IsTrue(result.Found);
             Assert.Greater(result.Path.Length, 0);
 
-            // Verify no path node is in a blocked cell
+
             for (int i = 0; i < result.Path.Length; i++)
             {
                 Assert.IsTrue(grid.IsFree(result.Path[i]),
@@ -77,7 +79,7 @@ namespace BovineLabs.Grid.MeshA.Tests
         public void MeshAStar_NoPath_ReturnsFalse()
         {
             using var grid = new NativeGrid2D(10, 10, Allocator.Temp);
-            // Block the entire row y=5
+
             for (int x = 0; x < 10; x++) grid.Set(x, 5, CellState.Blocked);
 
             using var result = MeshAStar.FindPath(grid, prims, mesh,
@@ -118,7 +120,7 @@ namespace BovineLabs.Grid.MeshA.Tests
         [Test]
         public void PrimitiveSet_CreateExtended8_Has24Primitives()
         {
-            using var ext = PrimitiveSetFactory.CreateExtended8(Allocator.Temp);
+            Assert.IsTrue(PrimitiveSetFactory.TryCreateExtended8(Allocator.Temp, out var ext));
             Assert.AreEqual(24, ext.Primitives.Length);
             ext.Dispose();
         }
@@ -146,7 +148,7 @@ namespace BovineLabs.Grid.MeshA.Tests
 
             Assert.IsTrue(optimal.Found);
             Assert.IsTrue(weighted.Found);
-            // Weighted should explore fewer nodes (but path cost >= optimal)
+
             Assert.LessOrEqual(weighted.NodesExplored, optimal.NodesExplored);
         }
     }

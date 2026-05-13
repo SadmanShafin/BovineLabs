@@ -31,10 +31,15 @@ namespace BovineLabs.Grid.Morse
     [BurstCompile]
     public unsafe static class MorseApi
     {
-        public static MorseState Create(int width, int height, int maxCritical, Allocator a)
+        public static bool TryCreate(int width, int height, int maxCritical, Allocator a, out MorseState result)
         {
-            var g = Grid2D.Create(width, height);
-            return new MorseState
+            if (!Grid2D.TryCreate(width, height, out var g))
+            {
+                result = default;
+                return false;
+            }
+
+            result = new MorseState
             {
                 Grid = g,
                 Ascending = new NativeArray<int>(g.Length, a),
@@ -42,10 +47,11 @@ namespace BovineLabs.Grid.Morse
                 Critical = new UnsafeList<CriticalPoint>(maxCritical, a),
                 Component = new NativeArray<int>(g.Length, a),
             };
+            return true;
         }
 
         [BurstCompile]
-        public static void BuildGradient(ref MorseState s, in NativeArray<float> scalar)
+        public static bool TryBuildGradient(ref MorseState s, in NativeArray<float> scalar)
         {
             s.Critical.Clear();
             float* sc = (float*)scalar.GetUnsafeReadOnlyPtr();
@@ -88,10 +94,11 @@ namespace BovineLabs.Grid.Morse
                         s.Critical.Add(new CriticalPoint { Cell = i, Type = 2, Value = v, Pair = -1 });
                 }
             }
+            return true;
         }
 
         [BurstCompile]
-        public static void TraceManifolds(ref MorseState s)
+        public static bool TryTraceManifolds(ref MorseState s)
         {
             int* comp = (int*)s.Component.GetUnsafePtr();
             int* desc = (int*)s.Descending.GetUnsafePtr();
@@ -104,14 +111,12 @@ namespace BovineLabs.Grid.Morse
             {
                 if (comp[i] >= 0) continue;
 
-                // Follow descending to min
                 int cur = i;
                 while (desc[cur] >= 0 && comp[cur] < 0)
                     cur = desc[cur];
 
                 int component = comp[cur] >= 0 ? comp[cur] : cur;
 
-                // Re-walk assigning component
                 cur = i;
                 visited.Clear();
                 while (comp[cur] < 0)
@@ -127,10 +132,11 @@ namespace BovineLabs.Grid.Morse
             }
 
             visited.Dispose();
+            return true;
         }
 
         [BurstCompile]
-        public static void PairByPersistence(ref MorseState s, in NativeArray<float> scalar)
+        public static bool TryPairByPersistence(ref MorseState s, in NativeArray<float> scalar)
         {
             float* sc = (float*)scalar.GetUnsafeReadOnlyPtr();
             int* desc = (int*)s.Descending.GetUnsafePtr();
@@ -149,10 +155,11 @@ namespace BovineLabs.Grid.Morse
                 crit[i].Pair = cur;
                 crit[i].Persistence = persistence;
             }
+            return true;
         }
 
         [BurstCompile]
-        public static void Simplify(ref MorseState s, in NativeArray<float> scalar, float threshold)
+        public static bool TrySimplify(ref MorseState s, in NativeArray<float> scalar, float threshold)
         {
             int* desc = (int*)s.Descending.GetUnsafePtr();
             CriticalPoint* crit = (CriticalPoint*)s.Critical.Ptr;
@@ -168,6 +175,7 @@ namespace BovineLabs.Grid.Morse
                         desc[cell] = desc[pair];
                 }
             }
+            return true;
         }
 
         public static void Dispose(ref MorseState s)

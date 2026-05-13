@@ -23,20 +23,28 @@ namespace BovineLabs.Grid.Cpd
     [BurstCompile]
     public unsafe static class CpdApi
     {
-        public static CpdState Create(int width, int height, int maxRuns, Allocator a)
+        public static bool TryCreate(int width, int height, int maxRuns, Allocator a, out CpdState result)
         {
-            var g = Grid2D.Create(width, height);
-            return new CpdState
+            if (!Grid2D.TryCreate(width, height, out var g))
+            {
+                result = default;
+                return false;
+            }
+
+            result = new CpdState
             {
                 Grid = g,
                 Runs = new UnsafeList<CpdRun>(maxRuns, a),
                 SourceRuns = new NativeArray<RangeI>(g.Length, a),
             };
+            return true;
         }
 
         [BurstCompile]
-        public static void Build(ref CpdState s, in NativeArray<byte> blocked)
+        public static bool TryBuild(ref CpdState s, in NativeArray<byte> blocked)
         {
+            if (!blocked.IsCreated) return false;
+
             s.Runs.Clear();
             byte* blk = (byte*)blocked.GetUnsafeReadOnlyPtr();
             int w = s.Grid.Width;
@@ -71,7 +79,6 @@ namespace BovineLabs.Grid.Cpd
                     int ux = u % w;
                     int uy = u / w;
                     float du = d[u];
-                    // Right, Up, Left, Down
                     if (ux + 1 < w) TryRelax(blk, d, p, queue, u, u + 1, du);
                     if (uy + 1 < h) TryRelax(blk, d, p, queue, u, u + w, du);
                     if (ux > 0) TryRelax(blk, d, p, queue, u, u - 1, du);
@@ -118,6 +125,7 @@ namespace BovineLabs.Grid.Cpd
             dist.Dispose();
             parent.Dispose();
             queue.Dispose();
+            return true;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -148,9 +156,11 @@ namespace BovineLabs.Grid.Cpd
         }
 
         [BurstCompile]
-        public static void ExtractPath(ref CpdState s, int source, int target, ref NativeList<int> path)
+        public static bool TryExtractPath(ref CpdState s, int source, int target, ref NativeList<int> path)
         {
             path.Clear();
+            if (!s.Grid.InBounds(source) || !s.Grid.InBounds(target)) return false;
+
             int cur = source;
             path.Add(cur);
             int maxSteps = s.Grid.Length;
@@ -163,11 +173,12 @@ namespace BovineLabs.Grid.Cpd
                 cur = s.Grid.ToIndex(p2);
                 path.Add(cur);
             }
+            return path.Length > 0 && path[path.Length - 1] == target;
         }
 
         public static void Dispose(ref CpdState s)
         {
-            s.Runs.Dispose();
+            if (s.Runs.IsCreated) s.Runs.Dispose();
             if (s.SourceRuns.IsCreated) s.SourceRuns.Dispose();
         }
     }

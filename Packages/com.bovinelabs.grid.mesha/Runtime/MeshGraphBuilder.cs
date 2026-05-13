@@ -10,19 +10,16 @@ namespace BovineLabs.Grid.MeshA
     {
         public const int NumHeadings = 8;
 
-        public static MeshGraphData Build(in PrimitiveSet primSet, Allocator allocator)
+        public static bool TryBuild(in PrimitiveSet primSet, Allocator allocator, out MeshGraphData result)
         {
             var mesh = new MeshGraphData(NumHeadings, NumHeadings, allocator);
 
-            // Step 1: Map each heading to its initial config (identity mapping)
             for (int theta = 0; theta < NumHeadings; theta++)
             {
                 mesh.InitialConfigByTheta[theta] = theta;
                 mesh.ThetaByInitialConfig[theta] = theta;
             }
 
-            // Step 2: Build successors for each config into flat arrays
-            // First pass: count successors per config
             var tempLists = new NativeArray<NativeList<SuccessorTransition>>(NumHeadings, Allocator.Temp);
             for (int i = 0; i < NumHeadings; i++)
                 tempLists[i] = new NativeList<SuccessorTransition>(4, Allocator.Temp);
@@ -41,7 +38,6 @@ namespace BovineLabs.Grid.MeshA
                 }
             }
 
-            // Compute total and offsets
             int total = 0;
             for (int i = 0; i < NumHeadings; i++) total += tempLists[i].Length;
 
@@ -58,7 +54,8 @@ namespace BovineLabs.Grid.MeshA
             }
             tempLists.Dispose();
 
-            return mesh;
+            result = mesh;
+            return true;
         }
     }
 }

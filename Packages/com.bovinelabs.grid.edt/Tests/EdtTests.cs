@@ -74,58 +74,77 @@ public class EdtTests
 
     [Test] public void Build_CenterObstacle()
     {
-        var s = EdtApi.Create(3, 3, Allocator.Temp); var b = new NativeArray<byte>(9, Allocator.Temp); var d = new NativeArray<float>(9, Allocator.Temp);
+        Assert.IsTrue(EdtApi.TryCreate(3, 3, Allocator.Temp, out var s));
+        var b = new NativeArray<byte>(9, Allocator.Temp);
+        var d = new NativeArray<float>(9, Allocator.Temp);
         b.Fill((byte)0); b[4] = 1;
-        EdtApi.Build(ref s, in b, ref d);
+        Assert.IsTrue(EdtApi.TryBuild(ref s, in b, ref d));
         Assert.AreEqual(0f, d[4], 0.001f); Assert.AreEqual(1f, d[1], 0.001f); Assert.AreEqual(2f, d[0], 0.001f); Assert.AreEqual(2f, d[8], 0.001f);
         EdtApi.Dispose(ref s); b.Dispose(); d.Dispose();
     }
 
     [Test] public void Build_CornerObstacle()
     {
-        var s = EdtApi.Create(3, 3, Allocator.Temp); var b = new NativeArray<byte>(9, Allocator.Temp); var d = new NativeArray<float>(9, Allocator.Temp);
+        Assert.IsTrue(EdtApi.TryCreate(3, 3, Allocator.Temp, out var s));
+        var b = new NativeArray<byte>(9, Allocator.Temp);
+        var d = new NativeArray<float>(9, Allocator.Temp);
         b.Fill((byte)0); b[0] = 1;
-        EdtApi.Build(ref s, in b, ref d);
+        Assert.IsTrue(EdtApi.TryBuild(ref s, in b, ref d));
         Assert.AreEqual(0f, d[0], 0.001f); Assert.AreEqual(1f, d[1], 0.001f); Assert.AreEqual(8f, d[8], 0.01f);
         EdtApi.Dispose(ref s); b.Dispose(); d.Dispose();
     }
 
     [Test] public void Build_AllObstacles()
     {
-        var s = EdtApi.Create(4, 4, Allocator.Temp); var b = new NativeArray<byte>(16, Allocator.Temp); var d = new NativeArray<float>(16, Allocator.Temp);
-        b.Fill((byte)1); EdtApi.Build(ref s, in b, ref d);
+        Assert.IsTrue(EdtApi.TryCreate(4, 4, Allocator.Temp, out var s));
+        var b = new NativeArray<byte>(16, Allocator.Temp);
+        var d = new NativeArray<float>(16, Allocator.Temp);
+        b.Fill((byte)1);
+        Assert.IsTrue(EdtApi.TryBuild(ref s, in b, ref d));
         for (int i = 0; i < 16; i++) Assert.AreEqual(0f, d[i], 0.001f);
         EdtApi.Dispose(ref s); b.Dispose(); d.Dispose();
     }
 
     [Test] public void Build_NoObstacles()
     {
-        var s = EdtApi.Create(3, 3, Allocator.Temp); var b = new NativeArray<byte>(9, Allocator.Temp); var d = new NativeArray<float>(9, Allocator.Temp);
-        b.Fill((byte)0); EdtApi.Build(ref s, in b, ref d);
+        Assert.IsTrue(EdtApi.TryCreate(3, 3, Allocator.Temp, out var s));
+        var b = new NativeArray<byte>(9, Allocator.Temp);
+        var d = new NativeArray<float>(9, Allocator.Temp);
+        b.Fill((byte)0);
+        Assert.IsTrue(EdtApi.TryBuild(ref s, in b, ref d));
         for (int i = 0; i < 9; i++) Assert.IsTrue(float.IsPositiveInfinity(d[i]));
         EdtApi.Dispose(ref s); b.Dispose(); d.Dispose();
     }
 
     [Test] public void Build_Line()
     {
-        var s = EdtApi.Create(5, 1, Allocator.Temp); var b = new NativeArray<byte>(5, Allocator.Temp); var d = new NativeArray<float>(5, Allocator.Temp);
-        b.Fill((byte)0); b[0] = 1; EdtApi.Build(ref s, in b, ref d);
+        Assert.IsTrue(EdtApi.TryCreate(5, 1, Allocator.Temp, out var s));
+        var b = new NativeArray<byte>(5, Allocator.Temp);
+        var d = new NativeArray<float>(5, Allocator.Temp);
+        b.Fill((byte)0); b[0] = 1;
+        Assert.IsTrue(EdtApi.TryBuild(ref s, in b, ref d));
         Assert.AreEqual(0f, d[0], 0.001f); Assert.AreEqual(1f, d[1], 0.001f); Assert.AreEqual(16f, d[4], 0.001f);
         EdtApi.Dispose(ref s); b.Dispose(); d.Dispose();
     }
 
     [Test] public void Build_Symmetric()
     {
-        var s = EdtApi.Create(5, 1, Allocator.Temp); var b = new NativeArray<byte>(5, Allocator.Temp); var d = new NativeArray<float>(5, Allocator.Temp);
-        b.Fill((byte)0); b[0] = 1; b[4] = 1; EdtApi.Build(ref s, in b, ref d);
+        Assert.IsTrue(EdtApi.TryCreate(5, 1, Allocator.Temp, out var s));
+        var b = new NativeArray<byte>(5, Allocator.Temp);
+        var d = new NativeArray<float>(5, Allocator.Temp);
+        b.Fill((byte)0); b[0] = 1; b[4] = 1;
+        Assert.IsTrue(EdtApi.TryBuild(ref s, in b, ref d));
         Assert.AreEqual(4f, d[2], 0.001f);
         EdtApi.Dispose(ref s); b.Dispose(); d.Dispose();
     }
 
     [Test] public void Build_OffCenter()
     {
-        var s = EdtApi.Create(5, 5, Allocator.Temp); var b = new NativeArray<byte>(25, Allocator.Temp); var d = new NativeArray<float>(25, Allocator.Temp);
-        b.Fill((byte)0); b[s.Grid.ToIndex(1, 1)] = 1; EdtApi.Build(ref s, in b, ref d);
+        Assert.IsTrue(EdtApi.TryCreate(5, 5, Allocator.Temp, out var s));
+        var b = new NativeArray<byte>(25, Allocator.Temp);
+        var d = new NativeArray<float>(25, Allocator.Temp);
+        b.Fill((byte)0); b[s.Grid.ToIndex(1, 1)] = 1;
+        Assert.IsTrue(EdtApi.TryBuild(ref s, in b, ref d));
         Assert.AreEqual(8f, d[s.Grid.ToIndex(3, 3)], 0.01f); Assert.AreEqual(9f, d[s.Grid.ToIndex(4, 1)], 0.01f);
         EdtApi.Dispose(ref s); b.Dispose(); d.Dispose();
     }
@@ -138,12 +157,20 @@ public class EdtTests
         d2.Dispose(); d.Dispose();
     }
 
-    [Test] public void Dispose_DoubleSafe() { var s = EdtApi.Create(3, 3, Allocator.Temp); EdtApi.Dispose(ref s); EdtApi.Dispose(ref s); }
+    [Test] public void Dispose_DoubleSafe()
+    {
+        Assert.IsTrue(EdtApi.TryCreate(3, 3, Allocator.Temp, out var s));
+        EdtApi.Dispose(ref s);
+        EdtApi.Dispose(ref s);
+    }
 
     [Test] public void Build_1x1()
     {
-        var s = EdtApi.Create(1, 1, Allocator.Temp); var b = new NativeArray<byte>(new byte[] { 1 }, Allocator.Temp); var d = new NativeArray<float>(1, Allocator.Temp);
-        EdtApi.Build(ref s, in b, ref d); Assert.AreEqual(0f, d[0], 0.001f);
+        Assert.IsTrue(EdtApi.TryCreate(1, 1, Allocator.Temp, out var s));
+        var b = new NativeArray<byte>(new byte[] { 1 }, Allocator.Temp);
+        var d = new NativeArray<float>(1, Allocator.Temp);
+        Assert.IsTrue(EdtApi.TryBuild(ref s, in b, ref d));
+        Assert.AreEqual(0f, d[0], 0.001f);
         EdtApi.Dispose(ref s); b.Dispose(); d.Dispose();
     }
 }

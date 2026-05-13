@@ -18,28 +18,35 @@ namespace BovineLabs.Grid.FastSweeping
     [BurstCompile]
     public unsafe static class FastSweepingApi
     {
-        public static FastSweepingState Create(int width, int height, Allocator a)
+        public static bool TryCreate(int width, int height, Allocator a, out FastSweepingState result)
         {
-            var g = Grid2D.Create(width, height);
-            return new FastSweepingState
+            if (!Grid2D.TryCreate(width, height, out var g))
+            {
+                result = default;
+                return false;
+            }
+
+            result = new FastSweepingState
             {
                 Grid = g,
                 T = new NativeArray<float>(g.Length, a),
             };
+            return true;
         }
 
         [BurstCompile]
-        public static void Initialize(ref FastSweepingState s, in NativeArray<int> sources)
+        public static bool TryInitialize(ref FastSweepingState s, in NativeArray<int> sources)
         {
             float* t = (float*)s.T.GetUnsafePtr();
             int len = s.Grid.Length;
             for (int i = 0; i < len; i++) t[i] = float.PositiveInfinity;
             int* src = (int*)sources.GetUnsafeReadOnlyPtr();
             for (int i = 0; i < sources.Length; i++) t[src[i]] = 0f;
+            return true;
         }
 
         [BurstCompile]
-        public static void SweepAllDirections(ref FastSweepingState s, in NativeArray<float> speed, int rounds)
+        public static bool TrySweepAllDirections(ref FastSweepingState s, in NativeArray<float> speed, int rounds)
         {
             float* t = (float*)s.T.GetUnsafePtr();
             float* sp = (float*)speed.GetUnsafePtr();
@@ -53,6 +60,7 @@ namespace BovineLabs.Grid.FastSweeping
                 Sweep(t, sp, w, h, 1, -1);
                 Sweep(t, sp, w, h, -1, -1);
             }
+            return true;
         }
 
         private static void Sweep(float* t, float* sp, int w, int h, int dx, int dy)
@@ -97,14 +105,14 @@ namespace BovineLabs.Grid.FastSweeping
         }
 
         [BurstCompile]
-        public static void RelaxCell(in FastSweepingState s, in NativeArray<float> speed, int cell)
+        public static bool TryRelaxCell(in FastSweepingState s, in NativeArray<float> speed, int cell)
         {
             float* t = (float*)s.T.GetUnsafePtr();
             float* sp = (float*)speed.GetUnsafePtr();
             int w = s.Grid.Width;
             int h = s.Grid.Height;
             float spd = sp[cell];
-            if (Hint.Unlikely(spd <= 0f)) return;
+            if (Hint.Unlikely(spd <= 0f)) return false;
 
             float invSpeed = 1f / spd;
             int cx = cell % w;
@@ -130,6 +138,7 @@ namespace BovineLabs.Grid.FastSweeping
             }
 
             if (tNew < t[cell]) t[cell] = tNew;
+            return true;
         }
 
         public static void Dispose(ref FastSweepingState s)

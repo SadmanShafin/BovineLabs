@@ -11,14 +11,13 @@ namespace BovineLabs.GraphCut
     {
         public Grid2D Grid;
         
-        // Edge data (SoA)
         public UnsafeList<int> EdgeTo;
         public UnsafeList<int> EdgeCap;
         public UnsafeList<int> EdgeFlow;
         public UnsafeList<int> EdgeRev;
         public UnsafeList<int> EdgeNext;
         
-        public NativeArray<int> EdgeHead; // nodes 0 to Length-1, Source=Length, Sink=Length+1
+        public NativeArray<int> EdgeHead;
         public NativeArray<int> Excess;
         public NativeArray<int> Height;
         public NativeArray<byte> SourceSide;
@@ -31,11 +30,16 @@ namespace BovineLabs.GraphCut
         private const int SourceOffset = 0;
         private const int SinkOffset = 1;
 
-        public static GraphCutState Create(int width, int height, int maxEdges, Allocator a)
+        public static bool TryCreate(int width, int height, int maxEdges, Allocator a, out GraphCutState result)
         {
-            var g = Grid2D.Create(width, height);
+            if (!Grid2D.TryCreate(width, height, out var g))
+            {
+                result = default;
+                return false;
+            }
+
             int nodeCount = g.Length + 2;
-            return new GraphCutState
+            result = new GraphCutState
             {
                 Grid = g,
                 EdgeTo = new UnsafeList<int>(maxEdges, a),
@@ -49,6 +53,7 @@ namespace BovineLabs.GraphCut
                 SourceSide = new NativeArray<byte>(g.Length, a),
                 ActiveNodes = new UnsafeList<int>(nodeCount, a),
             };
+            return true;
         }
 
         [BurstCompile]
@@ -88,7 +93,6 @@ namespace BovineLabs.GraphCut
                 int w = pairwisePtr[i];
                 if (w <= 0) continue;
 
-                // Only 2 directions to avoid double-counting
                 for (int d = 0; d < 2; d++)
                 {
                     int2 offset = Grid2D.Dir4(d);
@@ -115,7 +119,7 @@ namespace BovineLabs.GraphCut
         }
 
         [BurstCompile]
-        public static bool MinCut(ref GraphCutState s)
+        public static bool TryMinCut(ref GraphCutState s)
         {
             int cellCount = s.Grid.Length;
             int nodeCount = cellCount + 2;
@@ -137,7 +141,6 @@ namespace BovineLabs.GraphCut
 
             heightPtr[source] = nodeCount;
 
-            // Initial pushes from source
             for (int e = headPtr[source]; e != -1; e = nextPtr[e])
             {
                 int v = toPtr[e];
@@ -188,14 +191,10 @@ namespace BovineLabs.GraphCut
                 }
             }
 
-            // Extract min-cut via BFS reachability from source in residual graph
             s.SourceSide.Fill((byte)0);
             byte* sidePtr = (byte*)s.SourceSide.GetUnsafePtr();
             var queue = new NativeQueue<int>(Allocator.Temp);
             queue.Enqueue(source);
-            
-            // Mark source as "visited" conceptually (virtual node)
-            // But we only store SourceSide for cells
             
             var visited = new NativeArray<byte>(nodeCount, Allocator.Temp);
             visited[source] = 1;
@@ -220,13 +219,14 @@ namespace BovineLabs.GraphCut
         }
 
         [BurstCompile]
-        public static void ApplyCutLabels(ref GraphCutState s, ref NativeArray<int> labels, int label0, int label1)
+        public static bool TryExtractCutLabels(ref GraphCutState s, ref NativeArray<int> labels, int label0, int label1)
         {
             int* labelsPtr = (int*)labels.GetUnsafePtr();
             byte* sidePtr = (byte*)s.SourceSide.GetUnsafePtr();
             int len = s.Grid.Length;
             for (int i = 0; i < len; i++)
                 labelsPtr[i] = sidePtr[i] == 1 ? label0 : label1;
+            return true;
         }
 
         public static void Dispose(ref GraphCutState s)

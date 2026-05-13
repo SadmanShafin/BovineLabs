@@ -16,16 +16,28 @@ namespace BovineLabs.Grid.DynamicCut
 
     public static class DynamicCutApi
     {
-        public static DynamicCutState Create(int width, int height, int maxEdges, Allocator a)
+        public static bool TryCreate(int width, int height, int maxEdges, Allocator a, out DynamicCutState result)
         {
-            var g = Grid2D.Create(width, height);
-            return new DynamicCutState
+            if (!Grid2D.TryCreate(width, height, out var g))
             {
-                Cut = GraphCutApi.Create(width, height, maxEdges, a),
+                result = default;
+                return false;
+            }
+
+            if (!GraphCutApi.TryCreate(width, height, maxEdges, a, out var cut))
+            {
+                result = default;
+                return false;
+            }
+
+            result = new DynamicCutState
+            {
+                Cut = cut,
                 DirtyNodes = new NativeList<int>(width * height, a),
                 UnarySource = new NativeArray<int>(g.Length, a),
                 UnarySink = new NativeArray<int>(g.Length, a),
             };
+            return true;
         }
 
         public static void EditUnary(ref DynamicCutState s, int cell, int sourceCapDelta, int sinkCapDelta)
@@ -40,7 +52,6 @@ namespace BovineLabs.Grid.DynamicCut
 
         public static unsafe void EditPairwise(ref DynamicCutState s, int a, int b, int capacityDelta)
         {
-            // Walk adjacency list of node 'a' to find edge to 'b'
             int* head = (int*)s.Cut.EdgeHead.GetUnsafePtr();
             int* next = s.Cut.EdgeNext.Ptr;
             int* to = s.Cut.EdgeTo.Ptr;
@@ -59,7 +70,6 @@ namespace BovineLabs.Grid.DynamicCut
                 e = next[e];
             }
 
-            // Also try reverse direction (b -> a)
             e = head[b];
             while (e >= 0)
             {
@@ -74,7 +84,7 @@ namespace BovineLabs.Grid.DynamicCut
             }
         }
 
-        public static bool Repair(ref DynamicCutState s)
+        public static bool TryRepair(ref DynamicCutState s)
         {
             var u0 = new NativeArray<int>(s.UnarySource.Length, Allocator.Temp);
             var u1 = new NativeArray<int>(s.UnarySink.Length, Allocator.Temp);

@@ -20,21 +20,25 @@ namespace BovineLabs.Grid.Watershed
     [BurstCompile]
     public unsafe static class WatershedApi
     {
-        public static WatershedState Create(int width, int height, Allocator a)
+        public static bool TryCreate(int width, int height, Allocator a, out WatershedState s)
         {
-            var g = Grid2D.Create(width, height);
-            return new WatershedState
+            s = default;
+            if (!Grid2D.TryCreate(width, height, out var g)) return false;
+            if (!MinHeap.TryCreate(g.Length, a, out var heap)) return false;
+            s = new WatershedState
             {
                 Grid = g,
                 Label = new NativeArray<int>(g.Length, a),
                 State = new NativeArray<byte>(g.Length, a),
-                Heap = MinHeap.Create(g.Length, a),
+                Heap = heap,
             };
+            return true;
         }
 
         [BurstCompile]
-        public static int FindMinima(ref WatershedState s, in NativeArray<float> height)
+        public static bool TryFindMinima(ref WatershedState s, in NativeArray<float> height, out int labelCount)
         {
+            labelCount = 0;
             int* label = (int*)s.Label.GetUnsafePtr();
             byte* st = (byte*)s.State.GetUnsafePtr();
             float* ht = (float*)height.GetUnsafeReadOnlyPtr();
@@ -45,7 +49,6 @@ namespace BovineLabs.Grid.Watershed
             for (int i = 0; i < len; i++) { label[i] = -1; st[i] = 0; }
             s.Heap.Clear();
 
-            int labelCount = 0;
             var stack = new UnsafeList<int>(len, Allocator.Temp);
 
             for (int i = 0; i < len; i++)
@@ -88,19 +91,19 @@ namespace BovineLabs.Grid.Watershed
                     int ci = stack.Ptr[si];
                     int cx = ci % w;
                     int cy = ci / w;
-                    if (cx > 0 && st[ci - 1] == 0 && label[ci - 1] == -1) { st[ci - 1] = 1; label[ci - 1] = lbl; s.Heap.InsertOrDecrease(new HeapNode(ci - 1, ht[ci - 1])); }
-                    if (cx + 1 < w && st[ci + 1] == 0 && label[ci + 1] == -1) { st[ci + 1] = 1; label[ci + 1] = lbl; s.Heap.InsertOrDecrease(new HeapNode(ci + 1, ht[ci + 1])); }
-                    if (cy > 0 && st[ci - w] == 0 && label[ci - w] == -1) { st[ci - w] = 1; label[ci - w] = lbl; s.Heap.InsertOrDecrease(new HeapNode(ci - w, ht[ci - w])); }
-                    if (cy + 1 < h && st[ci + w] == 0 && label[ci + w] == -1) { st[ci + w] = 1; label[ci + w] = lbl; s.Heap.InsertOrDecrease(new HeapNode(ci + w, ht[ci + w])); }
+                    if (cx > 0 && st[ci - 1] == 0 && label[ci - 1] == -1) { st[ci - 1] = 1; label[ci - 1] = lbl; if (!s.Heap.TryInsertOrDecrease(new HeapNode(ci - 1, ht[ci - 1]))) { stack.Dispose(); return false; } }
+                    if (cx + 1 < w && st[ci + 1] == 0 && label[ci + 1] == -1) { st[ci + 1] = 1; label[ci + 1] = lbl; if (!s.Heap.TryInsertOrDecrease(new HeapNode(ci + 1, ht[ci + 1]))) { stack.Dispose(); return false; } }
+                    if (cy > 0 && st[ci - w] == 0 && label[ci - w] == -1) { st[ci - w] = 1; label[ci - w] = lbl; if (!s.Heap.TryInsertOrDecrease(new HeapNode(ci - w, ht[ci - w]))) { stack.Dispose(); return false; } }
+                    if (cy + 1 < h && st[ci + w] == 0 && label[ci + w] == -1) { st[ci + w] = 1; label[ci + w] = lbl; if (!s.Heap.TryInsertOrDecrease(new HeapNode(ci + w, ht[ci + w]))) { stack.Dispose(); return false; } }
                 }
             }
 
             stack.Dispose();
-            return labelCount;
+            return true;
         }
 
         [BurstCompile]
-        public static void Flood(ref WatershedState s, in NativeArray<float> height)
+        public static bool TryFlood(ref WatershedState s, in NativeArray<float> height)
         {
             int* label = (int*)s.Label.GetUnsafePtr();
             byte* st = (byte*)s.State.GetUnsafePtr();
@@ -110,33 +113,36 @@ namespace BovineLabs.Grid.Watershed
 
             while (!s.Heap.IsEmpty)
             {
-                int u = s.Heap.Pop().Id;
+                if (!s.Heap.TryPop(out var top)) return false;
+                int u = top.Id;
                 st[u] = 2;
                 int ux = u % w;
                 int uy = u / w;
                 int lblU = label[u];
 
-                if (ux > 0) FloodNeighbor(label, st, ht, w, h, u - 1, lblU, s);
-                if (ux + 1 < w) FloodNeighbor(label, st, ht, w, h, u + 1, lblU, s);
-                if (uy > 0) FloodNeighbor(label, st, ht, w, h, u - w, lblU, s);
-                if (uy + 1 < h) FloodNeighbor(label, st, ht, w, h, u + w, lblU, s);
+                if (ux > 0) if (!TryFloodNeighbor(label, st, ht, w, h, u - 1, lblU, s)) return false;
+                if (ux + 1 < w) if (!TryFloodNeighbor(label, st, ht, w, h, u + 1, lblU, s)) return false;
+                if (uy > 0) if (!TryFloodNeighbor(label, st, ht, w, h, u - w, lblU, s)) return false;
+                if (uy + 1 < h) if (!TryFloodNeighbor(label, st, ht, w, h, u + w, lblU, s)) return false;
             }
+            return true;
         }
 
-        private static void FloodNeighbor(int* label, byte* st, float* ht, int w, int h, int ni, int lblU, WatershedState s)
+        private static bool TryFloodNeighbor(int* label, byte* st, float* ht, int w, int h, int ni, int lblU, WatershedState s)
         {
-            if (st[ni] == 2) return;
+            if (st[ni] == 2) return true;
             if (label[ni] == -1) label[ni] = lblU;
             else if (label[ni] != lblU) label[ni] = -2;
             if (st[ni] == 0)
             {
                 st[ni] = 1;
-                s.Heap.InsertOrDecrease(new HeapNode(ni, ht[ni]));
+                return s.Heap.TryInsertOrDecrease(new HeapNode(ni, ht[ni]));
             }
+            return true;
         }
 
         [BurstCompile]
-        public static void ExtractBoundaries(ref WatershedState s, ref NativeArray<byte> boundary)
+        public static bool TryExtractBoundaries(ref WatershedState s, ref NativeArray<byte> boundary)
         {
             int* label = (int*)s.Label.GetUnsafePtr();
             byte* bnd = (byte*)boundary.GetUnsafePtr();
@@ -161,6 +167,7 @@ namespace BovineLabs.Grid.Watershed
                 if (!isBorder && y + 1 < h && label[i + w] >= 0 && label[i + w] != li) isBorder = true;
                 if (isBorder) bnd[i] = 1;
             }
+            return true;
         }
 
         public static void Dispose(ref WatershedState s)
