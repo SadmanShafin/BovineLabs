@@ -53,16 +53,16 @@ public class JpsTests
     }
 
     [Test] public void Jump_ToGoal()
-    { var b = new NativeArray<byte>(100, Allocator.Temp); b.Fill((byte)0); Assert.IsTrue(JpsApi.Jump(in state, in b, new int2(0, 0), new int2(1, 0), state.Grid.ToIndex(5, 0), out int j)); Assert.AreEqual(state.Grid.ToIndex(5, 0), j); b.Dispose(); }
+    { var b = new NativeArray<byte>(100, Allocator.Temp); b.Fill((byte)0); Assert.IsTrue(JpsApi.TryJump(in state, in b, new int2(0, 0), new int2(1, 0), state.Grid.ToIndex(5, 0), out int j)); Assert.AreEqual(state.Grid.ToIndex(5, 0), j); b.Dispose(); }
 
     [Test] public void Jump_HitWall()
-    { var b = new NativeArray<byte>(100, Allocator.Temp); b.Fill((byte)0); b[state.Grid.ToIndex(3, 0)] = 1; Assert.IsFalse(JpsApi.Jump(in state, in b, new int2(0, 0), new int2(1, 0), 99, out _)); b.Dispose(); }
+    { var b = new NativeArray<byte>(100, Allocator.Temp); b.Fill((byte)0); b[state.Grid.ToIndex(3, 0)] = 1; Assert.IsFalse(JpsApi.TryJump(in state, in b, new int2(0, 0), new int2(1, 0), 99, out _)); b.Dispose(); }
 
     [Test] public void Jump_Diagonal()
-    { var b = new NativeArray<byte>(100, Allocator.Temp); b.Fill((byte)0); Assert.IsTrue(JpsApi.Jump(in state, in b, new int2(0, 0), new int2(1, 1), state.Grid.ToIndex(3, 3), out int j)); Assert.AreEqual(state.Grid.ToIndex(3, 3), j); b.Dispose(); }
+    { var b = new NativeArray<byte>(100, Allocator.Temp); b.Fill((byte)0); Assert.IsTrue(JpsApi.TryJump(in state, in b, new int2(0, 0), new int2(1, 1), state.Grid.ToIndex(3, 3), out int j)); Assert.AreEqual(state.Grid.ToIndex(3, 3), j); b.Dispose(); }
 
     [Test] public void Jump_OutOfBounds()
-    { var b = new NativeArray<byte>(100, Allocator.Temp); b.Fill((byte)0); Assert.IsFalse(JpsApi.Jump(in state, in b, new int2(0, 0), new int2(-1, 0), 99, out _)); b.Dispose(); }
+    { var b = new NativeArray<byte>(100, Allocator.Temp); b.Fill((byte)0); Assert.IsFalse(JpsApi.TryJump(in state, in b, new int2(0, 0), new int2(-1, 0), 99, out _)); b.Dispose(); }
 
     [Test] public void ExtractPath_TwoSteps()
     { var par = new NativeArray<int>(3, Allocator.Temp); var p = new NativeList<int>(Allocator.Temp); par[0] = -1; par[1] = 0; par[2] = 1; Assert.IsTrue(JpsApi.TryExtractPath(in par, 2, 0, ref p)); Assert.AreEqual(3, p.Length); Assert.AreEqual(0, p[0]); Assert.AreEqual(2, p[2]); par.Dispose(); p.Dispose(); }

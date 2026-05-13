@@ -220,7 +220,7 @@ namespace BovineLabs.Grid.Hashlife
 
         public static void Dispose(ref HashlifeState s)
         {
-            s.Nodes.Dispose();
+            if (s.Nodes.IsCreated) s.Nodes.Dispose();
             if (s.Intern.IsCreated) s.Intern.Dispose();
             if (s.ResultCache.IsCreated) s.ResultCache.Dispose();
         }

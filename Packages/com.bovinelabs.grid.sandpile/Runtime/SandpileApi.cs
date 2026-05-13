@@ -109,6 +109,12 @@ namespace BovineLabs.Grid.Sandpile
         }
 
         [BurstCompile]
+        public static void RelaxAll(ref SandpileState s)
+        {
+            TryRelaxAll(ref s);
+        }
+
+        [BurstCompile]
         public static bool TryRelaxAll(ref SandpileState s)
         {
             while (TryRelaxStep(ref s)) { }

@@ -54,7 +54,6 @@ namespace BovineLabs.Grid.Watershed
             for (int i = 0; i < len; i++)
             {
                 if (st[i] != 0) continue;
-                if (ht[i] <= 0f) continue;
 
                 int x = i % w;
                 int y = i / w;

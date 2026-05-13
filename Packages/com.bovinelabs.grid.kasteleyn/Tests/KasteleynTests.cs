@@ -26,7 +26,7 @@ public class KasteleynTests
         var region = new NativeArray<byte>(4, Allocator.Temp); region.Fill((byte)1);
         KasteleynApi.SetRegion(ref s, region);
         Assert.IsTrue(KasteleynApi.TryBuildPlanarGraph(ref s));
-        KasteleynApi.OrientKasteleyn(ref s);
+        Assert.IsTrue(KasteleynApi.TryOrientKasteleyn(ref s));
 
         for (int i = 0; i < s.VertexCount; i++)
         {

@@ -98,6 +98,12 @@ namespace BovineLabs.Grid.Morse
         }
 
         [BurstCompile]
+        public static void TraceManifolds(ref MorseState s)
+        {
+            TryTraceManifolds(ref s);
+        }
+
+        [BurstCompile]
         public static bool TryTraceManifolds(ref MorseState s)
         {
             int* comp = (int*)s.Component.GetUnsafePtr();
@@ -182,7 +188,7 @@ namespace BovineLabs.Grid.Morse
         {
             if (s.Ascending.IsCreated) s.Ascending.Dispose();
             if (s.Descending.IsCreated) s.Descending.Dispose();
-            s.Critical.Dispose();
+            if (s.Critical.IsCreated) s.Critical.Dispose();
             if (s.Component.IsCreated) s.Component.Dispose();
         }
     }

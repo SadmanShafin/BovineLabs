@@ -1,0 +1,8 @@
+status=failed total=137 passed=133 failed=1 skipped=3 inconclusive=0 duration=0.1662789
+
+FAIL AnyaTests.Search_WithWall
+message:
+Expected: True
+  But was:  False
+stack:
+at AnyaTests.Search_WithWall () [0x00062] in ./Packages/com.bovinelabs.grid.anya/Tests/AnyaTests.cs:40

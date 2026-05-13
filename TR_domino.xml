@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="9" result="Passed" total="9" passed="9" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-05-13 14:24:59Z" end-time="2026-05-13 14:24:59Z" duration="0.0349574">
+  <test-suite type="TestSuite" id="1000" name="BovineLabs" fullname="BovineLabs" runstate="Runnable" testcasecount="137" result="Passed" start-time="2026-05-13 14:24:59Z" end-time="2026-05-13 14:24:59Z" duration="0.034957" total="9" passed="9" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="EditMode" />
+    </properties>
+    <test-suite type="Assembly" id="1055" name="com.bovinelabs.grid.domino.tests.dll" fullname="/home/i/Documents/BovineLabs/Library/ScriptAssemblies/com.bovinelabs.grid.domino.tests.dll" runstate="Runnable" testcasecount="9" result="Passed" start-time="2026-05-13 14:24:59Z" end-time="2026-05-13 14:24:59Z" duration="0.026188" total="9" passed="9" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="217953" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <test-suite type="TestFixture" id="1045" name="DominoTests" fullname="DominoTests" classname="DominoTests" runstate="Runnable" testcasecount="9" result="Passed" start-time="2026-05-13 14:24:59Z" end-time="2026-05-13 14:24:59Z" duration="0.025346" total="9" passed="9" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-case id="1049" name="BuildTiling_2x2" fullname="DominoTests.BuildTiling_2x2" methodname="BuildTiling_2x2" classname="DominoTests" runstate="Runnable" seed="1785384575" result="Passed" start-time="2026-05-13 14:24:59Z" end-time="2026-05-13 14:24:59Z" duration="0.009029" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1050" name="BuildTiling_4x4" fullname="DominoTests.BuildTiling_4x4" methodname="BuildTiling_4x4" classname="DominoTests" runstate="Runnable" seed="1012621900" result="Passed" start-time="2026-05-13 14:24:59Z" end-time="2026-05-13 14:24:59Z" duration="0.000266" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1047" name="CheckTileable_Even" fullname="DominoTests.CheckTileable_Even" methodname="CheckTileable_Even" classname="DominoTests" runstate="Runnable" seed="1187964268" result="Passed" start-time="2026-05-13 14:24:59Z" end-time="2026-05-13 14:24:59Z" duration="0.000228" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1048" name="CheckTileable_Odd" fullname="DominoTests.CheckTileable_Odd" methodname="CheckTileable_Odd" classname="DominoTests" runstate="Runnable" seed="865966256" result="Passed" start-time="2026-05-13 14:24:59Z" end-time="2026-05-13 14:24:59Z" duration="0.000283" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1046" name="Create_Dimensions" fullname="DominoTests.Create_Dimensions" methodname="Create_Dimensions" classname="DominoTests" runstate="Runnable" seed="869855043" result="Passed" start-time="2026-05-13 14:24:59Z" end-time="2026-05-13 14:24:59Z" duration="0.002273" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1054" name="Dispose_Double" fullname="DominoTests.Dispose_Double" methodname="Dispose_Double" classname="DominoTests" runstate="Runnable" seed="1031828293" result="Passed" start-time="2026-05-13 14:24:59Z" end-time="2026-05-13 14:24:59Z" duration="0.000138" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1052" name="Flip_HorizontalToVertical" fullname="DominoTests.Flip_HorizontalToVertical" methodname="Flip_HorizontalToVertical" classname="DominoTests" runstate="Runnable" seed="613900362" result="Passed" start-time="2026-05-13 14:24:59Z" end-time="2026-05-13 14:24:59Z" duration="0.000537" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1053" name="Flip_OutOfBounds_ReturnsFalse" fullname="DominoTests.Flip_OutOfBounds_ReturnsFalse" methodname="Flip_OutOfBounds_ReturnsFalse" classname="DominoTests" runstate="Runnable" seed="1670933420" result="Passed" start-time="2026-05-13 14:24:59Z" end-time="2026-05-13 14:24:59Z" duration="0.000170" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1051" name="MutilatedChessboard_Untileable" fullname="DominoTests.MutilatedChessboard_Untileable" methodname="MutilatedChessboard_Untileable" classname="DominoTests" runstate="Runnable" seed="709088882" result="Passed" start-time="2026-05-13 14:24:59Z" end-time="2026-05-13 14:24:59Z" duration="0.000290" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+          <output><![CDATA[Saving results to: /home/i/.config/unity3d/DefaultCompany/BovineLabs/TestResults.xml
+]]></output>
+        </test-case>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

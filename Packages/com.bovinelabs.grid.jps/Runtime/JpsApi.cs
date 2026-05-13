@@ -156,7 +156,7 @@ namespace BovineLabs.Grid.Jps
             if (s.G.IsCreated) s.G.Dispose();
             if (s.Parent.IsCreated) s.Parent.Dispose();
             if (s.Closed.IsCreated) s.Closed.Dispose();
-            s.Open.Dispose();
+            if (s.Open.IsCreated) s.Open.Dispose();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

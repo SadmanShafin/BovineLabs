@@ -65,15 +65,15 @@ namespace BovineLabs.Grid.Wilson
                 int cx = current % w;
                 int cy = current / w;
                 int count = 0;
-                int neighbors0 = -1, neighbors1 = -1, neighbors2 = -1, neighbors3 = -1;
+                int* neighbors = stackalloc int[4];
 
-                if (cx + 1 < w) { neighbors0 = current + 1; count = 1; }
-                if (cy + 1 < h) { int n = current + w; if (count == 0) neighbors0 = n; else neighbors1 = n; count++; }
-                if (cx > 0) { int n = current - 1; if (count <= 1) { if (count == 0) neighbors0 = n; else neighbors1 = n; } else neighbors2 = n; count++; }
-                if (cy > 0) { int n = current - w; if (count <= 1) { if (count == 0) neighbors0 = n; else neighbors1 = n; } else if (count == 2) neighbors2 = n; else neighbors3 = n; count++; }
+                if (cx + 1 < w) neighbors[count++] = current + 1;
+                if (cy + 1 < h) neighbors[count++] = current + w;
+                if (cx > 0) neighbors[count++] = current - 1;
+                if (cy > 0) neighbors[count++] = current - w;
 
                 int pick = rng.NextInt(0, count);
-                int next = pick == 0 ? neighbors0 : pick == 1 ? neighbors1 : pick == 2 ? neighbors2 : neighbors3;
+                int next = neighbors[pick];
 
                 walkNext[current] = next;
                 current = next;

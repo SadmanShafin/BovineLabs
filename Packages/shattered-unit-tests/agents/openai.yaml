@@ -1,0 +1,3 @@
+interface:
+  display_name: "Shattered Unit Tests"
+  short_description: "Create/refactor tests and configure project *.Tests.asmdef patterns."

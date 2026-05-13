@@ -26,6 +26,12 @@ namespace BovineLabs.Grid
             return true;
         }
 
+        public static Grid2D Create(int width, int height)
+        {
+            TryCreate(width, height, out var result);
+            return result;
+        }
+
         public int ToIndex(int2 p)
         {
             return p.y * Width + p.x;

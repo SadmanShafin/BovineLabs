@@ -1,0 +1,1058 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="137" result="Failed(Child)" total="137" passed="133" failed="1" inconclusive="0" skipped="3" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.1662789">
+  <test-suite type="TestSuite" id="1000" name="BovineLabs" fullname="BovineLabs" runstate="Runnable" testcasecount="137" result="Failed" site="Child" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.166279" total="137" passed="133" failed="1" inconclusive="0" skipped="3" asserts="0">
+    <properties>
+      <property name="platform" value="EditMode" />
+    </properties>
+    <failure>
+      <message><![CDATA[One or more child tests had errors]]></message>
+    </failure>
+    <test-suite type="Assembly" id="1014" name="BovineLabs.Grid.Wavestar.Tests.dll" fullname="/home/i/Documents/BovineLabs/Library/ScriptAssemblies/BovineLabs.Grid.Wavestar.Tests.dll" runstate="Runnable" testcasecount="12" result="Skipped" label="Ignored" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.039873" total="12" passed="11" failed="0" inconclusive="0" skipped="1" asserts="0">
+      <properties>
+        <property name="_PID" value="214530" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <reason>
+        <message><![CDATA[One or more child tests were ignored]]></message>
+      </reason>
+      <test-suite type="TestSuite" id="1015" name="BovineLabs" fullname="BovineLabs" runstate="Runnable" testcasecount="12" result="Skipped" label="Ignored" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.039623" total="12" passed="11" failed="0" inconclusive="0" skipped="1" asserts="0">
+        <properties />
+        <reason>
+          <message><![CDATA[One or more child tests were ignored]]></message>
+        </reason>
+        <test-suite type="TestSuite" id="1016" name="Grid" fullname="BovineLabs.Grid" runstate="Runnable" testcasecount="12" result="Skipped" label="Ignored" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.039513" total="12" passed="11" failed="0" inconclusive="0" skipped="1" asserts="0">
+          <properties />
+          <reason>
+            <message><![CDATA[One or more child tests were ignored]]></message>
+          </reason>
+          <test-suite type="TestSuite" id="1017" name="Wavestar" fullname="BovineLabs.Grid.Wavestar" runstate="Runnable" testcasecount="12" result="Skipped" label="Ignored" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.039414" total="12" passed="11" failed="0" inconclusive="0" skipped="1" asserts="0">
+            <properties />
+            <reason>
+              <message><![CDATA[One or more child tests were ignored]]></message>
+            </reason>
+            <test-suite type="TestSuite" id="1018" name="Tests" fullname="BovineLabs.Grid.Wavestar.Tests" runstate="Runnable" testcasecount="12" result="Skipped" label="Ignored" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.039274" total="12" passed="11" failed="0" inconclusive="0" skipped="1" asserts="0">
+              <properties />
+              <reason>
+                <message><![CDATA[One or more child tests were ignored]]></message>
+              </reason>
+              <test-suite type="TestFixture" id="1001" name="WavestarTests" fullname="BovineLabs.Grid.Wavestar.Tests.WavestarTests" classname="BovineLabs.Grid.Wavestar.Tests.WavestarTests" runstate="Runnable" testcasecount="12" result="Skipped" label="Ignored" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.038555" total="12" passed="11" failed="0" inconclusive="0" skipped="1" asserts="0">
+                <properties />
+                <reason>
+                  <message><![CDATA[One or more child tests were ignored]]></message>
+                </reason>
+                <test-case id="1012" name="OctreeIndex_Contains_PointInsideSubvolume" fullname="BovineLabs.Grid.Wavestar.Tests.WavestarTests.OctreeIndex_Contains_PointInsideSubvolume" methodname="OctreeIndex_Contains_PointInsideSubvolume" classname="BovineLabs.Grid.Wavestar.Tests.WavestarTests" runstate="Runnable" seed="1681590388" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.005462" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1011" name="OctreeIndex_MortonCode_Roundtrip" fullname="BovineLabs.Grid.Wavestar.Tests.WavestarTests.OctreeIndex_MortonCode_Roundtrip" methodname="OctreeIndex_MortonCode_Roundtrip" classname="BovineLabs.Grid.Wavestar.Tests.WavestarTests" runstate="Runnable" seed="1384793385" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.002926" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1013" name="OctreeIndex_ParentChild_Relationship" fullname="BovineLabs.Grid.Wavestar.Tests.WavestarTests.OctreeIndex_ParentChild_Relationship" methodname="OctreeIndex_ParentChild_Relationship" classname="BovineLabs.Grid.Wavestar.Tests.WavestarTests" runstate="Runnable" seed="142757988" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000171" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1005" name="Wavestar_AnyAngle_ShorterThanGridConstrained" fullname="BovineLabs.Grid.Wavestar.Tests.WavestarTests.Wavestar_AnyAngle_ShorterThanGridConstrained" methodname="Wavestar_AnyAngle_ShorterThanGridConstrained" classname="BovineLabs.Grid.Wavestar.Tests.WavestarTests" runstate="Runnable" seed="1800701408" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.013562" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1002" name="Wavestar_EmptyGrid_PathFound" fullname="BovineLabs.Grid.Wavestar.Tests.WavestarTests.Wavestar_EmptyGrid_PathFound" methodname="Wavestar_EmptyGrid_PathFound" classname="BovineLabs.Grid.Wavestar.Tests.WavestarTests" runstate="Runnable" seed="183469639" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000913" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1003" name="Wavestar_EmptyGrid_StraightLine" fullname="BovineLabs.Grid.Wavestar.Tests.WavestarTests.Wavestar_EmptyGrid_StraightLine" methodname="Wavestar_EmptyGrid_StraightLine" classname="BovineLabs.Grid.Wavestar.Tests.WavestarTests" runstate="Runnable" seed="1378860516" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000320" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1007" name="Wavestar_EpsilonZero_OptimalPath" fullname="BovineLabs.Grid.Wavestar.Tests.WavestarTests.Wavestar_EpsilonZero_OptimalPath" methodname="Wavestar_EpsilonZero_OptimalPath" classname="BovineLabs.Grid.Wavestar.Tests.WavestarTests" runstate="Runnable" seed="24185965" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000319" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1006" name="Wavestar_MultiResolution_RefinesNearObstacles" fullname="BovineLabs.Grid.Wavestar.Tests.WavestarTests.Wavestar_MultiResolution_RefinesNearObstacles" methodname="Wavestar_MultiResolution_RefinesNearObstacles" classname="BovineLabs.Grid.Wavestar.Tests.WavestarTests" runstate="Runnable" seed="634702035" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000782" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1009" name="Wavestar_NoPath_ReturnsFalse" fullname="BovineLabs.Grid.Wavestar.Tests.WavestarTests.Wavestar_NoPath_ReturnsFalse" methodname="Wavestar_NoPath_ReturnsFalse" classname="BovineLabs.Grid.Wavestar.Tests.WavestarTests" runstate="Runnable" seed="994251197" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.001491" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1008" name="Wavestar_PathReconstruction_ValidWaypoints" fullname="BovineLabs.Grid.Wavestar.Tests.WavestarTests.Wavestar_PathReconstruction_ValidWaypoints" methodname="Wavestar_PathReconstruction_ValidWaypoints" classname="BovineLabs.Grid.Wavestar.Tests.WavestarTests" runstate="Runnable" seed="637846603" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000551" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1010" name="Wavestar_StartEqualsGoal_TrivialPath" fullname="BovineLabs.Grid.Wavestar.Tests.WavestarTests.Wavestar_StartEqualsGoal_TrivialPath" methodname="Wavestar_StartEqualsGoal_TrivialPath" classname="BovineLabs.Grid.Wavestar.Tests.WavestarTests" runstate="Runnable" seed="412535308" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000629" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1004" name="Wavestar_WithObstacles_PathAvoidsThem" fullname="BovineLabs.Grid.Wavestar.Tests.WavestarTests.Wavestar_WithObstacles_PathAvoidsThem" methodname="Wavestar_WithObstacles_PathAvoidsThem" classname="BovineLabs.Grid.Wavestar.Tests.WavestarTests" runstate="Ignored" seed="1689305221" result="Skipped" label="Ignored" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000112" asserts="0">
+                  <properties>
+                    <property name="_SKIPREASON" value="TODO: multi-resolution refinement near obstacles needs tuning" />
+                  </properties>
+                  <reason>
+                    <message><![CDATA[TODO: multi-resolution refinement near obstacles needs tuning]]></message>
+                  </reason>
+                </test-case>
+              </test-suite>
+            </test-suite>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+    <test-suite type="Assembly" id="1027" name="com.bovinelabs.grid.anya.tests.dll" fullname="/home/i/Documents/BovineLabs/Library/ScriptAssemblies/com.bovinelabs.grid.anya.tests.dll" runstate="Runnable" testcasecount="7" result="Failed" site="Child" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.014562" total="7" passed="6" failed="1" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="214530" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <failure>
+        <message><![CDATA[One or more child tests had errors]]></message>
+      </failure>
+      <test-suite type="TestFixture" id="1019" name="AnyaTests" fullname="AnyaTests" classname="AnyaTests" runstate="Runnable" testcasecount="7" result="Failed" site="Child" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.009858" total="7" passed="6" failed="1" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <failure>
+          <message><![CDATA[One or more child tests had errors]]></message>
+        </failure>
+        <test-case id="1020" name="Create_Dimensions" fullname="AnyaTests.Create_Dimensions" methodname="Create_Dimensions" classname="AnyaTests" runstate="Runnable" seed="253090215" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.001397" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1026" name="Dispose_Double" fullname="AnyaTests.Dispose_Double" methodname="Dispose_Double" classname="AnyaTests" runstate="Runnable" seed="270740918" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000123" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1022" name="Search_BlockedGoal" fullname="AnyaTests.Search_BlockedGoal" methodname="Search_BlockedGoal" classname="AnyaTests" runstate="Runnable" seed="180770251" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.002582" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1025" name="Search_CornerHugging" fullname="AnyaTests.Search_CornerHugging" methodname="Search_CornerHugging" classname="AnyaTests" runstate="Runnable" seed="185630293" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.001255" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1021" name="Search_DirectLine" fullname="AnyaTests.Search_DirectLine" methodname="Search_DirectLine" classname="AnyaTests" runstate="Runnable" seed="707481808" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000238" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1024" name="Search_EuclideanCost_OpenGrid" fullname="AnyaTests.Search_EuclideanCost_OpenGrid" methodname="Search_EuclideanCost_OpenGrid" classname="AnyaTests" runstate="Runnable" seed="343961228" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000494" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1023" name="Search_WithWall" fullname="AnyaTests.Search_WithWall" methodname="Search_WithWall" classname="AnyaTests" runstate="Runnable" seed="1169759003" result="Failed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.002524" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+          <failure>
+            <message><![CDATA[  Expected: True
+  But was:  False
+]]></message>
+            <stack-trace><![CDATA[at AnyaTests.Search_WithWall () [0x00062] in ./Packages/com.bovinelabs.grid.anya/Tests/AnyaTests.cs:40
+]]></stack-trace>
+          </failure>
+        </test-case>
+      </test-suite>
+    </test-suite>
+    <test-suite type="Assembly" id="1035" name="com.bovinelabs.grid.belief.tests.dll" fullname="/home/i/Documents/BovineLabs/Library/ScriptAssemblies/com.bovinelabs.grid.belief.tests.dll" runstate="Runnable" testcasecount="6" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.003606" total="6" passed="6" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="214530" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <test-suite type="TestFixture" id="1028" name="BeliefTests" fullname="BeliefTests" classname="BeliefTests" runstate="Runnable" testcasecount="6" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.003365" total="6" passed="6" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-case id="1030" name="ClearMessages" fullname="BeliefTests.ClearMessages" methodname="ClearMessages" classname="BeliefTests" runstate="Runnable" seed="1240530971" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000528" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1032" name="ConsensusChain" fullname="BeliefTests.ConsensusChain" methodname="ConsensusChain" classname="BeliefTests" runstate="Runnable" seed="322875027" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.001048" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1029" name="Create_Dimensions" fullname="BeliefTests.Create_Dimensions" methodname="Create_Dimensions" classname="BeliefTests" runstate="Runnable" seed="898343099" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000137" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1034" name="Dispose_Double" fullname="BeliefTests.Dispose_Double" methodname="Dispose_Double" classname="BeliefTests" runstate="Runnable" seed="2029538242" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000107" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1031" name="Iterate_ThenDecode" fullname="BeliefTests.Iterate_ThenDecode" methodname="Iterate_ThenDecode" classname="BeliefTests" runstate="Runnable" seed="1433595351" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000255" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1033" name="MessageClear_NoGhostBeliefs" fullname="BeliefTests.MessageClear_NoGhostBeliefs" methodname="MessageClear_NoGhostBeliefs" classname="BeliefTests" runstate="Runnable" seed="563635734" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000295" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+      </test-suite>
+    </test-suite>
+    <test-suite type="Assembly" id="1044" name="com.bovinelabs.grid.cbs.tests.dll" fullname="/home/i/Documents/BovineLabs/Library/ScriptAssemblies/com.bovinelabs.grid.cbs.tests.dll" runstate="Runnable" testcasecount="7" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.009579" total="7" passed="7" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="214530" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <test-suite type="TestFixture" id="1036" name="CbsTests" fullname="CbsTests" classname="CbsTests" runstate="Runnable" testcasecount="7" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.009360" total="7" passed="7" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-case id="1039" name="AStar_SimplePath" fullname="CbsTests.AStar_SimplePath" methodname="AStar_SimplePath" classname="CbsTests" runstate="Runnable" seed="615857764" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.002168" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1037" name="Create_Dimensions" fullname="CbsTests.Create_Dimensions" methodname="Create_Dimensions" classname="CbsTests" runstate="Runnable" seed="247082963" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000145" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1040" name="Dispose_Double" fullname="CbsTests.Dispose_Double" methodname="Dispose_Double" classname="CbsTests" runstate="Runnable" seed="653764953" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000114" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1041" name="Solve_EdgeSwapConflict" fullname="CbsTests.Solve_EdgeSwapConflict" methodname="Solve_EdgeSwapConflict" classname="CbsTests" runstate="Runnable" seed="1486619265" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.003478" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1042" name="Solve_GoalWaitConflict" fullname="CbsTests.Solve_GoalWaitConflict" methodname="Solve_GoalWaitConflict" classname="CbsTests" runstate="Runnable" seed="313092493" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000448" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1043" name="Solve_MultiAgentBottleneck" fullname="CbsTests.Solve_MultiAgentBottleneck" methodname="Solve_MultiAgentBottleneck" classname="CbsTests" runstate="Runnable" seed="519672418" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.001395" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1038" name="Solve_TwoAgents_NoConflict" fullname="CbsTests.Solve_TwoAgents_NoConflict" methodname="Solve_TwoAgents_NoConflict" classname="CbsTests" runstate="Runnable" seed="1611557736" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000482" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+      </test-suite>
+    </test-suite>
+    <test-suite type="Assembly" id="1055" name="com.bovinelabs.grid.domino.tests.dll" fullname="/home/i/Documents/BovineLabs/Library/ScriptAssemblies/com.bovinelabs.grid.domino.tests.dll" runstate="Runnable" testcasecount="9" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.005455" total="9" passed="9" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="214530" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <test-suite type="TestFixture" id="1045" name="DominoTests" fullname="DominoTests" classname="DominoTests" runstate="Runnable" testcasecount="9" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.005215" total="9" passed="9" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-case id="1049" name="BuildTiling_2x2" fullname="DominoTests.BuildTiling_2x2" methodname="BuildTiling_2x2" classname="DominoTests" runstate="Runnable" seed="723009954" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.002484" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1050" name="BuildTiling_4x4" fullname="DominoTests.BuildTiling_4x4" methodname="BuildTiling_4x4" classname="DominoTests" runstate="Runnable" seed="1605757348" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000253" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1047" name="CheckTileable_Even" fullname="DominoTests.CheckTileable_Even" methodname="CheckTileable_Even" classname="DominoTests" runstate="Runnable" seed="172914717" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000130" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1048" name="CheckTileable_Odd" fullname="DominoTests.CheckTileable_Odd" methodname="CheckTileable_Odd" classname="DominoTests" runstate="Runnable" seed="1208250278" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000125" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1046" name="Create_Dimensions" fullname="DominoTests.Create_Dimensions" methodname="Create_Dimensions" classname="DominoTests" runstate="Runnable" seed="1327394660" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000128" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1054" name="Dispose_Double" fullname="DominoTests.Dispose_Double" methodname="Dispose_Double" classname="DominoTests" runstate="Runnable" seed="1787513762" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000098" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1052" name="Flip_HorizontalToVertical" fullname="DominoTests.Flip_HorizontalToVertical" methodname="Flip_HorizontalToVertical" classname="DominoTests" runstate="Runnable" seed="1126527257" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000367" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1053" name="Flip_OutOfBounds_ReturnsFalse" fullname="DominoTests.Flip_OutOfBounds_ReturnsFalse" methodname="Flip_OutOfBounds_ReturnsFalse" classname="DominoTests" runstate="Runnable" seed="319599403" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000144" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1051" name="MutilatedChessboard_Untileable" fullname="DominoTests.MutilatedChessboard_Untileable" methodname="MutilatedChessboard_Untileable" classname="DominoTests" runstate="Runnable" seed="20820657" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000179" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+      </test-suite>
+    </test-suite>
+    <test-suite type="Assembly" id="1067" name="com.bovinelabs.grid.ehl.tests.dll" fullname="/home/i/Documents/BovineLabs/Library/ScriptAssemblies/com.bovinelabs.grid.ehl.tests.dll" runstate="Runnable" testcasecount="10" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.047169" total="10" passed="10" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="214530" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <test-suite type="TestSuite" id="1068" name="BovineLabs" fullname="BovineLabs" runstate="Runnable" testcasecount="10" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.047004" total="10" passed="10" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1069" name="Grid" fullname="BovineLabs.Grid" runstate="Runnable" testcasecount="10" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.046905" total="10" passed="10" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestSuite" id="1070" name="EHL" fullname="BovineLabs.Grid.EHL" runstate="Runnable" testcasecount="10" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.046820" total="10" passed="10" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-suite type="TestSuite" id="1071" name="Tests" fullname="BovineLabs.Grid.EHL.Tests" runstate="Runnable" testcasecount="10" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.046713" total="10" passed="10" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-suite type="TestFixture" id="1056" name="EHLStarTests" fullname="BovineLabs.Grid.EHL.Tests.EHLStarTests" classname="BovineLabs.Grid.EHL.Tests.EHLStarTests" runstate="Runnable" testcasecount="10" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.046503" total="10" passed="10" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-case id="1059" name="HubLabels_CoverAllPairs" fullname="BovineLabs.Grid.EHL.Tests.EHLStarTests.HubLabels_CoverAllPairs" methodname="HubLabels_CoverAllPairs" classname="BovineLabs.Grid.EHL.Tests.EHLStarTests" runstate="Runnable" seed="1377811132" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.023209" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1065" name="Index_CellLookup_ReturnsCorrectCell" fullname="BovineLabs.Grid.EHL.Tests.EHLStarTests.Index_CellLookup_ReturnsCorrectCell" methodname="Index_CellLookup_ReturnsCorrectCell" classname="BovineLabs.Grid.EHL.Tests.EHLStarTests" runstate="Runnable" seed="876209127" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.002452" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1063" name="MemoryBudget_Respected_AfterCompression" fullname="BovineLabs.Grid.EHL.Tests.EHLStarTests.MemoryBudget_Respected_AfterCompression" methodname="MemoryBudget_Respected_AfterCompression" classname="BovineLabs.Grid.EHL.Tests.EHLStarTests" runstate="Runnable" seed="761718499" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000980" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1064" name="Query_DistanceMonotonicallyIncreasing" fullname="BovineLabs.Grid.EHL.Tests.EHLStarTests.Query_DistanceMonotonicallyIncreasing" methodname="Query_DistanceMonotonicallyIncreasing" classname="BovineLabs.Grid.EHL.Tests.EHLStarTests" runstate="Runnable" seed="1291829930" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.004259" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1062" name="Query_NoPath_WhenBlocked" fullname="BovineLabs.Grid.EHL.Tests.EHLStarTests.Query_NoPath_WhenBlocked" methodname="Query_NoPath_WhenBlocked" classname="BovineLabs.Grid.EHL.Tests.EHLStarTests" runstate="Runnable" seed="2009295415" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.001812" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1066" name="Query_PathContainsSourceAndTarget" fullname="BovineLabs.Grid.EHL.Tests.EHLStarTests.Query_PathContainsSourceAndTarget" methodname="Query_PathContainsSourceAndTarget" classname="BovineLabs.Grid.EHL.Tests.EHLStarTests" runstate="Runnable" seed="150761205" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.002371" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1060" name="Query_ReturnsOptimalPath_StraightLine" fullname="BovineLabs.Grid.EHL.Tests.EHLStarTests.Query_ReturnsOptimalPath_StraightLine" methodname="Query_ReturnsOptimalPath_StraightLine" classname="BovineLabs.Grid.EHL.Tests.EHLStarTests" runstate="Runnable" seed="822038937" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.002352" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1061" name="Query_ReturnsPath_AroundObstacle" fullname="BovineLabs.Grid.EHL.Tests.EHLStarTests.Query_ReturnsPath_AroundObstacle" methodname="Query_ReturnsPath_AroundObstacle" classname="BovineLabs.Grid.EHL.Tests.EHLStarTests" runstate="Runnable" seed="1177518152" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.002682" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1057" name="VisibilityGraph_ConvexVerticesFound" fullname="BovineLabs.Grid.EHL.Tests.EHLStarTests.VisibilityGraph_ConvexVerticesFound" methodname="VisibilityGraph_ConvexVerticesFound" classname="BovineLabs.Grid.EHL.Tests.EHLStarTests" runstate="Runnable" seed="219417192" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.002288" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1058" name="VisibilityGraph_EdgesCorrect" fullname="BovineLabs.Grid.EHL.Tests.EHLStarTests.VisibilityGraph_EdgesCorrect" methodname="VisibilityGraph_EdgesCorrect" classname="BovineLabs.Grid.EHL.Tests.EHLStarTests" runstate="Runnable" seed="1598930280" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.002461" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+              </test-suite>
+            </test-suite>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+    <test-suite type="Assembly" id="1078" name="com.bovinelabs.grid.graphcut.tests.dll" fullname="/home/i/Documents/BovineLabs/Library/ScriptAssemblies/com.bovinelabs.grid.graphcut.tests.dll" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.002901" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="214530" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <test-suite type="TestFixture" id="1072" name="GraphCutTests" fullname="GraphCutTests" classname="GraphCutTests" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.002553" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-case id="1075" name="Bottleneck_FlowIsMinCut" fullname="GraphCutTests.Bottleneck_FlowIsMinCut" methodname="Bottleneck_FlowIsMinCut" classname="GraphCutTests" runstate="Runnable" seed="1260505273" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000645" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1073" name="Create_Dimensions" fullname="GraphCutTests.Create_Dimensions" methodname="Create_Dimensions" classname="GraphCutTests" runstate="Runnable" seed="1748406466" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000142" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1077" name="Dispose_Double" fullname="GraphCutTests.Dispose_Double" methodname="Dispose_Double" classname="GraphCutTests" runstate="Runnable" seed="1677167921" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000120" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1076" name="GridPartition_SymmetricCut" fullname="GraphCutTests.GridPartition_SymmetricCut" methodname="GridPartition_SymmetricCut" classname="GraphCutTests" runstate="Runnable" seed="127890865" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000456" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1074" name="Solve_Small" fullname="GraphCutTests.Solve_Small" methodname="Solve_Small" classname="GraphCutTests" runstate="Runnable" seed="1371463844" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000275" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+      </test-suite>
+    </test-suite>
+    <test-suite type="Assembly" id="1090" name="com.bovinelabs.grid.mesha.tests.dll" fullname="/home/i/Documents/BovineLabs/Library/ScriptAssemblies/com.bovinelabs.grid.mesha.tests.dll" runstate="Runnable" testcasecount="10" result="Skipped" label="Ignored" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.015006" total="10" passed="8" failed="0" inconclusive="0" skipped="2" asserts="0">
+      <properties>
+        <property name="_PID" value="214530" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <reason>
+        <message><![CDATA[One or more child tests were ignored]]></message>
+      </reason>
+      <test-suite type="TestSuite" id="1091" name="BovineLabs" fullname="BovineLabs" runstate="Runnable" testcasecount="10" result="Skipped" label="Ignored" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.014855" total="10" passed="8" failed="0" inconclusive="0" skipped="2" asserts="0">
+        <properties />
+        <reason>
+          <message><![CDATA[One or more child tests were ignored]]></message>
+        </reason>
+        <test-suite type="TestSuite" id="1092" name="Grid" fullname="BovineLabs.Grid" runstate="Runnable" testcasecount="10" result="Skipped" label="Ignored" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.014760" total="10" passed="8" failed="0" inconclusive="0" skipped="2" asserts="0">
+          <properties />
+          <reason>
+            <message><![CDATA[One or more child tests were ignored]]></message>
+          </reason>
+          <test-suite type="TestSuite" id="1093" name="MeshA" fullname="BovineLabs.Grid.MeshA" runstate="Runnable" testcasecount="10" result="Skipped" label="Ignored" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.014680" total="10" passed="8" failed="0" inconclusive="0" skipped="2" asserts="0">
+            <properties />
+            <reason>
+              <message><![CDATA[One or more child tests were ignored]]></message>
+            </reason>
+            <test-suite type="TestSuite" id="1094" name="Tests" fullname="BovineLabs.Grid.MeshA.Tests" runstate="Runnable" testcasecount="10" result="Skipped" label="Ignored" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.014575" total="10" passed="8" failed="0" inconclusive="0" skipped="2" asserts="0">
+              <properties />
+              <reason>
+                <message><![CDATA[One or more child tests were ignored]]></message>
+              </reason>
+              <test-suite type="TestFixture" id="1079" name="MeshAStarTests" fullname="BovineLabs.Grid.MeshA.Tests.MeshAStarTests" classname="BovineLabs.Grid.MeshA.Tests.MeshAStarTests" runstate="Runnable" testcasecount="10" result="Skipped" label="Ignored" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.014372" total="10" passed="8" failed="0" inconclusive="0" skipped="2" asserts="0">
+                <properties />
+                <reason>
+                  <message><![CDATA[One or more child tests were ignored]]></message>
+                </reason>
+                <test-case id="1082" name="MeshAStar_BlockedPath_GoesAround" fullname="BovineLabs.Grid.MeshA.Tests.MeshAStarTests.MeshAStar_BlockedPath_GoesAround" methodname="MeshAStar_BlockedPath_GoesAround" classname="BovineLabs.Grid.MeshA.Tests.MeshAStarTests" runstate="Ignored" seed="201655381" result="Skipped" label="Ignored" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000002" asserts="0">
+                  <properties>
+                    <property name="_SKIPREASON" value="TODO: swept-cell collision check needs tuning for obstacle detour" />
+                  </properties>
+                  <reason>
+                    <message><![CDATA[TODO: swept-cell collision check needs tuning for obstacle detour]]></message>
+                  </reason>
+                </test-case>
+                <test-case id="1080" name="MeshAStar_EmptyGrid_PathFound" fullname="BovineLabs.Grid.MeshA.Tests.MeshAStarTests.MeshAStar_EmptyGrid_PathFound" methodname="MeshAStar_EmptyGrid_PathFound" classname="BovineLabs.Grid.MeshA.Tests.MeshAStarTests" runstate="Runnable" seed="1749367" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.009677" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1085" name="MeshAStar_NodesExplored_Counted" fullname="BovineLabs.Grid.MeshA.Tests.MeshAStarTests.MeshAStar_NodesExplored_Counted" methodname="MeshAStar_NodesExplored_Counted" classname="BovineLabs.Grid.MeshA.Tests.MeshAStarTests" runstate="Runnable" seed="101634664" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000349" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1083" name="MeshAStar_NoPath_ReturnsFalse" fullname="BovineLabs.Grid.MeshA.Tests.MeshAStarTests.MeshAStar_NoPath_ReturnsFalse" methodname="MeshAStar_NoPath_ReturnsFalse" classname="BovineLabs.Grid.MeshA.Tests.MeshAStarTests" runstate="Runnable" seed="1645011203" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000449" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1084" name="MeshAStar_PathCost_Positive" fullname="BovineLabs.Grid.MeshA.Tests.MeshAStarTests.MeshAStar_PathCost_Positive" methodname="MeshAStar_PathCost_Positive" classname="BovineLabs.Grid.MeshA.Tests.MeshAStarTests" runstate="Ignored" seed="2089437216" result="Skipped" label="Ignored" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000002" asserts="0">
+                  <properties>
+                    <property name="_SKIPREASON" value="TODO: zero-cost transitions from unconnected primitives" />
+                  </properties>
+                  <reason>
+                    <message><![CDATA[TODO: zero-cost transitions from unconnected primitives]]></message>
+                  </reason>
+                </test-case>
+                <test-case id="1081" name="MeshAStar_StartEqualsGoal_TrivialPath" fullname="BovineLabs.Grid.MeshA.Tests.MeshAStarTests.MeshAStar_StartEqualsGoal_TrivialPath" methodname="MeshAStar_StartEqualsGoal_TrivialPath" classname="BovineLabs.Grid.MeshA.Tests.MeshAStarTests" runstate="Runnable" seed="1590219565" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000338" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1089" name="MeshAStar_Weighted_FasterThanOptimal" fullname="BovineLabs.Grid.MeshA.Tests.MeshAStarTests.MeshAStar_Weighted_FasterThanOptimal" methodname="MeshAStar_Weighted_FasterThanOptimal" classname="BovineLabs.Grid.MeshA.Tests.MeshAStarTests" runstate="Runnable" seed="470722177" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000643" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1088" name="MeshGraph_InitialConfigMapping_Correct" fullname="BovineLabs.Grid.MeshA.Tests.MeshAStarTests.MeshGraph_InitialConfigMapping_Correct" methodname="MeshGraph_InitialConfigMapping_Correct" classname="BovineLabs.Grid.MeshA.Tests.MeshAStarTests" runstate="Runnable" seed="1439000038" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000262" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1086" name="PrimitiveSet_CreateCardinal8_Has8Primitives" fullname="BovineLabs.Grid.MeshA.Tests.MeshAStarTests.PrimitiveSet_CreateCardinal8_Has8Primitives" methodname="PrimitiveSet_CreateCardinal8_Has8Primitives" classname="BovineLabs.Grid.MeshA.Tests.MeshAStarTests" runstate="Runnable" seed="829792470" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000213" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1087" name="PrimitiveSet_CreateExtended8_Has24Primitives" fullname="BovineLabs.Grid.MeshA.Tests.MeshAStarTests.PrimitiveSet_CreateExtended8_Has24Primitives" methodname="PrimitiveSet_CreateExtended8_Has24Primitives" classname="BovineLabs.Grid.MeshA.Tests.MeshAStarTests" runstate="Runnable" seed="1727349561" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000600" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+              </test-suite>
+            </test-suite>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+    <test-suite type="Assembly" id="1175" name="com.bovinelabs.grid.tests.dll" fullname="/home/i/Documents/BovineLabs/Library/ScriptAssemblies/com.bovinelabs.grid.tests.dll" runstate="Runnable" testcasecount="71" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.023429" total="71" passed="71" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="214530" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <test-suite type="TestSuite" id="1176" name="BovineLabs" fullname="BovineLabs" runstate="Runnable" testcasecount="12" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.004439" total="12" passed="12" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1177" name="Grid" fullname="BovineLabs.Grid" runstate="Runnable" testcasecount="12" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.004344" total="12" passed="12" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestSuite" id="1178" name="Tests" fullname="BovineLabs.Grid.Tests" runstate="Runnable" testcasecount="12" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.004228" total="12" passed="12" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-suite type="TestFixture" id="1165" name="GridHeuristicsTests" fullname="BovineLabs.Grid.Tests.GridHeuristicsTests" classname="BovineLabs.Grid.Tests.GridHeuristicsTests" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.001478" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1166" name="Euclidean_SamePoint_Zero" fullname="BovineLabs.Grid.Tests.GridHeuristicsTests.Euclidean_SamePoint_Zero" methodname="Euclidean_SamePoint_Zero" classname="BovineLabs.Grid.Tests.GridHeuristicsTests" runstate="Runnable" seed="731170468" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000178" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1167" name="Euclidean_UnitDiagonal" fullname="BovineLabs.Grid.Tests.GridHeuristicsTests.Euclidean_UnitDiagonal" methodname="Euclidean_UnitDiagonal" classname="BovineLabs.Grid.Tests.GridHeuristicsTests" runstate="Runnable" seed="606238760" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000109" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1170" name="Manhattan_Correct" fullname="BovineLabs.Grid.Tests.GridHeuristicsTests.Manhattan_Correct" methodname="Manhattan_Correct" classname="BovineLabs.Grid.Tests.GridHeuristicsTests" runstate="Runnable" seed="348686553" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000129" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1168" name="Octile_Cardinal" fullname="BovineLabs.Grid.Tests.GridHeuristicsTests.Octile_Cardinal" methodname="Octile_Cardinal" classname="BovineLabs.Grid.Tests.GridHeuristicsTests" runstate="Runnable" seed="126752742" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000099" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1169" name="Octile_Diagonal" fullname="BovineLabs.Grid.Tests.GridHeuristicsTests.Octile_Diagonal" methodname="Octile_Diagonal" classname="BovineLabs.Grid.Tests.GridHeuristicsTests" runstate="Runnable" seed="1138998330" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000094" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1160" name="NativeGrid2DTests" fullname="BovineLabs.Grid.Tests.NativeGrid2DTests" classname="BovineLabs.Grid.Tests.NativeGrid2DTests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.001297" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1161" name="Create_WidthHeightSet" fullname="BovineLabs.Grid.Tests.NativeGrid2DTests.Create_WidthHeightSet" methodname="Create_WidthHeightSet" classname="BovineLabs.Grid.Tests.NativeGrid2DTests" runstate="Runnable" seed="72591538" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000159" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1162" name="InBounds_InsideTrue" fullname="BovineLabs.Grid.Tests.NativeGrid2DTests.InBounds_InsideTrue" methodname="InBounds_InsideTrue" classname="BovineLabs.Grid.Tests.NativeGrid2DTests" runstate="Runnable" seed="998559652" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000130" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1163" name="InBounds_OutsideFalse" fullname="BovineLabs.Grid.Tests.NativeGrid2DTests.InBounds_OutsideFalse" methodname="InBounds_OutsideFalse" classname="BovineLabs.Grid.Tests.NativeGrid2DTests" runstate="Runnable" seed="792947439" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000137" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1164" name="SetAndIsFree_Works" fullname="BovineLabs.Grid.Tests.NativeGrid2DTests.SetAndIsFree_Works" methodname="SetAndIsFree_Works" classname="BovineLabs.Grid.Tests.NativeGrid2DTests" runstate="Runnable" seed="2045981427" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000125" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1171" name="NativeMinHeapTests" fullname="BovineLabs.Grid.Tests.NativeMinHeapTests" classname="BovineLabs.Grid.Tests.NativeMinHeapTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.001126" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1174" name="Contains_Works" fullname="BovineLabs.Grid.Tests.NativeMinHeapTests.Contains_Works" methodname="Contains_Works" classname="BovineLabs.Grid.Tests.NativeMinHeapTests" runstate="Runnable" seed="413350127" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000174" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1172" name="PushPop_SortedOrder" fullname="BovineLabs.Grid.Tests.NativeMinHeapTests.PushPop_SortedOrder" methodname="PushPop_SortedOrder" classname="BovineLabs.Grid.Tests.NativeMinHeapTests" runstate="Runnable" seed="1457812169" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000141" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1173" name="TryUpdate_LowersCost" fullname="BovineLabs.Grid.Tests.NativeMinHeapTests.TryUpdate_LowersCost" methodname="TryUpdate_LowersCost" classname="BovineLabs.Grid.Tests.NativeMinHeapTests" runstate="Runnable" seed="1618449281" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000191" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+      <test-suite type="TestFixture" id="1095" name="Grid2DTests" fullname="Grid2DTests" classname="Grid2DTests" runstate="Runnable" testcasecount="18" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.004633" total="18" passed="18" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-case id="1109" name="Directions4_SumZero" fullname="Grid2DTests.Directions4_SumZero" methodname="Directions4_SumZero" classname="Grid2DTests" runstate="Runnable" seed="702462491" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000151" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1110" name="Directions8_SumZero" fullname="Grid2DTests.Directions8_SumZero" methodname="Directions8_SumZero" classname="Grid2DTests" runstate="Runnable" seed="834511186" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000212" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1106" name="HeuristicEuclidean" fullname="Grid2DTests.HeuristicEuclidean" methodname="HeuristicEuclidean" classname="Grid2DTests" runstate="Runnable" seed="4195390" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000154" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1105" name="HeuristicManhattan" fullname="Grid2DTests.HeuristicManhattan" methodname="HeuristicManhattan" classname="Grid2DTests" runstate="Runnable" seed="1927366455" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000105" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1108" name="HeuristicOctile_Diagonal" fullname="Grid2DTests.HeuristicOctile_Diagonal" methodname="HeuristicOctile_Diagonal" classname="Grid2DTests" runstate="Runnable" seed="966505682" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000132" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1107" name="HeuristicOctile_Straight" fullname="Grid2DTests.HeuristicOctile_Straight" methodname="HeuristicOctile_Straight" classname="Grid2DTests" runstate="Runnable" seed="270798729" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000101" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1102" name="InBounds_Index" fullname="Grid2DTests.InBounds_Index" methodname="InBounds_Index" classname="Grid2DTests" runstate="Runnable" seed="196077456" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000130" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1100" name="InBounds_Inside_True" fullname="Grid2DTests.InBounds_Inside_True" methodname="InBounds_Inside_True" classname="Grid2DTests" runstate="Runnable" seed="1955709697" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000116" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1101" name="InBounds_Outside_False" fullname="Grid2DTests.InBounds_Outside_False" methodname="InBounds_Outside_False" classname="Grid2DTests" runstate="Runnable" seed="643061374" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000112" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1111" name="OneByOne" fullname="Grid2DTests.OneByOne" methodname="OneByOne" classname="Grid2DTests" runstate="Runnable" seed="1262996561" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000182" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1096" name="Setup_SetsDimensions" fullname="Grid2DTests.Setup_SetsDimensions" methodname="Setup_SetsDimensions" classname="Grid2DTests" runstate="Runnable" seed="912596646" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000114" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1113" name="SingleColumn_RoundTrip" fullname="Grid2DTests.SingleColumn_RoundTrip" methodname="SingleColumn_RoundTrip" classname="Grid2DTests" runstate="Runnable" seed="1077000661" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000198" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1112" name="SingleRow_RoundTrip" fullname="Grid2DTests.SingleRow_RoundTrip" methodname="SingleRow_RoundTrip" classname="Grid2DTests" runstate="Runnable" seed="345144281" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000202" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1099" name="ToCoord_RoundTrip" fullname="Grid2DTests.ToCoord_RoundTrip" methodname="ToCoord_RoundTrip" classname="Grid2DTests" runstate="Runnable" seed="1982908771" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000151" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1097" name="ToIndex_Origin" fullname="Grid2DTests.ToIndex_Origin" methodname="ToIndex_Origin" classname="Grid2DTests" runstate="Runnable" seed="4099657" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000108" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1098" name="ToIndex_RowMajor" fullname="Grid2DTests.ToIndex_RowMajor" methodname="ToIndex_RowMajor" classname="Grid2DTests" runstate="Runnable" seed="1216963691" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000131" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1104" name="TryIndex_Invalid" fullname="Grid2DTests.TryIndex_Invalid" methodname="TryIndex_Invalid" classname="Grid2DTests" runstate="Runnable" seed="33593911" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000134" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1103" name="TryIndex_Valid" fullname="Grid2DTests.TryIndex_Valid" methodname="TryIndex_Valid" classname="Grid2DTests" runstate="Runnable" seed="1212969958" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000109" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+      </test-suite>
+      <test-suite type="TestFixture" id="1114" name="GridNeighborsTests" fullname="GridNeighborsTests" classname="GridNeighborsTests" runstate="Runnable" testcasecount="11" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.003571" total="11" passed="11" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-case id="1125" name="_1x1_NoNeighbors" fullname="GridNeighborsTests._1x1_NoNeighbors" methodname="_1x1_NoNeighbors" classname="GridNeighborsTests" runstate="Runnable" seed="347190586" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000377" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1119" name="AllBlocked_0Neighbors" fullname="GridNeighborsTests.AllBlocked_0Neighbors" methodname="AllBlocked_0Neighbors" classname="GridNeighborsTests" runstate="Runnable" seed="1291212114" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000203" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1118" name="Blocked_Skipped" fullname="GridNeighborsTests.Blocked_Skipped" methodname="Blocked_Skipped" classname="GridNeighborsTests" runstate="Runnable" seed="1953593546" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000169" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1115" name="Center_4Neighbors" fullname="GridNeighborsTests.Center_4Neighbors" methodname="Center_4Neighbors" classname="GridNeighborsTests" runstate="Runnable" seed="1924229100" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000151" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1120" name="Center_8Neighbors" fullname="GridNeighborsTests.Center_8Neighbors" methodname="Center_8Neighbors" classname="GridNeighborsTests" runstate="Runnable" seed="1881634208" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000227" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1116" name="Corner_2Neighbors" fullname="GridNeighborsTests.Corner_2Neighbors" methodname="Corner_2Neighbors" classname="GridNeighborsTests" runstate="Runnable" seed="1846068354" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000158" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1121" name="Corner_3DiagNeighbors" fullname="GridNeighborsTests.Corner_3DiagNeighbors" methodname="Corner_3DiagNeighbors" classname="GridNeighborsTests" runstate="Runnable" seed="1518347506" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000146" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1122" name="DiagonalPassable_BothFree" fullname="GridNeighborsTests.DiagonalPassable_BothFree" methodname="DiagonalPassable_BothFree" classname="GridNeighborsTests" runstate="Runnable" seed="1918080404" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000214" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1123" name="DiagonalPassable_OneBlocked" fullname="GridNeighborsTests.DiagonalPassable_OneBlocked" methodname="DiagonalPassable_OneBlocked" classname="GridNeighborsTests" runstate="Runnable" seed="1182585195" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000145" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1124" name="DiagonalPassable_OutOfBounds" fullname="GridNeighborsTests.DiagonalPassable_OutOfBounds" methodname="DiagonalPassable_OutOfBounds" classname="GridNeighborsTests" runstate="Runnable" seed="2062674480" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000134" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1117" name="Edge_3Neighbors" fullname="GridNeighborsTests.Edge_3Neighbors" methodname="Edge_3Neighbors" classname="GridNeighborsTests" runstate="Runnable" seed="723369129" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000147" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+      </test-suite>
+      <test-suite type="TestFixture" id="1126" name="HeapNodeTests" fullname="HeapNodeTests" classname="HeapNodeTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.001228" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-case id="1128" name="Constructor_DefaultKey1" fullname="HeapNodeTests.Constructor_DefaultKey1" methodname="Constructor_DefaultKey1" classname="HeapNodeTests" runstate="Runnable" seed="1410554772" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000112" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1127" name="Constructor_Full" fullname="HeapNodeTests.Constructor_Full" methodname="Constructor_Full" classname="HeapNodeTests" runstate="Runnable" seed="1478489384" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000114" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1129" name="ZeroKey" fullname="HeapNodeTests.ZeroKey" methodname="ZeroKey" classname="HeapNodeTests" runstate="Runnable" seed="1517883779" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000376" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+      </test-suite>
+      <test-suite type="TestFixture" id="1130" name="MinHeapTests" fullname="MinHeapTests" classname="MinHeapTests" runstate="Runnable" testcasecount="15" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.004949" total="15" passed="15" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-case id="1142" name="Clear" fullname="MinHeapTests.Clear" methodname="Clear" classname="MinHeapTests" runstate="Runnable" seed="392601606" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000258" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1141" name="Contains_AfterPop" fullname="MinHeapTests.Contains_AfterPop" methodname="Contains_AfterPop" classname="MinHeapTests" runstate="Runnable" seed="367614396" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000163" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1139" name="Contains_Inserted" fullname="MinHeapTests.Contains_Inserted" methodname="Contains_Inserted" classname="MinHeapTests" runstate="Runnable" seed="24061629" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000153" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1140" name="Contains_NotInserted" fullname="MinHeapTests.Contains_NotInserted" methodname="Contains_NotInserted" classname="MinHeapTests" runstate="Runnable" seed="1006762746" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000122" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1136" name="DecreaseKey" fullname="MinHeapTests.DecreaseKey" methodname="DecreaseKey" classname="MinHeapTests" runstate="Runnable" seed="1123080133" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000189" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1144" name="DecreaseKey_Interleaved" fullname="MinHeapTests.DecreaseKey_Interleaved" methodname="DecreaseKey_Interleaved" classname="MinHeapTests" runstate="Runnable" seed="1689619922" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000293" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1137" name="DecreaseKey_NoIncrease" fullname="MinHeapTests.DecreaseKey_NoIncrease" methodname="DecreaseKey_NoIncrease" classname="MinHeapTests" runstate="Runnable" seed="491134749" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000223" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1145" name="DuplicateId_OneEntry" fullname="MinHeapTests.DuplicateId_OneEntry" methodname="DuplicateId_OneEntry" classname="MinHeapTests" runstate="Runnable" seed="1800246788" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000173" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1131" name="Empty_OnCreate" fullname="MinHeapTests.Empty_OnCreate" methodname="Empty_OnCreate" classname="MinHeapTests" runstate="Runnable" seed="1676937327" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000133" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1132" name="Insert_Single" fullname="MinHeapTests.Insert_Single" methodname="Insert_Single" classname="MinHeapTests" runstate="Runnable" seed="958477363" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000153" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1143" name="Many_MaintainsOrder" fullname="MinHeapTests.Many_MaintainsOrder" methodname="Many_MaintainsOrder" classname="MinHeapTests" runstate="Runnable" seed="1752797897" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000380" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1138" name="Peek_NoRemove" fullname="MinHeapTests.Peek_NoRemove" methodname="Peek_NoRemove" classname="MinHeapTests" runstate="Runnable" seed="984759260" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000176" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1134" name="Pop_Ordered" fullname="MinHeapTests.Pop_Ordered" methodname="Pop_Ordered" classname="MinHeapTests" runstate="Runnable" seed="59617300" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000229" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1133" name="Pop_Single" fullname="MinHeapTests.Pop_Single" methodname="Pop_Single" classname="MinHeapTests" runstate="Runnable" seed="1341709314" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000169" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1135" name="Pop_TieBreak" fullname="MinHeapTests.Pop_TieBreak" methodname="Pop_TieBreak" classname="MinHeapTests" runstate="Runnable" seed="2117807923" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000198" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+      </test-suite>
+      <test-suite type="TestFixture" id="1146" name="NativeArrayExtensionsTests" fullname="NativeArrayExtensionsTests" classname="NativeArrayExtensionsTests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.001845" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-case id="1149" name="Fill_Byte" fullname="NativeArrayExtensionsTests.Fill_Byte" methodname="Fill_Byte" classname="NativeArrayExtensionsTests" runstate="Runnable" seed="1754284689" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000239" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1150" name="Fill_Empty" fullname="NativeArrayExtensionsTests.Fill_Empty" methodname="Fill_Empty" classname="NativeArrayExtensionsTests" runstate="Runnable" seed="866703356" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000589" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1148" name="Fill_Float" fullname="NativeArrayExtensionsTests.Fill_Float" methodname="Fill_Float" classname="NativeArrayExtensionsTests" runstate="Runnable" seed="364064191" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000144" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1147" name="Fill_Int" fullname="NativeArrayExtensionsTests.Fill_Int" methodname="Fill_Int" classname="NativeArrayExtensionsTests" runstate="Runnable" seed="1620926862" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000141" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+      </test-suite>
+      <test-suite type="TestFixture" id="1151" name="RangeITests" fullname="RangeITests" classname="RangeITests" runstate="Runnable" testcasecount="8" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.001880" total="8" passed="8" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-case id="1152" name="Constructor" fullname="RangeITests.Constructor" methodname="Constructor" classname="RangeITests" runstate="Runnable" seed="2063010831" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000140" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1156" name="Contains_AtEnd" fullname="RangeITests.Contains_AtEnd" methodname="Contains_AtEnd" classname="RangeITests" runstate="Runnable" seed="1530753114" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000115" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1157" name="Contains_Before" fullname="RangeITests.Contains_Before" methodname="Contains_Before" classname="RangeITests" runstate="Runnable" seed="320232538" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000095" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1158" name="Contains_EmptyRange" fullname="RangeITests.Contains_EmptyRange" methodname="Contains_EmptyRange" classname="RangeITests" runstate="Runnable" seed="542832489" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000087" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1155" name="Contains_Inside" fullname="RangeITests.Contains_Inside" methodname="Contains_Inside" classname="RangeITests" runstate="Runnable" seed="1122867199" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000093" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1159" name="Contains_ZeroOffset" fullname="RangeITests.Contains_ZeroOffset" methodname="Contains_ZeroOffset" classname="RangeITests" runstate="Runnable" seed="1992024939" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000093" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1153" name="End" fullname="RangeITests.End" methodname="End" classname="RangeITests" runstate="Runnable" seed="1073080928" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000113" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+        </test-case>
+        <test-case id="1154" name="End_ZeroCount" fullname="RangeITests.End_ZeroCount" methodname="End_ZeroCount" classname="RangeITests" runstate="Runnable" seed="2051847877" result="Passed" start-time="2026-05-13 14:19:12Z" end-time="2026-05-13 14:19:12Z" duration="0.000092" asserts="0">
+          <properties>
+            <property name="retryIteration" value="0" />
+            <property name="repeatIteration" value="0" />
+          </properties>
+          <output><![CDATA[Saving results to: /home/i/.config/unity3d/DefaultCompany/BovineLabs/TestResults.xml
+]]></output>
+        </test-case>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

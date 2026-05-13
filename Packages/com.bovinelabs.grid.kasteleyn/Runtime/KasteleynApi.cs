@@ -167,8 +167,8 @@ namespace BovineLabs.Grid.Kasteleyn
         public static void Dispose(ref KasteleynState s)
         {
             if (s.Region.IsCreated) s.Region.Dispose();
-            s.Edges.Dispose();
-            s.EdgeCoords.Dispose();
+            if (s.Edges.IsCreated) s.Edges.Dispose();
+            if (s.EdgeCoords.IsCreated) s.EdgeCoords.Dispose();
             if (s.Matrix.IsCreated) s.Matrix.Dispose();
             if (s.CellToVertex.IsCreated) s.CellToVertex.Dispose();
         }

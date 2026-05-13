@@ -1,7 +1,7 @@
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
-using BovineLabs.GraphCut;
+using BovineLabs.Grid.GraphCut;
 using BovineLabs.Grid;
 
 namespace BovineLabs.Grid.DynamicCut
@@ -95,7 +95,7 @@ namespace BovineLabs.Grid.DynamicCut
             for (int i = 0; i < pw.Length; i++) pw[i] = 1;
 
             GraphCutApi.BuildBinaryEnergy(ref s.Cut, u0, u1, pw);
-            bool result = GraphCutApi.MinCut(ref s.Cut);
+            bool result = GraphCutApi.TryMinCut(ref s.Cut);
             s.DirtyNodes.Clear();
 
             u0.Dispose(); u1.Dispose(); pw.Dispose();

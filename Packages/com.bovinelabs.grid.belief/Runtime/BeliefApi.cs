@@ -71,6 +71,8 @@ namespace BovineLabs.Grid.Belief
 
             for (int iter = 0; iter < iterations; iter++)
             {
+                s.MessagesNext.Fill(0f);
+
                 for (int cell = 0; cell < cellCount; cell++)
                 {
                     int y = cell / width;

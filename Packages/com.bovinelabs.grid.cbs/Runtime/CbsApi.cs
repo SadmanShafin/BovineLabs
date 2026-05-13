@@ -163,15 +163,32 @@ namespace BovineLabs.Grid.Cbs
                 {
                     int lenI = pathLengthsPtr[i];
                     int lenJ = pathLengthsPtr[j];
-                    int maxT = math.min(lenI, lenJ);
+                    int maxT = math.max(lenI, lenJ);
                     for (int time = 0; time < maxT; time++)
                     {
-                        int cellI = GetCellAtTime(in s, in node, i, time);
-                        int cellJ = GetCellAtTime(in s, in node, j, time);
-                        if (cellI == cellJ)
+                        int cellI_t = GetCellAtTime(in s, in node, i, time);
+                        int cellJ_t = GetCellAtTime(in s, in node, j, time);
+                        if (cellI_t == cellJ_t)
                         {
-                            a1 = i; a2 = j; cell = cellI; t = time;
+                            a1 = i;
+                            a2 = j;
+                            cell = cellI_t;
+                            t = time;
                             return true;
+                        }
+
+                        if (time + 1 < maxT)
+                        {
+                            int cellI_next = GetCellAtTime(in s, in node, i, time + 1);
+                            int cellJ_next = GetCellAtTime(in s, in node, j, time + 1);
+                            if (cellI_t == cellJ_next && cellI_next == cellJ_t)
+                            {
+                                a1 = i;
+                                a2 = j;
+                                cell = cellI_t;
+                                t = time + 1;
+                                return true;
+                            }
                         }
                     }
                 }
@@ -185,7 +202,9 @@ namespace BovineLabs.Grid.Cbs
             int* pathLengthsPtr = s.PathLengths.Ptr + node.LengthOffset;
             int pathStart = node.PathOffset;
             for (int a = 0; a < agentIdx; a++) pathStart += pathLengthsPtr[a];
-            return s.FlatPaths[pathStart + time];
+            int pathLength = pathLengthsPtr[agentIdx];
+            int clampedTime = math.clamp(time, 0, pathLength - 1);
+            return s.FlatPaths[pathStart + clampedTime];
         }
 
         [BurstCompile]
@@ -314,7 +333,7 @@ namespace BovineLabs.Grid.Cbs
             if (s.Constraints.IsCreated) s.Constraints.Dispose();
             if (s.FlatPaths.IsCreated) s.FlatPaths.Dispose();
             if (s.PathLengths.IsCreated) s.PathLengths.Dispose();
-            s.Heap.Dispose();
+            if (s.Heap.IsCreated) s.Heap.Dispose();
         }
     }
 }

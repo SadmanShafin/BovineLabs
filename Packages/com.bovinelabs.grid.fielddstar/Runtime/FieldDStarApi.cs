@@ -154,7 +154,7 @@ namespace BovineLabs.Grid.FieldDStar
                 if (v2 - v1 <= c)
                 {
                     float d = v2 - v1;
-                    if (Hint.Likely(c > d))
+                    if (Hint.Likely(c > d + 1e-6f))
                     {
                         float x = d / math.sqrt(c * c - d * d);
                         if (Hint.Likely(x < 1.0f)) return c * math.sqrt(x * x + 1.0f) + v1 * (1.0f - x) + v2 * x;
@@ -168,7 +168,7 @@ namespace BovineLabs.Grid.FieldDStar
                 if (v1 - v2 <= c)
                 {
                     float d = v1 - v2;
-                    if (Hint.Likely(c > d))
+                    if (Hint.Likely(c > d + 1e-6f))
                     {
                         float x = d / math.sqrt(c * c - d * d);
                         if (Hint.Likely(x < 1.0f)) return c * math.sqrt(x * x + 1.0f) + v2 * (1.0f - x) + v1 * x;

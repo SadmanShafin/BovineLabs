@@ -2,7 +2,11 @@
 
 This document outlines the strict performance, architectural, and stylistic guidelines for modifying, optimizing, or expanding the `com.bovinelabs.grid.*` packages. 
 
-**Primary Directive:** Maximize performance using the Unity DOTS stack (`Unity.Burst`, `Unity.Collections`, `Unity.Mathematics`). 
+**Primary Directive:** Maximize performance using the Unity DOTS stack (`Unity.Burst`, `Unity.Collections`, `Unity.Mathematics`).
+
+**Current Status:** 33/34 tests pass. One remaining failure: `AnyaTests.Search_WithWall` — see `Packages/todo.md` for details.
+
+**Quick Start:** Edit code → run tests → parse with compactor. See §7 below. 
 ---
 
 ## 1. The "Unsafe" Paradigm (Memory & Data Structures)
@@ -110,4 +114,162 @@ Grid data is currently often passed as multiple parallel `NativeArray`s or inter
 *   Never use Managed Types (`class`, `IEnumerable`, `Action`, `Func`) anywhere in the grid processing pipelines.
 
 ---
+
+## 7. Testing & Iteration Loop
+
+The project has tools for fast test iteration. Use them.
+
+### Test Runner (headless, ~15s per targeted run)
+
+```bash
+UNITY_EDITOR="/home/i/Unity/Hub/Editor/6000.5.0b1/Editor/Unity"
+PROJECT="/home/i/Documents/BovineLabs"
+
+# Run one fixture
+"$UNITY_EDITOR" -runTests -batchmode -projectPath "$PROJECT" \
+  -testResults TR.xml -testPlatform EditMode \
+  -testFilter "DominoTests" -logFile /dev/null 2>&1
+
+# Run one method
+  -testFilter "AnyaTests.Search_DirectLine"
+
+# Run all
+  # (omit -testFilter)
+```
+
+### Compactors (token-efficient result parsing)
+
+Built from `Packages/com.bovinelabs.compactors/`. Build once:
+```bash
+cd Packages/com.bovinelabs.compactors && dotnet build -c Release
+```
+
+Run:
+```bash
+COMPACTOR="dotnet /home/i/Documents/BovineLabs/Packages/com.bovinelabs.compactors/bin/Release/net10.0/testresultscompact.dll"
+$COMPACTOR --input TR.xml --stdout
+```
+
+Output on success:
+```
+status=passed total=42 passed=42 failed=0 skipped=0 inconclusive=0 duration=12.345
+```
+
+Output on failure:
+```
+status=failed total=42 passed=40 failed=1 skipped=1 inconclusive=0 duration=12.345
+
+FAIL MyProject.Tests.PlayerTests.JumpsWhenGrounded
+message:
+Expected: True
+But was: False
+stack:
+at MyProject.Tests.PlayerTests.cs:line 27
+```
+
+### Standard Debug Loop
+
+```
+1. Edit Runtime/XApi.cs
+2. Run: UNITY_EDITOR -runTests ... -testFilter "XTests" ...
+3. Parse: $COMPACTOR --input TR.xml --stdout
+4. If failures → read message/stack → fix → goto 2
+```
+
+### unity-cli (live Unity, for probing)
+
+Unity must be open. If not:
+```bash
+nohup /home/i/Unity/Hub/Editor/6000.5.0b1/Editor/Unity -batchmode -projectPath /home/i/Documents/BovineLabs &
+```
+
+```bash
+unity-cli exec "return 42;"                    # basic probe
+unity-cli editor refresh --compile              # after .cs edits
+unity-cli console --type error                  # check for compile errors
+cat << 'CSHARP' | unity-cli exec                # multi-line (use for anything complex)
+return System.DateTime.Now;
+CSHARP
+```
+
+**Limitation:** Grid sub-packages (domino, cbs, anya, etc.) are NOT loaded in the editor domain by default. `unity-cli exec` only sees assemblies with Editor platform or referenced by Editor assemblies. For algorithm debugging, use the test runner with `-testFilter`.
+
+### Test Log Compactor
+
+For compile errors from Unity's build log:
+```bash
+LOGCOMPACT="dotnet /home/i/Documents/BovineLabs/Packages/com.bovinelabs.compactors/bin/Release/net10.0/testlogcompact.dll"
+$LOGCOMPACT --input TestLog.log --stdout
+```
+
+---
+
+## 8. Test Assembly Setup (asmdef)
+
+Test assemblies that aren't discovered by the runner always have asmdef issues. The working template:
+
+```json
+{
+  "name": "com.bovinelabs.grid.X.tests",
+  "references": [
+    "com.bovinelabs.grid",
+    "com.bovinelabs.grid.X",
+    "Unity.Burst",
+    "Unity.Collections",
+    "Unity.Mathematics",
+    "UnityEngine.TestRunner",
+    "UnityEditor.TestRunner"
+  ],
+  "includePlatforms": ["Editor"],
+  "excludePlatforms": [],
+  "allowUnsafeCode": true,
+  "overrideReferences": true,
+  "precompiledReferences": ["nunit.framework.dll"],
+  "autoReferenced": false,
+  "defineConstraints": ["UNITY_INCLUDE_TESTS"],
+  "versionDefines": [],
+  "noEngineReferences": false
+}
+```
+
+If `overrideReferences != true` or `"nunit.framework.dll"` is missing or `includePlatforms` is empty → assembly compiles but test runner never discovers it. Symptom: `total=0` in compacted output despite tests existing.
+
+---
+
+## 9. Cross-Package Gotchas
+
+### `NativeArray<T>.Fill()` Extension Method
+Defined in `com.bovinelabs.grid/Runtime/MinHeap.cs` as `NativeArrayExtensions.Fill<T>`. Requires `using BovineLabs.Grid;` in any file that calls `.Fill()`. Missing using → `CS1061: 'NativeArray<float>' does not contain a definition for 'Fill'`.
+
+### `GraphCutApi` API Surface
+- `AddEdgeInternal(ref state, u, v, cap)` — must be `public static`, not `internal` (cross-assembly call).
+- `Dispose(ref state)` — static method, NOT `state.Dispose()`.
+- `BuildBinaryEnergy` adds pairwise edges in both directions (undirected). For bipartite matching (domino tiling), bypass it and build the flow network manually: source→black(cap 1), black→adjacent_white(cap 1, all 4 dirs), white→sink(cap 1).
+
+### Domino Bipartite Matching
+Must add edges in ALL 4 directions from black cells to white neighbors (not just right/down). Bottom-right corner black cells can only match left/up. Flow extraction must handle negative diff: `diff == -1` → `matchDir[v] = 1`, `diff == -w` → `matchDir[v] = 2`.
+
+### Anya Interval Expansion (KNOWN BUG)
+Each node expands in BOTH dy directions (dy=+1 and dy=-1). Despite this fix, the algorithm still fails `Search_WithWall`: start `(0,0)→(9,0)` with blocked cell at `(5,0)`. The path must go down, around, and back up. The root cause is that when expanding back up to row 0 from below, the interval projection from a root on row 0 projects to infinite width (root.y == interval.y triggers the special case), but the cellY check scans row 0 which still has the blocked cell at x=5, and the interval doesn't properly "skip over" it to rediscover x=6..9. The fix likely requires interval splitting (create two sub-intervals when a blocked cell is encountered, like `[0,5)` and `[6,10)`) rather than just `continue`-ing past blocked cells. LineOfSight shortcut handles directly visible goals, so this only affects paths requiring detours.
+
+### CBS Constraint Limitation
+Constraint format is `(agent, cell, time)` — vertex occupation only. Cannot express edge constraints ("agent cannot traverse edge at time T"). Swap conflicts get approximated by constraining the destination cell. For full edge conflict support, `CbsConstraint` would need `(agent, cellFrom, cellTo, time)` fields and `TryAStar` would need to check edge constraints in addition to vertex constraints.
+
+### asmdef Changes
+After modifying `.asmdef` files, delete old DLLs from `Library/ScriptAssemblies/` for clean rebuild. Without this, Unity may cache stale assembly references.
+
+### MinHeap Uses `float` Keys
+`HeapNode.Key0` is `float`. Anya uses `double` internally for costs but casts to `float` for the heap priority. This loses precision and can cause suboptimal node expansion order for large grids. If Anya optimality matters, consider a `double`-keyed heap variant.
+
+---
+
+## 10. Logging
+
+Use BovineLabs logging, not `Debug.Log*`.
+- In ECS systems: `var logger = SystemAPI.GetSingleton<BLLogger>(); logger.LogInfoString(...);`
+- Outside systems: `BLGlobalLogger.LogInfoString(...);`
+- See `Packages/shattered-debug-logging/SKILL.md` for full reference.
+
+---
+
 **End of Guidelines.** When submitting PRs or generating code modifications, ensure your output rigorously adheres to these constraints.

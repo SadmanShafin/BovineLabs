@@ -143,6 +143,12 @@ namespace BovineLabs.Grid.Rsr
         }
 
         [BurstCompile]
+        public static void GetSuccessors(ref RsrState s, int cell, in NativeArray<byte> blocked, ref NativeList<int> successors)
+        {
+            TryGetSuccessors(ref s, cell, in blocked, ref successors);
+        }
+
+        [BurstCompile]
         public static bool TryGetSuccessors(ref RsrState s, int cell, in NativeArray<byte> blocked, ref NativeList<int> successors)
         {
             successors.Clear();
@@ -181,8 +187,8 @@ namespace BovineLabs.Grid.Rsr
         public static void Dispose(ref RsrState s)
         {
             if (s.RectOfCell.IsCreated) s.RectOfCell.Dispose();
-            s.Rects.Dispose();
-            s.PerimeterCells.Dispose();
+            if (s.Rects.IsCreated) s.Rects.Dispose();
+            if (s.PerimeterCells.IsCreated) s.PerimeterCells.Dispose();
         }
     }
 }

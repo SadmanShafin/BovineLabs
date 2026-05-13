@@ -18,7 +18,7 @@ namespace BovineLabs.Grid.MeshA
         public int StartTheta;
         public float Weight;
 
-        public NativeList<int2>.ParallelWriter Path;
+        public NativeList<int2> Path;
         public NativeReference<bool> Found;
         public NativeReference<float> PathCost;
         public NativeReference<int> NodesExplored;
@@ -74,7 +74,7 @@ namespace BovineLabs.Grid.MeshA
 
                     for (int i = reversePath.Length - 1; i >= 0; i--)
                     {
-                        Path.AddNoResize(reversePath[i]);
+                        Path.Add(reversePath[i]);
                     }
                     reversePath.Dispose();
 
@@ -166,6 +166,20 @@ namespace BovineLabs.Grid.MeshA
     [BurstCompile]
     public static class MeshAStar
     {
+        public static PathResult FindPath(
+            in NativeGrid2D grid,
+            in PrimitiveSet primSet,
+            in MeshGraphData meshGraph,
+            int2 start,
+            int2 goal,
+            int startTheta = 0,
+            float weight = 1.0f,
+            Allocator allocator = Allocator.Temp)
+        {
+            TryFindPath(grid, primSet, meshGraph, start, goal, out var result, startTheta, weight, allocator);
+            return result;
+        }
+
         public static bool TryFindPath(
             in NativeGrid2D grid,
             in PrimitiveSet primSet,
@@ -191,7 +205,7 @@ namespace BovineLabs.Grid.MeshA
                 Goal = goal,
                 StartTheta = startTheta,
                 Weight = weight,
-                Path = result.Path.AsParallelWriter(),
+                Path = result.Path,
                 Found = found,
                 PathCost = pathCost,
                 NodesExplored = nodesExplored,

@@ -3,6 +3,7 @@
     "rootNamespace": "BovineLabs.Grid.Domino",
     "references": [
         "com.bovinelabs.grid",
+        "com.bovinelabs.grid.graphcut",
         "Unity.Burst",
         "Unity.Collections",
         "Unity.Mathematics"

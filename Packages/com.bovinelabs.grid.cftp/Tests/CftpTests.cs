@@ -27,7 +27,7 @@ public class CftpTests
     {
         Assert.IsTrue(CftpApi.TryCreate(3, 3, 1000, Allocator.Temp, out var s));
         var rng = new Unity.Mathematics.Random(42);
-        CftpApi.GeneratePastUpdates(ref s, ref rng, 5);
+        Assert.IsTrue(CftpApi.TryGeneratePastUpdates(ref s, ref rng, 5));
         Assert.AreEqual(45, s.Updates.Length);
         CftpApi.Dispose(ref s);
     }

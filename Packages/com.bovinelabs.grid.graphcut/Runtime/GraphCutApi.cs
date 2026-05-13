@@ -5,7 +5,7 @@ using Unity.Burst;
 using Unity.Burst.CompilerServices;
 using BovineLabs.Grid;
 
-namespace BovineLabs.GraphCut
+namespace BovineLabs.Grid.GraphCut
 {
     public struct GraphCutState
     {
@@ -22,6 +22,7 @@ namespace BovineLabs.GraphCut
         public NativeArray<int> Height;
         public NativeArray<byte> SourceSide;
         public UnsafeList<int> ActiveNodes;
+        public NativeArray<byte> InActiveNodes;
     }
 
     [BurstCompile]
@@ -52,6 +53,7 @@ namespace BovineLabs.GraphCut
                 Height = new NativeArray<int>(nodeCount, a),
                 SourceSide = new NativeArray<byte>(g.Length, a),
                 ActiveNodes = new UnsafeList<int>(nodeCount, a),
+                InActiveNodes = new NativeArray<byte>(nodeCount, a),
             };
             return true;
         }
@@ -80,8 +82,8 @@ namespace BovineLabs.GraphCut
 
             for (int i = 0; i < cellCount; i++)
             {
-                if (unary0Ptr[i] > 0) AddEdge(ref s, sourceIdx, i, unary0Ptr[i]);
-                if (unary1Ptr[i] > 0) AddEdge(ref s, i, sinkIdx, unary1Ptr[i]);
+                if (unary0Ptr[i] > 0) AddEdgeInternal(ref s, sourceIdx, i, unary0Ptr[i]);
+                if (unary1Ptr[i] > 0) AddEdgeInternal(ref s, i, sinkIdx, unary1Ptr[i]);
             }
 
             int width = s.Grid.Width;
@@ -100,13 +102,15 @@ namespace BovineLabs.GraphCut
                     int ny = y + offset.y;
                     if (Hint.Likely(nx >= 0 && ny >= 0 && nx < width && ny < height))
                     {
-                        AddEdge(ref s, i, ny * width + nx, w);
+                        int neighbor = ny * width + nx;
+                        AddEdgeInternal(ref s, i, neighbor, w);
+                        AddEdgeInternal(ref s, neighbor, i, w);
                     }
                 }
             }
         }
 
-        private static void AddEdge(ref GraphCutState s, int u, int v, int cap)
+        public static void AddEdgeInternal(ref GraphCutState s, int u, int v, int cap)
         {
             int uvIdx = s.EdgeTo.Length;
             int vuIdx = uvIdx + 1;
@@ -116,6 +120,21 @@ namespace BovineLabs.GraphCut
 
             s.EdgeTo.Add(u); s.EdgeCap.Add(0); s.EdgeFlow.Add(0); s.EdgeRev.Add(uvIdx); s.EdgeNext.Add(s.EdgeHead[v]);
             s.EdgeHead[v] = vuIdx;
+        }
+
+        [BurstCompile]
+        public static bool TrySolve(ref GraphCutState s, int sourceCell, int sinkCell)
+        {
+            var u0 = new NativeArray<int>(s.Grid.Length, Allocator.Temp);
+            var u1 = new NativeArray<int>(s.Grid.Length, Allocator.Temp);
+            var pw = new NativeArray<int>(s.Grid.Length, Allocator.Temp);
+            if (sourceCell >= 0 && sourceCell < u0.Length) u0[sourceCell] = 1000000;
+            if (sinkCell >= 0 && sinkCell < u1.Length) u1[sinkCell] = 1000000;
+            for (int i = 0; i < pw.Length; i++) pw[i] = 1;
+            BuildBinaryEnergy(ref s, u0, u1, pw);
+            bool result = TryMinCut(ref s);
+            u0.Dispose(); u1.Dispose(); pw.Dispose();
+            return result;
         }
 
         [BurstCompile]
@@ -129,10 +148,12 @@ namespace BovineLabs.GraphCut
             s.Excess.Fill(0);
             s.Height.Fill(0);
             s.ActiveNodes.Clear();
+            s.InActiveNodes.Fill((byte)0);
 
             int* excessPtr = (int*)s.Excess.GetUnsafePtr();
             int* heightPtr = (int*)s.Height.GetUnsafePtr();
             int* headPtr = (int*)s.EdgeHead.GetUnsafePtr();
+            byte* inActivePtr = (byte*)s.InActiveNodes.GetUnsafePtr();
             int* toPtr = s.EdgeTo.Ptr;
             int* capPtr = s.EdgeCap.Ptr;
             int* flowPtr = s.EdgeFlow.Ptr;
@@ -149,13 +170,18 @@ namespace BovineLabs.GraphCut
                 flowPtr[revPtr[e]] = -cap;
                 excessPtr[v] = cap;
                 excessPtr[source] -= cap;
-                if (v != sink && v != source) s.ActiveNodes.Add(v);
+                if (v != sink && v != source && inActivePtr[v] == 0)
+                {
+                    s.ActiveNodes.Add(v);
+                    inActivePtr[v] = 1;
+                }
             }
 
             while (s.ActiveNodes.Length > 0)
             {
                 int u = s.ActiveNodes[s.ActiveNodes.Length - 1];
                 s.ActiveNodes.RemoveAtSwapBack(s.ActiveNodes.Length - 1);
+                inActivePtr[u] = 0;
 
                 while (excessPtr[u] > 0)
                 {
@@ -175,8 +201,11 @@ namespace BovineLabs.GraphCut
                                 flowPtr[revPtr[e]] -= push;
                                 excessPtr[u] -= push;
                                 excessPtr[v] += push;
-                                if (v != source && v != sink && !s.ActiveNodes.Contains(v))
+                                if (v != source && v != sink && inActivePtr[v] == 0)
+                                {
                                     s.ActiveNodes.Add(v);
+                                    inActivePtr[v] = 1;
+                                }
                                 pushed = true;
                                 if (excessPtr[u] == 0) break;
                             }
@@ -241,6 +270,7 @@ namespace BovineLabs.GraphCut
             if (s.Height.IsCreated) s.Height.Dispose();
             if (s.SourceSide.IsCreated) s.SourceSide.Dispose();
             s.ActiveNodes.Dispose();
+            if (s.InActiveNodes.IsCreated) s.InActiveNodes.Dispose();
         }
     }
 }

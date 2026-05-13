@@ -11,7 +11,7 @@ namespace BovineLabs.Grid.Sipp
 
     public struct SippNode { public int Cell; public int IntervalIdx; public float Time; public float F; public int Parent; }
 
-    public struct DynamicObstacle { public int Cell; float StartTime; float EndTime; }
+    public struct DynamicObstacle { public int Cell; public float StartTime; public float EndTime; }
 
     public struct SippState
     {

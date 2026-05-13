@@ -185,7 +185,7 @@ namespace BovineLabs.Grid.DStarLite
         {
             if (s.G.IsCreated) s.G.Dispose();
             if (s.RHS.IsCreated) s.RHS.Dispose();
-            s.Open.Dispose();
+            if (s.Open.IsCreated) s.Open.Dispose();
             if (s.InOpen.IsCreated) s.InOpen.Dispose();
             if (s.Parent.IsCreated) s.Parent.Dispose();
         }

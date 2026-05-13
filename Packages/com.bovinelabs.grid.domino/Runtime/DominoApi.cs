@@ -5,6 +5,7 @@ using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
 using BovineLabs.Grid;
+using BovineLabs.Grid.GraphCut;
 
 namespace BovineLabs.Grid.Domino
 {
@@ -65,76 +66,93 @@ namespace BovineLabs.Grid.Domino
         [BurstCompile]
         public static bool TryBuildTilingByMatching(ref DominoState s)
         {
-            byte* region = (byte*)s.Region.GetUnsafePtr();
-            byte* matchDir = (byte*)s.MatchingDir.GetUnsafePtr();
             int w = s.Grid.Width;
             int h = s.Grid.Height;
             int len = s.Grid.Length;
-
+            byte* region = (byte*)s.Region.GetUnsafePtr();
+            byte* matchDir = (byte*)s.MatchingDir.GetUnsafePtr();
             UnsafeUtility.MemSet(matchDir, 0, len);
 
-            var matchTo = new NativeArray<int>(len, Allocator.Temp);
-            int* mPtr = (int*)matchTo.GetUnsafePtr();
-            for (int i = 0; i < len; i++) mPtr[i] = -1;
+            if (!GraphCutApi.TryCreate(w, h, len * 10, Allocator.Temp, out var cut)) return false;
+
+            cut.EdgeTo.Clear();
+            cut.EdgeCap.Clear();
+            cut.EdgeFlow.Clear();
+            cut.EdgeRev.Clear();
+            cut.EdgeNext.Clear();
+
+            int sourceIdx = len;
+            int sinkIdx = len + 1;
+            int blackCount = 0, whiteCount = 0;
 
             for (int i = 0; i < len; i++)
             {
                 if (region[i] == 0) continue;
-                int cx = i % w;
-                int cy = i / w;
-                if ((cx + cy) % 2 != 0) continue;
-                if (mPtr[i] >= 0) continue;
-
-                if (cx + 1 < w)
-                {
-                    int ni = i + 1;
-                    if (region[ni] != 0 && mPtr[ni] < 0)
-                    {
-                        mPtr[i] = ni; mPtr[ni] = i;
-                        matchDir[i] = 1;
-                        continue;
-                    }
-                }
-                if (cy + 1 < h)
-                {
-                    int ni = i + w;
-                    if (region[ni] != 0 && mPtr[ni] < 0)
-                    {
-                        mPtr[i] = ni; mPtr[ni] = i;
-                        matchDir[i] = 2;
-                        continue;
-                    }
-                }
-                if (cx > 0)
-                {
-                    int ni = i - 1;
-                    if (region[ni] != 0 && mPtr[ni] < 0)
-                    {
-                        mPtr[i] = ni; mPtr[ni] = i;
-                        matchDir[ni] = 1;
-                        continue;
-                    }
-                }
-                if (cy > 0)
-                {
-                    int ni = i - w;
-                    if (region[ni] != 0 && mPtr[ni] < 0)
-                    {
-                        mPtr[i] = ni; mPtr[ni] = i;
-                        matchDir[ni] = 2;
-                        continue;
-                    }
-                }
+                int x = i % w;
+                int y = i / w;
+                if ((x + y) % 2 == 0) blackCount++;
+                else whiteCount++;
             }
 
-            bool allMatched = true;
+            if (blackCount != whiteCount) { GraphCutApi.Dispose(ref cut); return false; }
+
+            for (int i = 0; i < len + 2; i++) cut.EdgeHead[i] = -1;
+
             for (int i = 0; i < len; i++)
             {
                 if (region[i] == 0) continue;
-                if (mPtr[i] < 0) { allMatched = false; break; }
+                int x = i % w;
+                int y = i / w;
+
+                if ((x + y) % 2 == 0)
+                {
+                    GraphCutApi.AddEdgeInternal(ref cut, sourceIdx, i, 1);
+                    if (x + 1 < w && region[i + 1] != 0)
+                        GraphCutApi.AddEdgeInternal(ref cut, i, i + 1, 1);
+                    if (x > 0 && region[i - 1] != 0)
+                        GraphCutApi.AddEdgeInternal(ref cut, i, i - 1, 1);
+                    if (y + 1 < h && region[i + w] != 0)
+                        GraphCutApi.AddEdgeInternal(ref cut, i, i + w, 1);
+                    if (y > 0 && region[i - w] != 0)
+                        GraphCutApi.AddEdgeInternal(ref cut, i, i - w, 1);
+                }
+                else
+                {
+                    GraphCutApi.AddEdgeInternal(ref cut, i, sinkIdx, 1);
+                }
             }
-            matchTo.Dispose();
-            return allMatched;
+
+            if (!GraphCutApi.TryMinCut(ref cut)) { GraphCutApi.Dispose(ref cut); return false; }
+
+            int* head = (int*)cut.EdgeHead.GetUnsafePtr();
+            int* to = cut.EdgeTo.Ptr;
+            int* flow = cut.EdgeFlow.Ptr;
+            int* next = cut.EdgeNext.Ptr;
+
+            int matchedCount = 0;
+            for (int e = head[sourceIdx]; e != -1; e = next[e])
+            {
+                if (flow[e] > 0)
+                {
+                    int u = to[e];
+                    for (int ee = head[u]; ee != -1; ee = next[ee])
+                    {
+                        if (flow[ee] > 0 && to[ee] < len)
+                        {
+                            int v = to[ee];
+                            matchedCount++;
+                            int diff = v - u;
+                            if (diff == 1) matchDir[u] = 1;
+                            else if (diff == w) matchDir[u] = 2;
+                            else if (diff == -1) matchDir[v] = 1;
+                            else if (diff == -w) matchDir[v] = 2;
+                        }
+                    }
+                }
+            }
+
+            GraphCutApi.Dispose(ref cut);
+            return matchedCount == blackCount;
         }
 
         [BurstCompile]
@@ -153,7 +171,10 @@ namespace BovineLabs.Grid.Domino
 
             var queue = new UnsafeQueue<int>(Allocator.Temp);
 
-            if (region[0] == 1) { queue.Enqueue(0); vPtr[0] = 1; }
+            for (int i = 0; i < len; i++)
+            {
+                if (region[i] == 1) { queue.Enqueue(i); vPtr[i] = 1; break; }
+            }
 
             while (queue.TryDequeue(out int cell))
             {
@@ -193,7 +214,42 @@ namespace BovineLabs.Grid.Domino
 
         public static bool TryFlipAt(ref DominoState s, int cell)
         {
-            if (s.MatchingDir[cell] == 0) return false;
+            int w = s.Grid.Width;
+            int h = s.Grid.Height;
+            if (cell < 0 || cell >= s.MatchingDir.Length || s.MatchingDir[cell] == 0) return false;
+
+            int cx = cell % w;
+            int cy = cell / w;
+
+            if (s.MatchingDir[cell] == 1)
+            {
+                if (cy + 1 >= h || cx + 1 >= w) return false;
+                int n1 = cell + 1;
+                int n2 = cell + w;
+                int n3 = cell + w + 1;
+                if (s.MatchingDir[n2] == 1 && s.MatchingDir[n1] == 0 && s.MatchingDir[n3] == 0)
+                {
+                    s.MatchingDir[cell] = 2;
+                    s.MatchingDir[n1] = 2;
+                    s.MatchingDir[n2] = 0;
+                    return true;
+                }
+            }
+            else if (s.MatchingDir[cell] == 2)
+            {
+                if (cy + 1 >= h || cx + 1 >= w) return false;
+                int n1 = cell + 1;
+                int n2 = cell + w;
+                int n3 = cell + w + 1;
+                if (s.MatchingDir[n1] == 2 && s.MatchingDir[n2] == 0 && s.MatchingDir[n3] == 0)
+                {
+                    s.MatchingDir[cell] = 1;
+                    s.MatchingDir[n2] = 1;
+                    s.MatchingDir[n1] = 0;
+                    return true;
+                }
+            }
+
             return false;
         }
 

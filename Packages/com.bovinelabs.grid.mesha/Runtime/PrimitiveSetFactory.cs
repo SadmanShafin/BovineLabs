@@ -19,9 +19,9 @@ namespace BovineLabs.Grid.MeshA
 
 
 
-        public static PrimitiveSet CreateCardinal8(Allocator allocator)
+        public static bool TryCreateCardinal8(Allocator allocator, out PrimitiveSet result)
         {
-            var set = new PrimitiveSet(8, allocator);
+            result = new PrimitiveSet(8, allocator);
             int2[] offsets = {
                 new int2(0, -1),
                 new int2(1, -1),
@@ -53,19 +53,14 @@ namespace BovineLabs.Grid.MeshA
                     sweptI: sweptI,
                     sweptJ: sweptJ
                 );
-                set.Add(prim);
+                result.Add(prim);
             }
-            return set;
+            return true;
         }
 
-
-
-
-
-
-        public static PrimitiveSet CreateExtended8(Allocator allocator)
+        public static bool TryCreateExtended8(Allocator allocator, out PrimitiveSet result)
         {
-            var set = new PrimitiveSet(24, allocator);
+            result = new PrimitiveSet(24, allocator);
             int2[] dirs = {
                 new int2(0, -1), new int2(1, -1), new int2(1, 0), new int2(1, 1),
                 new int2(0, 1), new int2(-1, 1), new int2(-1, 0), new int2(-1, -1),
@@ -81,14 +76,14 @@ namespace BovineLabs.Grid.MeshA
                 var si1 = new NativeArray<int>(1, allocator);
                 var sj1 = new NativeArray<int>(1, allocator);
                 si1[0] = dir.x; sj1[0] = dir.y;
-                set.Add(new MotionPrimitive(primId++, theta, dir, theta, baseLen, 0f, si1, sj1));
+                result.Add(new MotionPrimitive(primId++, theta, dir, theta, baseLen, 0f, si1, sj1));
 
 
                 var si2 = new NativeArray<int>(2, allocator);
                 var sj2 = new NativeArray<int>(2, allocator);
                 si2[0] = dir.x; sj2[0] = dir.y;
                 si2[1] = dir.x * 2; sj2[1] = dir.y * 2;
-                set.Add(new MotionPrimitive(primId++, theta, dir * 2, theta, baseLen * 2, 0f, si2, sj2));
+                result.Add(new MotionPrimitive(primId++, theta, dir * 2, theta, baseLen * 2, 0f, si2, sj2));
 
 
                 int nextTheta = (theta + 1) % 8;
@@ -100,9 +95,9 @@ namespace BovineLabs.Grid.MeshA
                 si3[1] = dir.x + nextDir.x; sj3[1] = dir.y + nextDir.y;
                 si3[2] = endOff.x; sj3[2] = endOff.y;
                 float arcLen = math.length(new float2(endOff.x, endOff.y));
-                set.Add(new MotionPrimitive(primId++, theta, endOff, nextTheta, arcLen, math.PI / 4f, si3, sj3));
+                result.Add(new MotionPrimitive(primId++, theta, endOff, nextTheta, arcLen, math.PI / 4f, si3, sj3));
             }
-            return set;
+            return true;
         }
     }
 }
