@@ -15,9 +15,16 @@
 - [x] **Anya NoBlockedTraversal** — Replaced Bresenham LoS with Amanatides & Woo fast voxel traversal (epsilon-robust)
 - [x] **CBS edge constraints** — `CbsConstraint` upgraded to `(Agent, Cell, CellFrom, Time)` format. Vertex constraints: `CellFrom == -1`. Edge constraints: `CellFrom >= 0`. `FindConflict` returns `conflictType` (0=vertex, 1=swap). `TryAStar` validates both. Test: `AStar_EdgeConstraint`
 - [x] **Fuzz** — `PathfinderFuzzTests` in `shattered-unit-tests` package. 7 test configurations × 10-20 trials each. Random xorshift grids at varying densities. Validates path start/goal correctness, cross-validates JPS/Anya reachability, monitors Anya optimality gaps. 145 total tests all pass.
+- [x] **Anya completeness** — Interval splitting at blocked cells: clear-run walker creates sub-intervals `[max(pL,x), min(pR,runEnd+1)]` around blocked cells instead of `continue`-ing
+- [x] **Anya optimality** — `ExpandCorners` scans all integer x positions in `[L,R]` for left/right wall corners; `TryAddCornerNode` creates bi-directional expansion from detected corners
+- [x] **MeshA hash map elimination** — Replaced 3× `NativeHashMap` with flat `float*`/`int*` arrays + `uint*` bit-packed closed set (1 bit per state). Uses `MinHeap` with `TryInsertOrDecrease` for decrease-key. All via `UnsafeUtility.Malloc(Allocator.Temp)`.
+- [x] **EHL SIMD Jaccard** — `ComputeOverlap` uses `ulong` bitmask + `math.countbits()` for Jaccard coefficient. Fast path for ≤64 hubs, multi-word fallback for larger.
+- [x] **Belief propagation optimization** — `TryIterate` rewritten with precomputed bounds, running `cellIdx++` increment, inlined direction mapping, unrolled 4-direction message sum, `UnsafeUtility.MemSet` for buffer clear, pointer-only access (zero NativeArray indexing). `TryDecodeMap` uses unrolled 4-direction message sum.
+- [x] **EDT parallel jobs** — `EdtRowJob`/`EdtColJob` as `IJobFor` structs for parallelizable separable passes. `TryBuildParallel` runs row pass then column pass. Rows operate in-place on dist2 buffer; columns use thread-local contiguous temp buffers.
 
 ## Future
-- [ ] **Anya completeness** — Interval splitting at blocked cells (create `[L,x)` and `[x+1,R)` sub-intervals instead of `continue`-ing past blocked cells). Will close remaining Anya reachability gaps found by fuzz testing.
-- [ ] **Anya optimality** — Fix corner detection to handle all wall configurations. Currently misses some corners causing suboptimal paths on dense obstacle maps.
-- [ ] **MeshA hash map elimination** — Strip `NativeHashMap` from MeshAStarJob, replace with flat arrays + bit-packed closed set
-- [ ] **EHL SIMD Jaccard** — Replace iterative overlap computation with `math.countbits()` SIMD bitmasks
+- [ ] **Anya steppable** — Split monolithic `TrySearch` into `TryInitSearch` + `TryStepSearch` for visualization
+- [ ] **WFC steppable** — Split into `TryObserveStep` + `TryPropagateStep` for frame-by-frame execution
+- [ ] **CBS steppable** — Separate high-level constraint tree stepper from low-level A* stepper
+- [ ] **EDT `ScheduleParallel`** — Wire `EdtRowJob`/`EdtColJob` into `JobHandle` pipeline with proper `ScheduleParallel(batchCount)` instead of `Run()`
+- [ ] **Continuum crowd** — Flatten 2D loops into 1D pointer increments, `[NoAlias]` annotation on dense field pointers

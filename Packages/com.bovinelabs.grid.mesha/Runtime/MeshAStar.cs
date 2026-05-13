@@ -2,8 +2,10 @@ using System;
 using System.Runtime.CompilerServices;
 using Unity.Burst;
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using Unity.Mathematics;
+using BovineLabs.Grid;
 
 namespace BovineLabs.Grid.MeshA
 {
@@ -26,45 +28,73 @@ namespace BovineLabs.Grid.MeshA
         public void Execute()
         {
             int gridW = Grid.Width;
-            var closed = new NativeHashMap<int, bool>(gridW * Grid.Height * MeshGraphBuilder.NumHeadings, Allocator.Temp);
-            var parentMap = new NativeHashMap<int, int>(gridW * Grid.Height * MeshGraphBuilder.NumHeadings, Allocator.Temp);
-            var gCosts = new NativeHashMap<int, float>(gridW * Grid.Height * MeshGraphBuilder.NumHeadings, Allocator.Temp);
+            int gridH = Grid.Height;
+            int numConfigs = MeshGraphBuilder.NumHeadings;
+            int totalStates = gridW * gridH * numConfigs;
 
-            int searchSpace = gridW * Grid.Height * MeshGraphBuilder.NumHeadings;
-            var heap = new NativeMinHeap(searchSpace, Allocator.Temp);
+            // Flat arrays replace NativeHashMap — O(1) access, no hashing overhead
+            float* gCosts = (float*)UnsafeUtility.Malloc(
+                UnsafeUtility.SizeOf<float>() * totalStates, UnsafeUtility.AlignOf<float>(), Allocator.Temp);
+            int* parentMap = (int*)UnsafeUtility.Malloc(
+                UnsafeUtility.SizeOf<int>() * totalStates, UnsafeUtility.AlignOf<int>(), Allocator.Temp);
+            // Bit-packed closed set: 1 bit per state
+            int closedWords = (totalStates + 31) >> 5;
+            uint* closed = (uint*)UnsafeUtility.Malloc(
+                UnsafeUtility.SizeOf<uint>() * closedWords, UnsafeUtility.AlignOf<uint>(), Allocator.Temp);
 
-            for (int h = 0; h < MeshGraphBuilder.NumHeadings; ++h)
+            // Initialize: gCosts = MaxValue, parentMap = -1, closed = 0
+            for (int i = 0; i < totalStates; i++) gCosts[i] = float.MaxValue;
+            UnsafeUtility.MemSet(parentMap, 0xFF, (long)totalStates * UnsafeUtility.SizeOf<int>()); // -1
+            UnsafeUtility.MemSet(closed, 0, (long)closedWords * UnsafeUtility.SizeOf<uint>());
+
+            var heap = new MinHeap();
+            if (!MinHeap.TryCreate(totalStates, Allocator.Temp, out heap))
+            {
+                UnsafeUtility.Free(gCosts, Allocator.Temp);
+                UnsafeUtility.Free(parentMap, Allocator.Temp);
+                UnsafeUtility.Free(closed, Allocator.Temp);
+                Found.Value = false;
+                return;
+            }
+
+            for (int h = 0; h < numConfigs; ++h)
             {
                 int startConfig = MeshGraph.InitialConfigByTheta[h];
                 int startKey = EncodeKey(Start.x, Start.y, startConfig, gridW);
-                if (!gCosts.ContainsKey(startKey))
+                if (gCosts[startKey] > 0f)
+                {
                     gCosts[startKey] = 0f;
-                heap.Push(startKey, GridHeuristics.Octile(Start, Goal) * Weight);
+                    heap.TryInsertOrDecrease(new HeapNode(startKey, GridHeuristics.Octile(Start, Goal) * Weight));
+                }
             }
 
             int explored = 0;
 
             while (heap.Count > 0)
             {
-                int currentKey = heap.Pop();
+                if (!heap.TryPop(out var top)) break;
+                int currentKey = top.Id;
                 explored++;
 
-                if (closed.ContainsKey(currentKey)) continue;
-                closed[currentKey] = true;
+                // Check closed bit
+                int wordIdx = currentKey >> 5;
+                int bitIdx = currentKey & 31;
+                uint mask = 1u << bitIdx;
+                if ((closed[wordIdx] & mask) != 0) continue;
+                closed[wordIdx] |= mask;
 
-                int cx, cy, cConfig;
-                DecodeKey(currentKey, out cx, out cy, out cConfig, gridW);
+                DecodeKey(currentKey, out int cx, out int cy, out int cConfig, gridW);
 
                 if (cx == Goal.x && cy == Goal.y)
                 {
                     int key = currentKey;
                     var reversePath = new NativeList<int2>(Allocator.Temp);
-                    while (parentMap.TryGetValue(key, out int parentKey))
+                    while (parentMap[key] != -1)
                     {
                         int px, py, pc;
                         DecodeKey(key, out px, out py, out pc, gridW);
                         reversePath.Add(new int2(px, py));
-                        key = parentKey;
+                        key = parentMap[key];
                     }
                     {
                         int sx, sy, sc;
@@ -83,9 +113,9 @@ namespace BovineLabs.Grid.MeshA
                     NodesExplored.Value = explored;
 
                     heap.Dispose();
-                    closed.Dispose();
-                    parentMap.Dispose();
-                    gCosts.Dispose();
+                    UnsafeUtility.Free(gCosts, Allocator.Temp);
+                    UnsafeUtility.Free(parentMap, Allocator.Temp);
+                    UnsafeUtility.Free(closed, Allocator.Temp);
                     return;
                 }
 
@@ -107,7 +137,11 @@ namespace BovineLabs.Grid.MeshA
                     if (!Grid.IsFree(new int2(nx, ny))) continue;
 
                     int nKey = EncodeKey(nx, ny, nConfig, gridW);
-                    if (closed.ContainsKey(nKey)) continue;
+
+                    // Check closed bit
+                    int nWord = nKey >> 5;
+                    int nBit = nKey & 31;
+                    if ((closed[nWord] & (1u << nBit)) != 0) continue;
 
                     float transCost = 0f;
                     if (succ.ConnectingPrimId >= 0)
@@ -124,15 +158,13 @@ namespace BovineLabs.Grid.MeshA
                     if (!collisionFree) continue;
 
                     float newG = currentG + transCost;
-                    float existingG;
-                    bool hasExisting = gCosts.TryGetValue(nKey, out existingG);
 
-                    if (!hasExisting || newG < existingG)
+                    if (newG < gCosts[nKey])
                     {
                         gCosts[nKey] = newG;
                         parentMap[nKey] = currentKey;
-                        float h = GridHeuristics.Octile(new int2(nx, ny), Goal) * Weight;
-                        heap.Push(nKey, newG + h);
+                        float heuristic = GridHeuristics.Octile(new int2(nx, ny), Goal) * Weight;
+                        heap.TryInsertOrDecrease(new HeapNode(nKey, newG + heuristic));
                     }
                 }
             }
@@ -142,9 +174,9 @@ namespace BovineLabs.Grid.MeshA
             NodesExplored.Value = explored;
 
             heap.Dispose();
-            closed.Dispose();
-            parentMap.Dispose();
-            gCosts.Dispose();
+            UnsafeUtility.Free(gCosts, Allocator.Temp);
+            UnsafeUtility.Free(parentMap, Allocator.Temp);
+            UnsafeUtility.Free(closed, Allocator.Temp);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

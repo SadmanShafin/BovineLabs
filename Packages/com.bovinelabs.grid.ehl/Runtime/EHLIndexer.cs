@@ -285,32 +285,70 @@ namespace BovineLabs.Grid.EHL
             return true;
         }
 
+        /// <summary>
+        /// Computes Jaccard overlap coefficient using SIMD bitmask operations.
+        /// Packs hub vertex IDs into ulong bitmasks (up to 64 distinct hubs per cell)
+        /// and uses math.countbits() for fast intersection size computation.
+        /// Falls back to sorted merge join when hub IDs exceed 64.
+        /// </summary>
         private float ComputeOverlap(NativeList<ViaLabel> a, NativeList<ViaLabel> b)
         {
             if (a.Length == 0 || b.Length == 0) return 0f;
 
-            int shared = 0;
-            int i = 0, j = 0;
-            while (i < a.Length && j < b.Length)
+            // Check if all hub IDs fit in a single ulong bitmask (IDs 0..63)
+            // The labels are sorted by HubVertexId, so max ID is the last element
+            int maxHubId = math.max(a[a.Length - 1].HubVertexId, b[b.Length - 1].HubVertexId);
+            if (maxHubId < 64)
             {
-                if (a[i].HubVertexId == b[j].HubVertexId)
-                {
-                    shared++;
-                    i++;
-                    j++;
-                }
-                else if (a[i].HubVertexId < b[j].HubVertexId)
-                {
-                    i++;
-                }
-                else
-                {
-                    j++;
-                }
+                // Fast path: single-word bitmask
+                ulong maskA = 0;
+                for (int i = 0; i < a.Length; i++)
+                    maskA |= 1UL << a[i].HubVertexId;
+
+                ulong maskB = 0;
+                for (int j = 0; j < b.Length; j++)
+                    maskB |= 1UL << b[j].HubVertexId;
+
+                ulong intersection = maskA & maskB;
+                ulong union = maskA | maskB;
+
+                int sharedBits = math.countbits(intersection);
+                int unionBits = math.countbits(union);
+
+                return unionBits > 0 ? (float)sharedBits / unionBits : 0f;
             }
 
-            int total = a.Length + b.Length - shared;
-            return total > 0 ? (float)shared / total : 0f;
+            // Fallback: multi-word bitmask path for large hub ID ranges
+            int numWords = (maxHubId >> 6) + 1;
+            ulong* maskA2 = (ulong*)UnsafeUtility.Malloc(UnsafeUtility.SizeOf<ulong>() * numWords, UnsafeUtility.AlignOf<ulong>(), Allocator.Temp);
+            ulong* maskB2 = (ulong*)UnsafeUtility.Malloc(UnsafeUtility.SizeOf<ulong>() * numWords, UnsafeUtility.AlignOf<ulong>(), Allocator.Temp);
+            UnsafeUtility.MemSet(maskA2, 0, (long)numWords * UnsafeUtility.SizeOf<ulong>());
+            UnsafeUtility.MemSet(maskB2, 0, (long)numWords * UnsafeUtility.SizeOf<ulong>());
+
+            for (int i = 0; i < a.Length; i++)
+            {
+                int id = a[i].HubVertexId;
+                maskA2[id >> 6] |= 1UL << (id & 63);
+            }
+
+            for (int j = 0; j < b.Length; j++)
+            {
+                int id = b[j].HubVertexId;
+                maskB2[id >> 6] |= 1UL << (id & 63);
+            }
+
+            int shared = 0;
+            int totalUnion = 0;
+            for (int w = 0; w < numWords; w++)
+            {
+                shared += math.countbits(maskA2[w] & maskB2[w]);
+                totalUnion += math.countbits(maskA2[w] | maskB2[w]);
+            }
+
+            UnsafeUtility.Free(maskA2, Allocator.Temp);
+            UnsafeUtility.Free(maskB2, Allocator.Temp);
+
+            return totalUnion > 0 ? (float)shared / totalUnion : 0f;
         }
 
         private NativeList<ViaLabel> MergeLabels(NativeList<ViaLabel> a, NativeList<ViaLabel> b)

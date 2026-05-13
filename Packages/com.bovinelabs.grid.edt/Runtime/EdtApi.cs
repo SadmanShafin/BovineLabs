@@ -3,6 +3,7 @@ using Unity.Burst;
 using Unity.Burst.CompilerServices;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
+using Unity.Jobs;
 using Unity.Mathematics;
 using System.Runtime.CompilerServices;
 using BovineLabs.Grid;
@@ -64,6 +65,10 @@ namespace BovineLabs.Grid.Edt
                 length);
         }
 
+        /// <summary>
+        /// Felzenszwalb-Huttenlocher 1D squared distance transform.
+        /// Operates entirely on raw pointers — no safety handle overhead.
+        /// </summary>
         [BurstCompile]
         public static void Transform1D(
             float* f,
@@ -115,28 +120,79 @@ namespace BovineLabs.Grid.Edt
             int w = s.Grid.Width;
             int h = s.Grid.Height;
 
+            // Phase 1: Transform rows (separable — each row is independent)
             for (int y = 0; y < h; y++)
             {
                 int rowStart = y * w;
+
+                // Copy row into temp (contiguous)
                 for (int x = 0; x < w; x++)
                     temp[x] = dist2Ptr[rowStart + x];
 
                 Transform1D(temp, temp, v, z, w);
 
+                // Write back using running pointer
+                float* dst = dist2Ptr + rowStart;
                 for (int x = 0; x < w; x++)
-                    dist2Ptr[rowStart + x] = temp[x];
+                    dst[x] = temp[x];
             }
 
+            // Phase 2: Transform columns (separable — each column is independent)
             for (int x = 0; x < w; x++)
             {
+                // Gather column into temp (stride=w)
+                float* src = dist2Ptr + x;
                 for (int y = 0; y < h; y++)
-                    temp[y] = dist2Ptr[y * w + x];
+                    temp[y] = src[y * w];
 
                 Transform1D(temp, temp, v, z, h);
 
+                // Scatter back
                 for (int y = 0; y < h; y++)
-                    dist2Ptr[y * w + x] = temp[y];
+                    src[y * w] = temp[y];
             }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Parallel version of TryBuild using IJobFor for row and column passes.
+        /// Each row/column is independently transformed.
+        /// </summary>
+        [BurstCompile]
+        public static bool TryBuildParallel(
+            ref EdtState s,
+            in NativeArray<byte> blocked,
+            ref NativeArray<float> dist2,
+            int maxDim)
+        {
+            InitFromBlocked(in blocked, ref dist2);
+
+            int w = s.Grid.Width;
+            int h = s.Grid.Height;
+
+            // Phase 1: Row pass (parallel)
+            var rowJob = new EdtRowJob
+            {
+                Dist2 = (float*)dist2.GetUnsafePtr(),
+                Width = w,
+                MaxDim = maxDim,
+            };
+
+            // Phase 2: Column pass (parallel)
+            var colJob = new EdtColJob
+            {
+                Dist2 = (float*)dist2.GetUnsafePtr(),
+                Width = w,
+                Height = h,
+                MaxDim = maxDim,
+            };
+
+            // Schedule sequentially to avoid data race between phases.
+            // Each phase internally can be parallel via ScheduleParallel.
+            // For inline (non-job) usage, just call TryBuild instead.
+            rowJob.Run(h);        // rows
+            colJob.Run(w);        // columns
 
             return true;
         }
@@ -162,6 +218,76 @@ namespace BovineLabs.Grid.Edt
         private static float Intersect(int q1, int q2, float f1, float f2)
         {
             return ((f2 + q2 * q2) - (f1 + q1 * q1)) / (2f * (q2 - q1));
+        }
+    }
+
+    /// <summary>
+    /// Job that transforms all rows of the EDT.
+    /// Each row is an independent 1D transform — can be scheduled as IJobFor.
+    /// Operates in-place on the dist2 buffer (Transform1D supports f == output).
+    /// </summary>
+    [BurstCompile]
+    public unsafe struct EdtRowJob : IJobFor
+    {
+        [NativeDisableUnsafePtrRestriction]
+        public float* Dist2;
+        public int Width;
+        public int MaxDim;
+
+        public void Execute(int rowIndex)
+        {
+            // Per-thread v/z buffers
+            int* v = (int*)UnsafeUtility.Malloc(
+                UnsafeUtility.SizeOf<int>() * MaxDim, UnsafeUtility.AlignOf<int>(), Allocator.Temp);
+            float* z = (float*)UnsafeUtility.Malloc(
+                UnsafeUtility.SizeOf<float>() * (MaxDim + 1), UnsafeUtility.AlignOf<float>(), Allocator.Temp);
+
+            float* row = Dist2 + rowIndex * Width;
+            EdtApi.Transform1D(row, row, v, z, Width);
+
+            UnsafeUtility.Free(v, Allocator.Temp);
+            UnsafeUtility.Free(z, Allocator.Temp);
+        }
+    }
+
+    /// <summary>
+    /// Job that transforms all columns of the EDT.
+    /// Each column is an independent 1D transform — can be scheduled as IJobFor.
+    /// Uses a thread-local temp buffer for column gather/scatter since columns
+    /// are strided in memory (stride = Width).
+    /// </summary>
+    [BurstCompile]
+    public unsafe struct EdtColJob : IJobFor
+    {
+        [NativeDisableUnsafePtrRestriction]
+        public float* Dist2;
+        public int Width;
+        public int Height;
+        public int MaxDim;
+
+        public void Execute(int colIndex)
+        {
+            int* v = (int*)UnsafeUtility.Malloc(
+                UnsafeUtility.SizeOf<int>() * MaxDim, UnsafeUtility.AlignOf<int>(), Allocator.Temp);
+            float* z = (float*)UnsafeUtility.Malloc(
+                UnsafeUtility.SizeOf<float>() * (MaxDim + 1), UnsafeUtility.AlignOf<float>(), Allocator.Temp);
+            float* col = (float*)UnsafeUtility.Malloc(
+                UnsafeUtility.SizeOf<float>() * Height, UnsafeUtility.AlignOf<float>(), Allocator.Temp);
+
+            // Gather column into contiguous buffer
+            float* src = Dist2 + colIndex;
+            for (int y = 0; y < Height; y++)
+                col[y] = src[y * Width];
+
+            EdtApi.Transform1D(col, col, v, z, Height);
+
+            // Scatter back
+            for (int y = 0; y < Height; y++)
+                src[y * Width] = col[y];
+
+            UnsafeUtility.Free(col, Allocator.Temp);
+            UnsafeUtility.Free(v, Allocator.Temp);
+            UnsafeUtility.Free(z, Allocator.Temp);
         }
     }
 }

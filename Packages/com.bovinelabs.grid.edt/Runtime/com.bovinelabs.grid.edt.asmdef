@@ -5,6 +5,7 @@
         "com.bovinelabs.grid",
         "Unity.Burst",
         "Unity.Collections",
+        "Unity.Jobs",
         "Unity.Mathematics"
     ],
     "includePlatforms": [],
