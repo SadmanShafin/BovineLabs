@@ -152,7 +152,8 @@ namespace BovineLabs.Grid.Rsr
         public static bool TryGetSuccessors(ref RsrState s, int cell, in NativeArray<byte> blocked, ref NativeList<int> successors)
         {
             successors.Clear();
-            int rectId = s.RectOfCell[cell];
+            int* roc = (int*)s.RectOfCell.GetUnsafePtr();
+            int rectId = roc[cell];
             if (rectId < 0 || rectId >= s.Rects.Length) return false;
 
             var rect = s.Rects.Ptr[rectId];
@@ -176,10 +177,10 @@ namespace BovineLabs.Grid.Rsr
                 }
 
                 byte* blk = (byte*)blocked.GetUnsafeReadOnlyPtr();
-                if (cx + 1 < w && blk[cy * w + cx + 1] == 0 && s.RectOfCell[cy * w + cx + 1] != rectId) successors.Add(cy * w + cx + 1);
-                if (cx > 0 && blk[cy * w + cx - 1] == 0 && s.RectOfCell[cy * w + cx - 1] != rectId) successors.Add(cy * w + cx - 1);
-                if (cy + 1 < h && blk[(cy + 1) * w + cx] == 0 && s.RectOfCell[(cy + 1) * w + cx] != rectId) successors.Add((cy + 1) * w + cx);
-                if (cy > 0 && blk[(cy - 1) * w + cx] == 0 && s.RectOfCell[(cy - 1) * w + cx] != rectId) successors.Add((cy - 1) * w + cx);
+                if (cx + 1 < w && blk[cy * w + cx + 1] == 0 && roc[cy * w + cx + 1] != rectId) successors.Add(cy * w + cx + 1);
+                if (cx > 0 && blk[cy * w + cx - 1] == 0 && roc[cy * w + cx - 1] != rectId) successors.Add(cy * w + cx - 1);
+                if (cy + 1 < h && blk[(cy + 1) * w + cx] == 0 && roc[(cy + 1) * w + cx] != rectId) successors.Add((cy + 1) * w + cx);
+                if (cy > 0 && blk[(cy - 1) * w + cx] == 0 && roc[(cy - 1) * w + cx] != rectId) successors.Add((cy - 1) * w + cx);
             }
             return true;
         }

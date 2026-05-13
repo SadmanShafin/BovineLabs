@@ -137,13 +137,16 @@ namespace BovineLabs.Grid.Subgoal
             gArr.Fill(float.PositiveInfinity);
             parentArr.Fill(-1);
 
+            float* gPtr = (float*)gArr.GetUnsafePtr();
+            int* parentPtr = (int*)parentArr.GetUnsafePtr();
+
             if (!MinHeap.TryCreate(totalNodes, Allocator.Temp, out var heap))
             {
                 gArr.Dispose(); parentArr.Dispose();
                 return false;
             }
 
-            gArr[startNode] = 0f;
+            gPtr[startNode] = 0f;
             if (!heap.TryInsertOrDecrease(new HeapNode(startNode, math.distance(startCoord, goalCoord))))
             {
                 gArr.Dispose(); parentArr.Dispose(); heap.Dispose();
@@ -160,7 +163,7 @@ namespace BovineLabs.Grid.Subgoal
                 int u = top.Id;
                 if (u == goalNode)
                 {
-                    ExtractPath(in s, start, goal, parentArr, goalNode, ref path);
+                    ExtractPath(in s, start, goal, parentPtr, goalNode, ref path);
                     gArr.Dispose(); parentArr.Dispose(); heap.Dispose();
                     return true;
                 }
@@ -173,14 +176,14 @@ namespace BovineLabs.Grid.Subgoal
                     {
                         int2 pv = s.Grid.ToCoord(s.Subgoals[v]);
                         if (LineOfSight(in s.Grid, blockedPtr, ref pu, ref pv))
-                            if (!TryRelax(v, pu, pv, u, ref gArr, ref parentArr, ref heap, goalCoord))
+                            if (!TryRelax(v, pu, pv, u, gPtr, parentPtr, ref heap, goalCoord))
                             {
                                 gArr.Dispose(); parentArr.Dispose(); heap.Dispose();
                                 return false;
                             }
                     }
                     if (LineOfSight(in s.Grid, blockedPtr, ref pu, ref goalCoord))
-                        if (!TryRelax(goalNode, pu, goalCoord, u, ref gArr, ref parentArr, ref heap, goalCoord))
+                        if (!TryRelax(goalNode, pu, goalCoord, u, gPtr, parentPtr, ref heap, goalCoord))
                         {
                             gArr.Dispose(); parentArr.Dispose(); heap.Dispose();
                             return false;
@@ -193,14 +196,14 @@ namespace BovineLabs.Grid.Subgoal
                     {
                         SubgoalEdge edge = s.Edges[i];
                         int2 pv = s.Grid.ToCoord(s.Subgoals[edge.To]);
-                        if (!TryRelax(edge.To, pu, pv, u, ref gArr, ref parentArr, ref heap, goalCoord))
+                        if (!TryRelax(edge.To, pu, pv, u, gPtr, parentPtr, ref heap, goalCoord))
                         {
                             gArr.Dispose(); parentArr.Dispose(); heap.Dispose();
                             return false;
                         }
                     }
                     if (LineOfSight(in s.Grid, blockedPtr, ref pu, ref goalCoord))
-                        if (!TryRelax(goalNode, pu, goalCoord, u, ref gArr, ref parentArr, ref heap, goalCoord))
+                        if (!TryRelax(goalNode, pu, goalCoord, u, gPtr, parentPtr, ref heap, goalCoord))
                         {
                             gArr.Dispose(); parentArr.Dispose(); heap.Dispose();
                             return false;
@@ -212,7 +215,7 @@ namespace BovineLabs.Grid.Subgoal
             return false;
         }
 
-        private static bool TryRelax(int v, int2 pu, int2 pv, int u, ref NativeArray<float> gArr, ref NativeArray<int> parentArr, ref MinHeap heap, int2 goalCoord)
+        private static bool TryRelax(int v, int2 pu, int2 pv, int u, float* gArr, int* parentArr, ref MinHeap heap, int2 goalCoord)
         {
             float d = math.distance(pu, pv);
             float newG = gArr[u] + d;
@@ -225,7 +228,7 @@ namespace BovineLabs.Grid.Subgoal
             return true;
         }
 
-        private static void ExtractPath(in SubgoalState s, int start, int goal, in NativeArray<int> parentArr, int goalNode, ref NativeList<int> path)
+        private static void ExtractPath(in SubgoalState s, int start, int goal, int* parentArr, int goalNode, ref NativeList<int> path)
         {
             var temp = new NativeList<int>(Allocator.Temp);
             int cur = goalNode;

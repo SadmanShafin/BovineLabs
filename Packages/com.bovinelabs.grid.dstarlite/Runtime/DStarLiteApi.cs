@@ -67,7 +67,7 @@ namespace BovineLabs.Grid.DStarLite
             if (blk[goal] != 0) return false;
 
             rhsPtr[goal] = 0f;
-            var key = CalculateKey(ref s, goal);
+            var key = CalculateKey(gPtr, rhsPtr, s.Start, s.Goal, s.Grid, s.Km, goal);
             if (!s.Open.TryInsertOrDecrease(new HeapNode(goal, key.x, key.y))) return false;
             inOpen[goal] = 1;
             return true;
@@ -84,67 +84,88 @@ namespace BovineLabs.Grid.DStarLite
         public static bool TryUpdateCell(ref DStarLiteState s, in NativeArray<byte> blocked, in NativeArray<float> cost, int cell)
         {
             if (!s.Grid.InBounds(cell)) return false;
-            return TryUpdateVertex(ref s, in blocked, in cost, cell);
+            float* gPtr = (float*)s.G.GetUnsafePtr();
+            float* rhsPtr = (float*)s.RHS.GetUnsafePtr();
+            byte* inOpen = (byte*)s.InOpen.GetUnsafePtr();
+            int* parentPtr = (int*)s.Parent.GetUnsafePtr();
+            byte* blk = (byte*)blocked.GetUnsafeReadOnlyPtr();
+            float* costPtr = cost.IsCreated ? (float*)cost.GetUnsafeReadOnlyPtr() : null;
+            return TryUpdateVertex(gPtr, rhsPtr, inOpen, parentPtr, blk, costPtr, ref s.Open, s.Grid, s.Goal, s.Start, s.Km, cell);
         }
 
         [BurstCompile]
         public static bool TryRepair(ref DStarLiteState s, in NativeArray<byte> blocked, in NativeArray<float> cost, int maxPops)
         {
+            float* gPtr = (float*)s.G.GetUnsafePtr();
+            float* rhsPtr = (float*)s.RHS.GetUnsafePtr();
+            byte* inOpen = (byte*)s.InOpen.GetUnsafePtr();
+            int* parentPtr = (int*)s.Parent.GetUnsafePtr();
+            byte* blk = (byte*)blocked.GetUnsafeReadOnlyPtr();
+            float* costPtr = cost.IsCreated ? (float*)cost.GetUnsafeReadOnlyPtr() : null;
+            int w = s.Grid.Width;
+
             int pops = 0;
             while (pops < maxPops)
             {
+                // Drain consistent nodes from top of heap
                 while (!s.Open.IsEmpty)
                 {
                     if (!s.Open.TryPeek(out var openTop)) return false;
-                    if (s.G[openTop.Id] != s.RHS[openTop.Id]) break;
+                    if (gPtr[openTop.Id] != rhsPtr[openTop.Id]) break;
                     if (!s.Open.TryPop(out _)) return false;
-                    s.InOpen[openTop.Id] = 0;
+                    inOpen[openTop.Id] = 0;
                 }
 
                 if (s.Open.IsEmpty) break;
 
-                var topKey = CalculateKey(ref s, s.Start);
+                var topKey = CalculateKey(gPtr, rhsPtr, s.Start, s.Goal, s.Grid, s.Km, s.Start);
                 if (!s.Open.TryPeek(out var openTop2)) return false;
 
                 if (!LessOrEqual(openTop2.Key0, openTop2.Key1, topKey.x, topKey.y) &&
-                    s.RHS[s.Start] == s.G[s.Start])
+                    rhsPtr[s.Start] == gPtr[s.Start])
                     return true;
 
                 if (!s.Open.TryPop(out var u)) return false;
-                s.InOpen[u.Id] = 0;
+                inOpen[u.Id] = 0;
                 pops++;
 
                 int uid = u.Id;
                 var uKey = new float2(u.Key0, u.Key1);
-                var trueKey = CalculateKey(ref s, uid);
+                var trueKey = CalculateKey(gPtr, rhsPtr, s.Start, s.Goal, s.Grid, s.Km, uid);
 
                 if (Less(uKey.x, uKey.y, trueKey.x, trueKey.y))
                 {
                     if (!s.Open.TryInsertOrDecrease(new HeapNode(uid, trueKey.x, trueKey.y))) return false;
-                    s.InOpen[uid] = 1;
+                    inOpen[uid] = 1;
                 }
-                else if (s.G[uid] > s.RHS[uid])
+                else if (gPtr[uid] > rhsPtr[uid])
                 {
-                    s.G[uid] = s.RHS[uid];
-                    if (!TryUpdateSuccessors(ref s, in blocked, in cost, uid)) return false;
+                    gPtr[uid] = rhsPtr[uid];
+                    if (!TryUpdateSuccessors(gPtr, rhsPtr, inOpen, parentPtr, blk, costPtr, ref s.Open, s.Grid, s.Goal, s.Start, s.Km, w, uid)) return false;
                 }
                 else
                 {
-                    s.G[uid] = float.PositiveInfinity;
-                    if (!TryUpdateVertex(ref s, in blocked, in cost, uid)) return false;
-                    if (!TryUpdateSuccessors(ref s, in blocked, in cost, uid)) return false;
+                    gPtr[uid] = float.PositiveInfinity;
+                    if (!TryUpdateVertex(gPtr, rhsPtr, inOpen, parentPtr, blk, costPtr, ref s.Open, s.Grid, s.Goal, s.Start, s.Km, uid)) return false;
+                    if (!TryUpdateSuccessors(gPtr, rhsPtr, inOpen, parentPtr, blk, costPtr, ref s.Open, s.Grid, s.Goal, s.Start, s.Km, w, uid)) return false;
                 }
             }
 
-            return s.RHS[s.Start] < float.PositiveInfinity;
+            return rhsPtr[s.Start] < float.PositiveInfinity;
         }
 
         [BurstCompile]
         public static bool TryExtractPath(ref DStarLiteState s, in NativeArray<byte> blocked, in NativeArray<float> cost, ref NativeList<int> path)
         {
             path.Clear();
-            if (s.RHS[s.Start] >= float.PositiveInfinity) return false;
-            if (blocked[s.Start] != 0) return false;
+            float* gPtr = (float*)s.G.GetUnsafePtr();
+            byte* blk = (byte*)blocked.GetUnsafeReadOnlyPtr();
+            float* costPtr = cost.IsCreated ? (float*)cost.GetUnsafeReadOnlyPtr() : null;
+            int w = s.Grid.Width;
+
+            float rhsStart = ((float*)s.RHS.GetUnsafePtr())[s.Start];
+            if (rhsStart >= float.PositiveInfinity) return false;
+            if (blk[s.Start] != 0) return false;
 
             int current = s.Start;
             path.Add(current);
@@ -162,14 +183,14 @@ namespace BovineLabs.Grid.DStarLite
                     int2 np = cp + Grid2D.Dir8(d);
                     if (!s.Grid.InBounds(np)) continue;
                     int ni = s.Grid.ToIndex(np);
-                    if (blocked[ni] != 0) continue;
+                    if (blk[ni] != 0) continue;
 
-                    float edgeCost = GetEdgeCost(s.Grid.Width, in cost, current, ni, in blocked);
-                    float total = edgeCost + s.G[ni];
-                    if (total < bestCost || (total == bestCost && s.G[ni] < bestG))
+                    float edgeCost = GetEdgeCost(w, costPtr, current, ni, blk);
+                    float total = edgeCost + gPtr[ni];
+                    if (total < bestCost || (total == bestCost && gPtr[ni] < bestG))
                     {
                         bestCost = total;
-                        bestG = s.G[ni];
+                        bestG = gPtr[ni];
                         best = ni;
                     }
                 }
@@ -190,70 +211,78 @@ namespace BovineLabs.Grid.DStarLite
             if (s.Parent.IsCreated) s.Parent.Dispose();
         }
 
-        private static float2 CalculateKey(ref DStarLiteState s, int cell)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static float2 CalculateKey(float* gPtr, float* rhsPtr, int start, int goal, Grid2D grid, float km, int cell)
         {
-            float minGRhs = math.min(s.G[cell], s.RHS[cell]);
-            float h = Grid2D.HeuristicOctile(s.Grid.ToCoord(s.Start), s.Grid.ToCoord(cell));
-            return new float2(minGRhs + h + s.Km, minGRhs);
+            float minGRhs = math.min(gPtr[cell], rhsPtr[cell]);
+            float h = Grid2D.HeuristicOctile(grid.ToCoord(start), grid.ToCoord(cell));
+            return new float2(minGRhs + h + km, minGRhs);
         }
 
-        private static bool TryUpdateVertex(ref DStarLiteState s, in NativeArray<byte> blocked, in NativeArray<float> cost, int cell)
+        private static bool TryUpdateVertex(
+            float* gPtr, float* rhsPtr, byte* inOpen, int* parentPtr,
+            byte* blk, float* costPtr,
+            ref MinHeap open, Grid2D grid, int goal, int start, float km, int cell)
         {
-            if (cell != s.Goal)
+            if (cell != goal)
             {
                 float minRhs = float.PositiveInfinity;
-                int2 cp = s.Grid.ToCoord(cell);
+                int2 cp = grid.ToCoord(cell);
                 for (int d = 0; d < 8; d++)
                 {
                     int2 np = cp + Grid2D.Dir8(d);
-                    if (!s.Grid.InBounds(np)) continue;
-                    int ni = s.Grid.ToIndex(np);
-                    if (blocked[ni] != 0) continue;
+                    if (!grid.InBounds(np)) continue;
+                    int ni = grid.ToIndex(np);
+                    if (blk[ni] != 0) continue;
 
-                    float edgeCost = GetEdgeCost(s.Grid.Width, in cost, cell, ni, in blocked);
-                    float candidate = edgeCost + s.G[ni];
+                    float edgeCost = GetEdgeCost(grid.Width, costPtr, cell, ni, blk);
+                    float candidate = edgeCost + gPtr[ni];
                     if (candidate < minRhs)
                     {
                         minRhs = candidate;
-                        s.Parent[cell] = ni;
+                        parentPtr[cell] = ni;
                     }
                 }
-                s.RHS[cell] = minRhs;
+                rhsPtr[cell] = minRhs;
             }
 
-            if (s.G[cell] != s.RHS[cell])
+            if (gPtr[cell] != rhsPtr[cell])
             {
-                var key = CalculateKey(ref s, cell);
-                if (!s.Open.TryInsertOrDecrease(new HeapNode(cell, key.x, key.y))) return false;
-                s.InOpen[cell] = 1;
+                var key = CalculateKey(gPtr, rhsPtr, start, goal, grid, km, cell);
+                if (!open.TryInsertOrDecrease(new HeapNode(cell, key.x, key.y))) return false;
+                inOpen[cell] = 1;
             }
             else
             {
-                s.Open.TryRemove(cell);
-                s.InOpen[cell] = 0;
+                open.TryRemove(cell);
+                inOpen[cell] = 0;
             }
             return true;
         }
 
-        private static bool TryUpdateSuccessors(ref DStarLiteState s, in NativeArray<byte> blocked, in NativeArray<float> cost, int cell)
+        private static bool TryUpdateSuccessors(
+            float* gPtr, float* rhsPtr, byte* inOpen, int* parentPtr,
+            byte* blk, float* costPtr,
+            ref MinHeap open, Grid2D grid, int goal, int start, float km, int w, int cell)
         {
-            int2 cp = s.Grid.ToCoord(cell);
+            int2 cp = grid.ToCoord(cell);
             for (int d = 0; d < 8; d++)
             {
                 int2 np = cp + Grid2D.Dir8(d);
-                if (!s.Grid.InBounds(np)) continue;
-                int ni = s.Grid.ToIndex(np);
-                if (blocked[ni] != 0) continue;
-                if (!TryUpdateVertex(ref s, in blocked, in cost, ni)) return false;
+                if (!grid.InBounds(np)) continue;
+                int ni = grid.ToIndex(np);
+                if (blk[ni] != 0) continue;
+                if (!TryUpdateVertex(gPtr, rhsPtr, inOpen, parentPtr, blk, costPtr, ref open, grid, goal, start, km, ni)) return false;
             }
             return true;
         }
 
-        private static float GetEdgeCost(int gridWidth, in NativeArray<float> cost, int from, int to, in NativeArray<byte> blocked)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static float GetEdgeCost(int gridWidth, float* costPtr, int from, int to, byte* blk)
         {
-            if (blocked[to] != 0) return float.PositiveInfinity;
-            if (cost.IsCreated && cost.Length > 0)
-                return (cost[from] + cost[to]) * 0.5f;
+            if (blk[to] != 0) return float.PositiveInfinity;
+            if (costPtr != null)
+                return (costPtr[from] + costPtr[to]) * 0.5f;
 
             int diff = math.abs(from - to);
             return math.select(1.414f, 1f, diff == 1 || diff == gridWidth);
