@@ -16,6 +16,10 @@ namespace BovineLabs.Grid.Wfc
         public NativeArray<ulong> Compatibility;
         public UnsafeQueue<int> Queue;
         public NativeArray<byte> Dirty;
+
+        // Steppable state
+        public MinHeap ObserveHeap;
+        public byte WfcComplete;
     }
 
     [BurstCompile]
@@ -26,6 +30,7 @@ namespace BovineLabs.Grid.Wfc
             s = default;
             if (patternCount > 64 || patternCount < 1) return false;
             if (!Grid2D.TryCreate(width, height, out var g)) return false;
+            if (!MinHeap.TryCreate(g.Length, a, out var heap)) return false;
             s = new WfcState
             {
                 Grid = g,
@@ -35,6 +40,8 @@ namespace BovineLabs.Grid.Wfc
                 Compatibility = new NativeArray<ulong>(patternCount * 4, a),
                 Queue = new UnsafeQueue<int>(a),
                 Dirty = new NativeArray<byte>(g.Length, a),
+                ObserveHeap = heap,
+                WfcComplete = 0,
             };
             return true;
         }
@@ -151,31 +158,83 @@ namespace BovineLabs.Grid.Wfc
             return true;
         }
 
+        /// <summary>
+        /// Monolithic run — calls Init then steps until done.
+        /// Preserved for backward compatibility with existing tests.
+        /// </summary>
         [BurstCompile]
         public static bool TryRun(ref WfcState s, ref NativeArray<int> output, ref Unity.Mathematics.Random rng)
         {
+            if (!TryInitWfc(ref s)) return false;
+
+            while (s.WfcComplete == 0)
+                TryObserveStep(ref s, ref rng);
+
+            if (s.WfcComplete == 2) return false;
+
+            int len = s.Grid.Length;
+            int* outputPtr = (int*)output.GetUnsafePtr();
+            ulong* possiblePtr = (ulong*)s.PossibleBits.GetUnsafePtr();
+            for (int i = 0; i < len; i++)
+            {
+                ulong bits = possiblePtr[i];
+                outputPtr[i] = bits == 0 ? -1 : math.tzcnt(bits);
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Initialize WFC: set all cells to all-possible, build observe heap.
+        /// After calling this, use TryObserveStep for frame-by-frame execution.
+        /// </summary>
+        [BurstCompile]
+        public static bool TryInitWfc(ref WfcState s)
+        {
             if (!TryInitializeAllPossible(ref s)) return false;
+
+            s.ObserveHeap.Clear();
+            s.WfcComplete = 0;
+
+            int len = s.Grid.Length;
+            int* entropyPtr = (int*)s.Entropy.GetUnsafePtr();
+
+            for (int i = 0; i < len; i++)
+                if (entropyPtr[i] > 1)
+                    if (!s.ObserveHeap.TryInsertOrDecrease(new HeapNode(i, entropyPtr[i]))) return false;
+
+            return true;
+        }
+
+        /// <summary>
+        /// Perform one observe-propagate step:
+        /// 1. Pop lowest-entropy cell from heap
+        /// 2. Choose a random pattern for it
+        /// 3. Observe (collapse) that cell
+        /// 4. Propagate constraints
+        /// Returns true if a step was performed, false if complete or contradiction.
+        /// Check s.WfcComplete after: 0=still running, 1=all collapsed, 2=contradiction.
+        /// </summary>
+        [BurstCompile]
+        public static bool TryObserveStep(ref WfcState s, ref Unity.Mathematics.Random rng)
+        {
+            if (s.WfcComplete != 0) return false;
+
             int len = s.Grid.Length;
             int* entropyPtr = (int*)s.Entropy.GetUnsafePtr();
             ulong* possiblePtr = (ulong*)s.PossibleBits.GetUnsafePtr();
-            int* outputPtr = (int*)output.GetUnsafePtr();
 
-            if (!MinHeap.TryCreate(len, Allocator.Temp, out var heap)) return false;
-            for (int i = 0; i < len; i++)
-                if (entropyPtr[i] > 1)
-                    if (!heap.TryInsertOrDecrease(new HeapNode(i, entropyPtr[i]))) { heap.Dispose(); return false; }
-
-            while (!heap.IsEmpty)
+            // Find next uncollapsed cell
+            while (!s.ObserveHeap.IsEmpty)
             {
-                if (!heap.TryPop(out var top)) { heap.Dispose(); return false; }
+                if (!s.ObserveHeap.TryPop(out var top)) { s.WfcComplete = 1; return false; }
                 int bestCell = top.Id;
                 int e = entropyPtr[bestCell];
                 if (e <= 1) continue;
-                if (possiblePtr[bestCell] == 0UL) continue;
+                if (possiblePtr[bestCell] == 0UL) { s.WfcComplete = 2; return false; }
 
+                // Choose a random pattern
                 ulong possible = possiblePtr[bestCell];
                 int count = e;
-
                 int chosen = rng.NextInt(0, count);
                 int pattern = -1;
                 ulong temp = possible;
@@ -186,8 +245,9 @@ namespace BovineLabs.Grid.Wfc
                 }
 
                 TryObserve(ref s, bestCell, pattern);
-                if (!TryPropagate(ref s)) { heap.Dispose(); return false; }
+                if (!TryPropagate(ref s)) { s.WfcComplete = 2; return false; }
 
+                // Re-enqueue dirty cells
                 byte* dirtyPtr = (byte*)s.Dirty.GetUnsafePtr();
                 for (int i = 0; i < len; i++)
                 {
@@ -195,12 +255,29 @@ namespace BovineLabs.Grid.Wfc
                     {
                         dirtyPtr[i] = 0;
                         if (entropyPtr[i] > 1)
-                            if (!heap.TryInsertOrDecrease(new HeapNode(i, entropyPtr[i]))) { heap.Dispose(); return false; }
+                            if (!s.ObserveHeap.TryInsertOrDecrease(new HeapNode(i, entropyPtr[i]))) return false;
                     }
                 }
-            }
-            heap.Dispose();
 
+                return true;
+            }
+
+            // Heap empty — all cells collapsed
+            s.WfcComplete = 1;
+            return false;
+        }
+
+        /// <summary>
+        /// After WFC is complete (WfcComplete == 1), extract the output map.
+        /// </summary>
+        [BurstCompile]
+        public static bool TryExtractOutput(ref WfcState s, ref NativeArray<int> output)
+        {
+            if (s.WfcComplete != 1) return false;
+
+            int len = s.Grid.Length;
+            ulong* possiblePtr = (ulong*)s.PossibleBits.GetUnsafePtr();
+            int* outputPtr = (int*)output.GetUnsafePtr();
             for (int i = 0; i < len; i++)
             {
                 ulong bits = possiblePtr[i];
@@ -216,6 +293,7 @@ namespace BovineLabs.Grid.Wfc
             if (s.Compatibility.IsCreated) s.Compatibility.Dispose();
             if (s.Queue.IsCreated) s.Queue.Dispose();
             if (s.Dirty.IsCreated) s.Dirty.Dispose();
+            if (s.ObserveHeap.IsCreated) s.ObserveHeap.Dispose();
         }
     }
 }

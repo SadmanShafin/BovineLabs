@@ -33,6 +33,11 @@ namespace BovineLabs.Grid.Cbs
         public UnsafeList<int> FlatPaths;
         public UnsafeList<int> PathLengths;
         public MinHeap Heap;
+
+        // Steppable state
+        public byte SolveComplete;
+        public int AgentCount;
+        public int SolutionNode;
     }
 
     [BurstCompile]
@@ -58,6 +63,10 @@ namespace BovineLabs.Grid.Cbs
             return true;
         }
 
+        /// <summary>
+        /// Monolithic solve — calls InitSolve then steps until done.
+        /// Preserved for backward compatibility with existing tests.
+        /// </summary>
         [BurstCompile]
         public static bool TrySolve(
             ref CbsState s,
@@ -66,19 +75,42 @@ namespace BovineLabs.Grid.Cbs
             ref NativeList<int> resultFlatPaths,
             ref NativeList<int> resultPathLengths)
         {
+            byte* blockedPtr = (byte*)blocked.GetUnsafeReadOnlyPtr();
+            AgentTask* agentsPtr = (AgentTask*)agents.GetUnsafeReadOnlyPtr();
+
+            if (!TryInitSolve(ref s, blockedPtr, agentsPtr, agents.Length))
+                return false;
+
+            while (s.SolveComplete == 0)
+            {
+                if (!TryStepSolve(ref s, blockedPtr, agentsPtr))
+                    break;
+            }
+
+            return TryExtractSolution(ref s, ref resultFlatPaths, ref resultPathLengths);
+        }
+
+        /// <summary>
+        /// Initialize CBS solver: clear state, plan root node, push onto heap.
+        /// After calling this, use TryStepSolve for frame-by-frame execution.
+        /// </summary>
+        [BurstCompile]
+        public static bool TryInitSolve(
+            ref CbsState s,
+            byte* blocked,
+            AgentTask* agents,
+            int agentCount)
+        {
             s.Nodes.Clear();
             s.Constraints.Clear();
             s.FlatPaths.Clear();
             s.PathLengths.Clear();
             s.Heap.Clear();
-            resultFlatPaths.Clear();
-            resultPathLengths.Clear();
+            s.SolveComplete = 0;
+            s.AgentCount = agentCount;
+            s.SolutionNode = -1;
 
-            int agentCount = agents.Length;
-            if (agentCount == 0) return true;
-
-            byte* blockedPtr = (byte*)blocked.GetUnsafeReadOnlyPtr();
-            AgentTask* agentsPtr = (AgentTask*)agents.GetUnsafeReadOnlyPtr();
+            if (agentCount == 0) { s.SolveComplete = 1; return true; }
 
             var root = new CbsNode
             {
@@ -87,40 +119,68 @@ namespace BovineLabs.Grid.Cbs
                 Parent = -1
             };
 
-            if (!PlanNode(ref s, ref root, blockedPtr, agentsPtr, agentCount)) return false;
+            if (!PlanNode(ref s, ref root, blocked, agents, agentCount)) return false;
 
             int rootIdx = s.Nodes.Length;
             s.Nodes.Add(root);
             if (!s.Heap.TryInsertOrDecrease(new HeapNode(rootIdx, root.Cost))) return false;
+            return true;
+        }
 
-            while (!s.Heap.IsEmpty)
+        /// <summary>
+        /// Perform one high-level CBS step: pop best node from heap, find first conflict,
+        /// branch into two child nodes with constraints. Returns true if a step was
+        /// performed, false if complete. Check s.SolveComplete: 0=running, 1=solved, 2=no solution.
+        /// </summary>
+        [BurstCompile]
+        public static bool TryStepSolve(ref CbsState s, byte* blocked, AgentTask* agents)
+        {
+            if (s.SolveComplete != 0) return false;
+
+            if (s.Heap.IsEmpty) { s.SolveComplete = 2; return false; }
+
+            if (!s.Heap.TryPop(out var heapNode)) { s.SolveComplete = 2; return false; }
+            int PIdx = heapNode.Id;
+            CbsNode P = s.Nodes[PIdx];
+
+            if (!FindConflict(in s, in P, s.AgentCount, out int a1, out int a2, out int conflictType, out int cell, out int cellFrom, out int cellTo, out int t))
             {
-                if (!s.Heap.TryPop(out var heapNode)) return false;
-                int PIdx = heapNode.Id;
-                CbsNode P = s.Nodes[PIdx];
-
-                if (!FindConflict(in s, in P, agentCount, out int a1, out int a2, out int conflictType, out int cell, out int cellFrom, out int cellTo, out int t))
-                {
-                    ExtractResult(in s, in P, agentCount, ref resultFlatPaths, ref resultPathLengths);
-                    return true;
-                }
-
-                if (conflictType == 0)
-                {
-                    // Vertex conflict: constrain each agent from occupying cell at time t
-                    if (!TryExpandChild(ref s, PIdx, a1, new CbsConstraint { Agent = a1, Cell = cell, CellFrom = -1, Time = t }, blockedPtr, agentsPtr, agentCount)) return false;
-                    if (!TryExpandChild(ref s, PIdx, a2, new CbsConstraint { Agent = a2, Cell = cell, CellFrom = -1, Time = t }, blockedPtr, agentsPtr, agentCount)) return false;
-                }
-                else
-                {
-                    // Edge/swap conflict: constrain each agent from traversing the conflicting edge
-                    // Agent a1 moved cellFrom→cellTo at time t; Agent a2 moved cellTo→cellFrom at time t
-                    if (!TryExpandChild(ref s, PIdx, a1, new CbsConstraint { Agent = a1, Cell = cellTo, CellFrom = cellFrom, Time = t }, blockedPtr, agentsPtr, agentCount)) return false;
-                    if (!TryExpandChild(ref s, PIdx, a2, new CbsConstraint { Agent = a2, Cell = cellFrom, CellFrom = cellTo, Time = t }, blockedPtr, agentsPtr, agentCount)) return false;
-                }
+                s.SolveComplete = 1;
+                s.SolutionNode = PIdx;
+                return false;
             }
 
-            return false;
+            if (conflictType == 0)
+            {
+                if (!TryExpandChild(ref s, PIdx, a1, new CbsConstraint { Agent = a1, Cell = cell, CellFrom = -1, Time = t }, blocked, agents, s.AgentCount)) return false;
+                if (!TryExpandChild(ref s, PIdx, a2, new CbsConstraint { Agent = a2, Cell = cell, CellFrom = -1, Time = t }, blocked, agents, s.AgentCount)) return false;
+            }
+            else
+            {
+                if (!TryExpandChild(ref s, PIdx, a1, new CbsConstraint { Agent = a1, Cell = cellTo, CellFrom = cellFrom, Time = t }, blocked, agents, s.AgentCount)) return false;
+                if (!TryExpandChild(ref s, PIdx, a2, new CbsConstraint { Agent = a2, Cell = cellFrom, CellFrom = cellTo, Time = t }, blocked, agents, s.AgentCount)) return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// After solve is complete (SolveComplete == 1), extract the solution paths.
+        /// </summary>
+        [BurstCompile]
+        public static bool TryExtractSolution(
+            ref CbsState s,
+            ref NativeList<int> resultFlatPaths,
+            ref NativeList<int> resultPathLengths)
+        {
+            resultFlatPaths.Clear();
+            resultPathLengths.Clear();
+
+            if (s.SolveComplete != 1 || s.SolutionNode < 0) return false;
+
+            var node = s.Nodes[s.SolutionNode];
+            ExtractResult(in s, in node, s.AgentCount, ref resultFlatPaths, ref resultPathLengths);
+            return true;
         }
 
         [BurstCompile]
@@ -168,7 +228,6 @@ namespace BovineLabs.Grid.Cbs
 
         /// <summary>
         /// Detects vertex and edge conflicts between all agent pairs.
-        /// conflictType: 0 = vertex (two agents at same cell at same time), 1 = edge (swap conflict).
         /// </summary>
         [BurstCompile]
         private static bool FindConflict(in CbsState s, in CbsNode node, int agentCount,
@@ -189,7 +248,6 @@ namespace BovineLabs.Grid.Cbs
                         int cellI_t = GetCellAtTime(in s, in node, i, time);
                         int cellJ_t = GetCellAtTime(in s, in node, j, time);
 
-                        // Vertex conflict: both agents at same cell at same time
                         if (cellI_t == cellJ_t)
                         {
                             a1 = i; a2 = j;
@@ -200,7 +258,6 @@ namespace BovineLabs.Grid.Cbs
                             return true;
                         }
 
-                        // Edge/swap conflict: agents swap positions
                         if (time + 1 < maxT)
                         {
                             int cellI_next = GetCellAtTime(in s, in node, i, time + 1);
@@ -336,13 +393,11 @@ namespace BovineLabs.Grid.Cbs
 
                         if (cons.CellFrom < 0)
                         {
-                            // Vertex constraint: agent cannot occupy cons.Cell at cons.Time
                             if (cons.Cell == ni && cons.Time == nextTime)
                             { constrained = true; break; }
                         }
                         else
                         {
-                            // Edge constraint: agent cannot traverse cons.CellFrom → cons.Cell at cons.Time
                             if (cons.Cell == ni && cons.CellFrom == u && cons.Time == nextTime)
                             { constrained = true; break; }
                         }

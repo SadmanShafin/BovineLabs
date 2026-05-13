@@ -125,13 +125,11 @@ namespace BovineLabs.Grid.Edt
             {
                 int rowStart = y * w;
 
-                // Copy row into temp (contiguous)
                 for (int x = 0; x < w; x++)
                     temp[x] = dist2Ptr[rowStart + x];
 
                 Transform1D(temp, temp, v, z, w);
 
-                // Write back using running pointer
                 float* dst = dist2Ptr + rowStart;
                 for (int x = 0; x < w; x++)
                     dst[x] = temp[x];
@@ -140,14 +138,12 @@ namespace BovineLabs.Grid.Edt
             // Phase 2: Transform columns (separable — each column is independent)
             for (int x = 0; x < w; x++)
             {
-                // Gather column into temp (stride=w)
                 float* src = dist2Ptr + x;
                 for (int y = 0; y < h; y++)
                     temp[y] = src[y * w];
 
                 Transform1D(temp, temp, v, z, h);
 
-                // Scatter back
                 for (int y = 0; y < h; y++)
                     src[y * w] = temp[y];
             }
@@ -156,22 +152,23 @@ namespace BovineLabs.Grid.Edt
         }
 
         /// <summary>
-        /// Parallel version of TryBuild using IJobFor for row and column passes.
-        /// Each row/column is independently transformed.
+        /// Parallel version of TryBuild using IJobFor.ScheduleParallel for row and column passes.
+        /// Returns a JobHandle for the combined row+column pipeline.
+        /// Caller is responsible for calling InitFromBlocked first and calling Complete() on the handle.
         /// </summary>
         [BurstCompile]
-        public static bool TryBuildParallel(
+        public static JobHandle TryBuildScheduled(
             ref EdtState s,
             in NativeArray<byte> blocked,
             ref NativeArray<float> dist2,
-            int maxDim)
+            int maxDim,
+            JobHandle dependency = default)
         {
             InitFromBlocked(in blocked, ref dist2);
 
             int w = s.Grid.Width;
             int h = s.Grid.Height;
 
-            // Phase 1: Row pass (parallel)
             var rowJob = new EdtRowJob
             {
                 Dist2 = (float*)dist2.GetUnsafePtr(),
@@ -179,7 +176,6 @@ namespace BovineLabs.Grid.Edt
                 MaxDim = maxDim,
             };
 
-            // Phase 2: Column pass (parallel)
             var colJob = new EdtColJob
             {
                 Dist2 = (float*)dist2.GetUnsafePtr(),
@@ -188,12 +184,27 @@ namespace BovineLabs.Grid.Edt
                 MaxDim = maxDim,
             };
 
-            // Schedule sequentially to avoid data race between phases.
-            // Each phase internally can be parallel via ScheduleParallel.
-            // For inline (non-job) usage, just call TryBuild instead.
-            rowJob.Run(h);        // rows
-            colJob.Run(w);        // columns
+            // Phase 1: rows in parallel
+            JobHandle rowHandle = rowJob.ScheduleParallel(h, 1, dependency);
 
+            // Phase 2: columns in parallel (depends on all rows being done)
+            JobHandle colHandle = colJob.ScheduleParallel(w, 1, rowHandle);
+
+            return colHandle;
+        }
+
+        /// <summary>
+        /// Convenience wrapper that schedules and completes in one call.
+        /// </summary>
+        [BurstCompile]
+        public static bool TryBuildParallel(
+            ref EdtState s,
+            in NativeArray<byte> blocked,
+            ref NativeArray<float> dist2,
+            int maxDim)
+        {
+            var handle = TryBuildScheduled(ref s, in blocked, ref dist2, maxDim);
+            handle.Complete();
             return true;
         }
 
@@ -222,9 +233,8 @@ namespace BovineLabs.Grid.Edt
     }
 
     /// <summary>
-    /// Job that transforms all rows of the EDT.
-    /// Each row is an independent 1D transform — can be scheduled as IJobFor.
-    /// Operates in-place on the dist2 buffer (Transform1D supports f == output).
+    /// Parallelizable row pass for EDT. Each row is an independent 1D transform.
+    /// Operates in-place on the dist2 buffer.
     /// </summary>
     [BurstCompile]
     public unsafe struct EdtRowJob : IJobFor
@@ -236,7 +246,6 @@ namespace BovineLabs.Grid.Edt
 
         public void Execute(int rowIndex)
         {
-            // Per-thread v/z buffers
             int* v = (int*)UnsafeUtility.Malloc(
                 UnsafeUtility.SizeOf<int>() * MaxDim, UnsafeUtility.AlignOf<int>(), Allocator.Temp);
             float* z = (float*)UnsafeUtility.Malloc(
@@ -251,10 +260,8 @@ namespace BovineLabs.Grid.Edt
     }
 
     /// <summary>
-    /// Job that transforms all columns of the EDT.
-    /// Each column is an independent 1D transform — can be scheduled as IJobFor.
-    /// Uses a thread-local temp buffer for column gather/scatter since columns
-    /// are strided in memory (stride = Width).
+    /// Parallelizable column pass for EDT. Each column is an independent 1D transform.
+    /// Uses thread-local contiguous buffer for column gather/scatter.
     /// </summary>
     [BurstCompile]
     public unsafe struct EdtColJob : IJobFor
@@ -274,14 +281,12 @@ namespace BovineLabs.Grid.Edt
             float* col = (float*)UnsafeUtility.Malloc(
                 UnsafeUtility.SizeOf<float>() * Height, UnsafeUtility.AlignOf<float>(), Allocator.Temp);
 
-            // Gather column into contiguous buffer
             float* src = Dist2 + colIndex;
             for (int y = 0; y < Height; y++)
                 col[y] = src[y * Width];
 
             EdtApi.Transform1D(col, col, v, z, Height);
 
-            // Scatter back
             for (int y = 0; y < Height; y++)
                 src[y * Width] = col[y];
 

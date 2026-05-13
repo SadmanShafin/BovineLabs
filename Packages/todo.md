@@ -20,11 +20,11 @@
 - [x] **MeshA hash map elimination** — Replaced 3× `NativeHashMap` with flat `float*`/`int*` arrays + `uint*` bit-packed closed set (1 bit per state). Uses `MinHeap` with `TryInsertOrDecrease` for decrease-key. All via `UnsafeUtility.Malloc(Allocator.Temp)`.
 - [x] **EHL SIMD Jaccard** — `ComputeOverlap` uses `ulong` bitmask + `math.countbits()` for Jaccard coefficient. Fast path for ≤64 hubs, multi-word fallback for larger.
 - [x] **Belief propagation optimization** — `TryIterate` rewritten with precomputed bounds, running `cellIdx++` increment, inlined direction mapping, unrolled 4-direction message sum, `UnsafeUtility.MemSet` for buffer clear, pointer-only access (zero NativeArray indexing). `TryDecodeMap` uses unrolled 4-direction message sum.
-- [x] **EDT parallel jobs** — `EdtRowJob`/`EdtColJob` as `IJobFor` structs for parallelizable separable passes. `TryBuildParallel` runs row pass then column pass. Rows operate in-place on dist2 buffer; columns use thread-local contiguous temp buffers.
+- [x] **Anya steppable** — `TryInitSearch` + `TryStepSearch` + `TryExtractPath`. Monolithic `TrySearch` preserved as backward-compatible wrapper. Steppable state: `Start`, `Goal`, `BestNode`, `BestCost`, `SearchComplete`.
+- [x] **WFC steppable** — `TryInitWfc` + `TryObserveStep` + `TryExtractOutput`. Monolithic `TryRun` preserved as backward-compatible wrapper. Steppable state: `ObserveHeap`, `WfcComplete` (0=running, 1=done, 2=contradiction).
+- [x] **CBS steppable** — `TryInitSolve` + `TryStepSolve` + `TryExtractSolution`. Monolithic `TrySolve` preserved as backward-compatible wrapper. Steppable state: `SolveComplete`, `AgentCount`, `SolutionNode`.
+- [x] **EDT ScheduleParallel** — `TryBuildScheduled` returns `JobHandle` pipeline: `EdtRowJob.ScheduleParallel` → `EdtColJob.ScheduleParallel` with proper dependency chaining. `TryBuildParallel` convenience wrapper completes inline. `TryBuild` (sequential) unchanged.
+- [x] **Continuum crowd optimization** — `TrySolvePotential` Gauss-Seidel sweeps flattened to 1D running `idx++`/`idx--` pointer increments. `RelaxCell` accepts precomputed index. `TryBuildFlow` flattened to 1D with running `idx++`. All neighbor reads via `pot[idx±1]`/`pot[idx±w]` — zero division/index math in inner loops.
 
 ## Future
-- [ ] **Anya steppable** — Split monolithic `TrySearch` into `TryInitSearch` + `TryStepSearch` for visualization
-- [ ] **WFC steppable** — Split into `TryObserveStep` + `TryPropagateStep` for frame-by-frame execution
-- [ ] **CBS steppable** — Separate high-level constraint tree stepper from low-level A* stepper
-- [ ] **EDT `ScheduleParallel`** — Wire `EdtRowJob`/`EdtColJob` into `JobHandle` pipeline with proper `ScheduleParallel(batchCount)` instead of `Run()`
-- [ ] **Continuum crowd** — Flatten 2D loops into 1D pointer increments, `[NoAlias]` annotation on dense field pointers
+(none — all tasks complete)

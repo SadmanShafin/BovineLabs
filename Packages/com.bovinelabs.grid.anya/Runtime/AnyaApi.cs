@@ -24,6 +24,13 @@ namespace BovineLabs.Grid.Anya
         public DoubleMinHeap Heap;
         public UnsafeList<AnyaNode> Pool;
         public NativeArray<double> RootGCost;
+
+        // Steppable state
+        public int2 Start;
+        public int2 Goal;
+        public int BestNode;
+        public double BestCost;
+        public byte SearchComplete;
     }
 
     [BurstCompile]
@@ -49,6 +56,10 @@ namespace BovineLabs.Grid.Anya
             return true;
         }
 
+        /// <summary>
+        /// Monolithic search — calls InitSearch then steps until done.
+        /// Preserved for backward compatibility with existing tests.
+        /// </summary>
         [BurstCompile]
         public static bool TrySearch(
             ref AnyaState s,
@@ -57,10 +68,45 @@ namespace BovineLabs.Grid.Anya
             ref int2 goal,
             ref NativeList<int2> path)
         {
-            path.Clear();
+            if (!TryInitSearch(ref s, in blocked, ref start, ref goal))
+                return false;
+
+            if (s.SearchComplete != 0)
+                return TryExtractPath(ref s, ref path);
+
+            byte* blk = (byte*)blocked.GetUnsafeReadOnlyPtr();
+            while (!s.Heap.IsEmpty)
+            {
+                if (TryStepSearchInternal(ref s, blk))
+                    break;
+            }
+
+            if (s.BestNode < 0) return false;
+            ExtractPath(in s.Pool, s.BestNode, s.Goal, ref path);
+            return true;
+        }
+
+        /// <summary>
+        /// Initialize search state. Sets start/goal, checks trivial cases (same cell,
+        /// direct line-of-sight), and pushes initial interval nodes onto the heap.
+        /// Returns false only for invalid inputs (out of bounds, blocked cells).
+        /// After calling this, use TryStepSearch for frame-by-frame expansion.
+        /// </summary>
+        [BurstCompile]
+        public static bool TryInitSearch(
+            ref AnyaState s,
+            in NativeArray<byte> blocked,
+            ref int2 start,
+            ref int2 goal)
+        {
             s.Heap.Clear();
             s.Pool.Clear();
             s.RootGCost.Fill(double.PositiveInfinity);
+            s.Start = start;
+            s.Goal = goal;
+            s.BestNode = -1;
+            s.BestCost = double.PositiveInfinity;
+            s.SearchComplete = 0;
 
             if (Hint.Unlikely(!s.Grid.InBounds(start) || !s.Grid.InBounds(goal))) return false;
 
@@ -72,7 +118,13 @@ namespace BovineLabs.Grid.Anya
 
             if (start.Equals(goal))
             {
-                path.Add(start);
+                s.BestNode = 0;
+                s.Pool.Add(new AnyaNode
+                {
+                    L = start.x, R = start.x, y = start.y, dy = 0,
+                    Root = new double2(start.x, start.y), RootG = 0.0, Parent = -1,
+                });
+                s.SearchComplete = 1;
                 return true;
             }
 
@@ -80,8 +132,13 @@ namespace BovineLabs.Grid.Anya
 
             if (LineOfSight(w, h, blk, start, goal))
             {
-                path.Add(start);
-                path.Add(goal);
+                s.BestNode = s.Pool.Length;
+                s.Pool.Add(new AnyaNode
+                {
+                    L = goal.x, R = goal.x, y = goal.y, dy = 0,
+                    Root = new double2(start.x, start.y), RootG = 0.0, Parent = -1,
+                });
+                s.SearchComplete = 1;
                 return true;
             }
 
@@ -92,118 +149,124 @@ namespace BovineLabs.Grid.Anya
             while (rInt < w && IsEdgePassable(rInt, start.y, w, h, blk)) rInt++;
 
             PushNode(ref s, lInt, rInt, start.y, 0, new double2(start.x, start.y), 0.0, -1, goal);
-
-            double bestCost = double.PositiveInfinity;
-            int bestNode = -1;
-
-            while (!s.Heap.IsEmpty)
-            {
-                if (!s.Heap.TryPop(out var top)) break;
-                if (top.Key0 >= bestCost) break;
-
-                int uIdx = top.Id;
-                AnyaNode u = s.Pool[uIdx];
-
-                for (int dir = -1; dir <= 1; dir += 2)
-                {
-                    int ny = u.y + dir;
-                    if (ny < 0 || ny > h) continue;
-
-                    double pL = u.L;
-                    double pR = u.R;
-                    if (u.Root.y != u.y)
-                    {
-                        double ratio = (double)(ny - u.Root.y) / (u.y - u.Root.y);
-                        pL = u.Root.x + (u.L - u.Root.x) * ratio;
-                        pR = u.Root.x + (u.R - u.Root.x) * ratio;
-                    }
-                    else
-                    {
-                        if (u.Root.x <= u.L + EPS) pR = double.PositiveInfinity;
-                        else if (u.Root.x >= u.R - EPS) pL = double.NegativeInfinity;
-                        else
-                        {
-                            pL = double.NegativeInfinity;
-                            pR = double.PositiveInfinity;
-                        }
-                    }
-
-                    int cellY = math.min(u.y, ny);
-                    if (cellY < 0 || cellY >= h) continue;
-
-                    int projStart = math.isinf(pL) ? 0 : math.max(0, (int)math.floor(pL));
-                    int projEnd = math.isinf(pR) ? w - 1 : math.min(w - 1, (int)math.ceil(pR));
-
-                    // Interval splitting: walk through the projection range and split
-                    // around blocked cells, creating sub-intervals for each clear run.
-                    int x = projStart;
-                    while (x <= projEnd)
-                    {
-                        // Skip blocked cells
-                        if (blk[cellY * w + x] != 0)
-                        {
-                            x++;
-                            continue;
-                        }
-
-                        // Find the end of this clear run
-                        int runEnd = x;
-                        while (runEnd + 1 <= projEnd && blk[cellY * w + (runEnd + 1)] == 0)
-                            runEnd++;
-
-                        // Compute the interval for this clear run, clipped to the projection
-                        double oL = math.max(pL, x);
-                        double oR = math.min(pR, runEnd + 1.0);
-                        if (oL > oR + EPS)
-                        {
-                            x = runEnd + 1;
-                            continue;
-                        }
-
-                        // Check if goal is reachable through this sub-interval
-                        if (ny == goal.y && goal.x >= oL - EPS && goal.x <= oR + EPS)
-                        {
-                            double2 goalD = new double2(goal.x, goal.y);
-                            double cost = u.RootG + math.distance(u.Root, goalD);
-                            if (cost < bestCost)
-                            {
-                                bestCost = cost;
-                                bestNode = s.Pool.Length;
-                                s.Pool.Add(new AnyaNode
-                                {
-                                    L = goal.x,
-                                    R = goal.x,
-                                    y = ny,
-                                    dy = 0,
-                                    Root = u.Root,
-                                    RootG = u.RootG,
-                                    Parent = uIdx,
-                                });
-                            }
-                        }
-
-                        PushNode(ref s, oL, oR, ny, u.dy, u.Root, u.RootG, uIdx, goal);
-                        x = runEnd + 1;
-                    }
-
-                    // Corner detection: check all integer x positions within the interval
-                    // where a blocked cell on one side creates a convex corner that can serve
-                    // as a new root for turning paths.
-                    ExpandCorners(ref s, in u, uIdx, dir, cellY, ny, w, h, blk, goal);
-                } // end for dir
-            } // end while
-
-            if (bestNode < 0) return false;
-
-            ExtractPath(in s.Pool, bestNode, goal, ref path);
             return true;
         }
 
         /// <summary>
-        /// Detects and expands corner nodes along the interval boundaries.
-        /// Corners occur at integer x positions where a blocked cell on one side
-        /// of the row boundary meets a free cell on the other side.
+        /// Perform one expansion step (pop the best node from the heap, expand its successors).
+        /// Returns true when the search is complete (either found optimal path or exhausted heap).
+        /// Returns false if more steps are needed.
         /// </summary>
+        [BurstCompile]
+        public static bool TryStepSearch(ref AnyaState s, in NativeArray<byte> blocked)
+        {
+            byte* blk = (byte*)blocked.GetUnsafeReadOnlyPtr();
+            return TryStepSearchInternal(ref s, blk);
+        }
+
+        private static bool TryStepSearchInternal(ref AnyaState s, byte* blk)
+        {
+            if (Hint.Unlikely(s.Heap.IsEmpty || s.SearchComplete != 0))
+                return true;
+
+            if (!s.Heap.TryPop(out var top)) { s.SearchComplete = 1; return true; }
+            if (top.Key0 >= s.BestCost) { s.SearchComplete = 1; return true; }
+
+            int uIdx = top.Id;
+            AnyaNode u = s.Pool[uIdx];
+
+            int w = s.Grid.Width;
+            int h = s.Grid.Height;
+            int2 goal = s.Goal;
+
+            for (int dir = -1; dir <= 1; dir += 2)
+            {
+                int ny = u.y + dir;
+                if (ny < 0 || ny > h) continue;
+
+                double pL = u.L;
+                double pR = u.R;
+                if (u.Root.y != u.y)
+                {
+                    double ratio = (double)(ny - u.Root.y) / (u.y - u.Root.y);
+                    pL = u.Root.x + (u.L - u.Root.x) * ratio;
+                    pR = u.Root.x + (u.R - u.Root.x) * ratio;
+                }
+                else
+                {
+                    if (u.Root.x <= u.L + EPS) pR = double.PositiveInfinity;
+                    else if (u.Root.x >= u.R - EPS) pL = double.NegativeInfinity;
+                    else
+                    {
+                        pL = double.NegativeInfinity;
+                        pR = double.PositiveInfinity;
+                    }
+                }
+
+                int cellY = math.min(u.y, ny);
+                if (cellY < 0 || cellY >= h) continue;
+
+                int projStart = math.isinf(pL) ? 0 : math.max(0, (int)math.floor(pL));
+                int projEnd = math.isinf(pR) ? w - 1 : math.min(w - 1, (int)math.ceil(pR));
+
+                int x = projStart;
+                while (x <= projEnd)
+                {
+                    if (blk[cellY * w + x] != 0) { x++; continue; }
+
+                    int runEnd = x;
+                    while (runEnd + 1 <= projEnd && blk[cellY * w + (runEnd + 1)] == 0)
+                        runEnd++;
+
+                    double oL = math.max(pL, x);
+                    double oR = math.min(pR, runEnd + 1.0);
+                    if (oL > oR + EPS) { x = runEnd + 1; continue; }
+
+                    if (ny == goal.y && goal.x >= oL - EPS && goal.x <= oR + EPS)
+                    {
+                        double2 goalD = new double2(goal.x, goal.y);
+                        double cost = u.RootG + math.distance(u.Root, goalD);
+                        if (cost < s.BestCost)
+                        {
+                            s.BestCost = cost;
+                            s.BestNode = s.Pool.Length;
+                            s.Pool.Add(new AnyaNode
+                            {
+                                L = goal.x, R = goal.x, y = ny, dy = 0,
+                                Root = u.Root, RootG = u.RootG, Parent = uIdx,
+                            });
+                        }
+                    }
+
+                    PushNode(ref s, oL, oR, ny, u.dy, u.Root, u.RootG, uIdx, goal);
+                    x = runEnd + 1;
+                }
+
+                ExpandCorners(ref s, in u, uIdx, dir, cellY, ny, w, h, blk, goal);
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// After search is complete, extract the path from the best node found.
+        /// </summary>
+        [BurstCompile]
+        public static bool TryExtractPath(ref AnyaState s, ref NativeList<int2> path)
+        {
+            path.Clear();
+            if (s.BestNode < 0) return false;
+
+            if (s.Pool[s.BestNode].Parent < 0 && s.Start.Equals(s.Goal))
+            {
+                path.Add(s.Start);
+                return true;
+            }
+
+            ExtractPath(in s.Pool, s.BestNode, s.Goal, ref path);
+            return path.Length > 0;
+        }
+
         private static void ExpandCorners(
             ref AnyaState s,
             in AnyaNode u,
@@ -216,7 +279,6 @@ namespace BovineLabs.Grid.Anya
             byte* blk,
             int2 goal)
         {
-            // Check all integer x positions in [L, R] for corners
             int lX = (int)math.round(u.L);
             int rX = (int)math.round(u.R);
 
@@ -227,32 +289,20 @@ namespace BovineLabs.Grid.Anya
                 bool leftBlocked = blk[cellY * w + (ix - 1)] != 0;
                 bool rightBlocked = ix < w && blk[cellY * w + ix] != 0;
 
-                // Left wall corner: blocked cell to the left of ix, free cell at ix
                 if (leftBlocked && blk[cellY * w + ix] == 0)
                 {
-                    // Only useful if root is to the right of this corner
                     if (u.Root.x > ix + EPS)
-                    {
                         TryAddCornerNode(ref s, u, uIdx, ix, w, h, blk, goal);
-                    }
                 }
 
-                // Right wall corner: free cell at ix-1, blocked cell at ix
                 if (!leftBlocked && rightBlocked)
                 {
-                    // Only useful if root is to the left of this corner
                     if (u.Root.x < ix - EPS)
-                    {
                         TryAddCornerNode(ref s, u, uIdx, ix, w, h, blk, goal);
-                    }
                 }
             }
         }
 
-        /// <summary>
-        /// Creates corner nodes at an integer grid point that is a convex corner.
-        /// Expands in both up and down directions from the corner.
-        /// </summary>
         private static void TryAddCornerNode(
             ref AnyaState s,
             in AnyaNode u,
@@ -270,19 +320,15 @@ namespace BovineLabs.Grid.Anya
             {
                 s.RootGCost[rootIdx] = newG;
 
-                // Find the maximal clear interval to the left
                 int fL = cornerX;
                 while (fL > 0 && IsEdgePassable(fL - 1, u.y, w, h, blk)) fL--;
 
-                // Find the maximal clear interval to the right
                 int fR = cornerX;
                 while (fR < w && IsEdgePassable(fR, u.y, w, h, blk)) fR++;
 
-                // Expand up
                 if (u.y + 1 <= h)
                     PushNode(ref s, fL, fR, u.y + 1, 1, newRoot, newG, uIdx, goal);
 
-                // Expand down
                 if (u.y - 1 >= 0)
                     PushNode(ref s, fL, fR, u.y - 1, -1, newRoot, newG, uIdx, goal);
             }
@@ -301,7 +347,6 @@ namespace BovineLabs.Grid.Anya
         {
             if (R - L <= EPS) return;
 
-            // Linear scan for duplicate
             for (int i = 0; i < s.Pool.Length; i++)
             {
                 if (NodeEquals(s.Pool[i], L, R, y, root))
@@ -357,13 +402,10 @@ namespace BovineLabs.Grid.Anya
 
         /// <summary>
         /// Amanatides &amp; Woo fast voxel traversal for line-of-sight.
-        /// Traverses all grid cells that the line segment from→to passes through,
-        /// returning false if any blocked cell is hit.
         /// </summary>
         [BurstCompile]
         public static bool LineOfSight(int w, int h, [NoAlias] byte* blk, int2 from, int2 to)
         {
-            // Same start/end: just check one cell
             if (from.x == to.x && from.y == to.y)
                 return from.x >= 0 && from.y >= 0 && from.x < w && from.y < h && blk[from.y * w + from.x] == 0;
 
@@ -375,12 +417,10 @@ namespace BovineLabs.Grid.Anya
             int stepX = dx > 0 ? 1 : dx < 0 ? -1 : 0;
             int stepY = dy > 0 ? 1 : dy < 0 ? -1 : 0;
 
-            // How far along the ray we must move for each component to cross a cell boundary
             double tMaxX, tMaxY;
             double tDeltaX = absDx > 1e-12 ? 1.0 / absDx : double.PositiveInfinity;
             double tDeltaY = absDy > 1e-12 ? 1.0 / absDy : double.PositiveInfinity;
 
-            // Offset to the next cell boundary
             if (stepX > 0) tMaxX = (math.floor(from.x) + 1.0 - from.x) * tDeltaX;
             else if (stepX < 0) tMaxX = (from.x - math.floor(from.x)) * tDeltaX;
             else tMaxX = double.PositiveInfinity;
@@ -392,7 +432,6 @@ namespace BovineLabs.Grid.Anya
             int x = from.x;
             int y = from.y;
 
-            // Check start cell
             if (x < 0 || y < 0 || x >= w || y >= h) return false;
             if (blk[y * w + x] != 0) return false;
 
@@ -400,7 +439,6 @@ namespace BovineLabs.Grid.Anya
             {
                 if (x == to.x && y == to.y) return true;
 
-                // Step to next voxel
                 if (tMaxX < tMaxY)
                 {
                     if (tMaxX > 1.0) { x = to.x; y = to.y; }
