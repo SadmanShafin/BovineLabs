@@ -1,3 +1,4 @@
+using System;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
@@ -60,10 +61,12 @@ namespace BovineLabs.Grid.EHL
                 covered[i] = false;
 
 
-            var hubLabels = (UnsafeList<VisibilityLabel>**)UnsafeUtility.Malloc(n * sizeof(System.IntPtr), UnsafeUtility.AlignOf<System.IntPtr>(), Allocator.Temp);
+            var hubLabels = (UnsafeList<VisibilityLabel>**)UnsafeUtility.Malloc(n * sizeof(IntPtr),
+                UnsafeUtility.AlignOf<IntPtr>(), Allocator.Temp);
             for (var i = 0; i < n; i++)
             {
-                var list = (UnsafeList<VisibilityLabel>*)UnsafeUtility.Malloc(sizeof(UnsafeList<VisibilityLabel>), UnsafeUtility.AlignOf<UnsafeList<VisibilityLabel>>(), Allocator.Temp);
+                var list = (UnsafeList<VisibilityLabel>*)UnsafeUtility.Malloc(sizeof(UnsafeList<VisibilityLabel>),
+                    UnsafeUtility.AlignOf<UnsafeList<VisibilityLabel>>(), Allocator.Temp);
                 *list = new UnsafeList<VisibilityLabel>(16, Allocator.Temp);
                 hubLabels[i] = list;
             }
@@ -168,10 +171,10 @@ namespace BovineLabs.Grid.EHL
                 for (var k = 0; k < hubLabels[v]->Length; k++) HubLabelsOut.Add(hubLabels[v]->Ptr[k]);
 
                 hubLabels[v]->Dispose();
-                Unity.Collections.LowLevel.Unsafe.UnsafeUtility.Free(hubLabels[v], Unity.Collections.Allocator.Temp);
+                UnsafeUtility.Free(hubLabels[v], Allocator.Temp);
             }
 
-            Unity.Collections.LowLevel.Unsafe.UnsafeUtility.Free(hubLabels, Unity.Collections.Allocator.Temp);
+            UnsafeUtility.Free(hubLabels, Allocator.Temp);
             covered.Dispose();
             dist.Dispose();
             succ.Dispose();

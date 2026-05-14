@@ -17,7 +17,7 @@ namespace BovineLabs.Grid.Wavestar
         public NativeHashSet<int> traversableSubvolumes;
         public NativeArray<int> distanceToObstacle;
 
-        public unsafe void Execute()
+        public void Execute()
         {
             var obstacleMap = new NativeObstacleMap(obstacleGrid, sizeX, sizeY, sizeZ);
             ComputeDistanceField();
@@ -28,7 +28,7 @@ namespace BovineLabs.Grid.Wavestar
         {
             var totalCells = sizeX * sizeY * sizeZ;
             for (var i = 0; i < totalCells; i++) distanceToObstacle[i] = obstacleGrid[i] != 0 ? 0 : totalCells;
-            var queue = new NativeList<int3>(Allocator.Temp);
+            var queue = new NativeList<int3>(Allocator.TempJob);
             for (var z = 0; z < sizeZ; z++)
             for (var y = 0; y < sizeY; y++)
             for (var x = 0; x < sizeX; x++)

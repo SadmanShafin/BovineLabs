@@ -61,14 +61,14 @@ namespace BovineLabs.Grid.MeshA
             PrimsByHeading = new NativeParallelMultiHashMap<int, int>(capacity, allocator);
         }
 
-        public unsafe void Add(MotionPrimitive prim)
+        public void Add(MotionPrimitive prim)
         {
             var idx = Primitives.Length;
             Primitives.Add(prim);
             PrimsByHeading.Add(prim.StartTheta, idx);
         }
 
-        public unsafe void Dispose()
+        public void Dispose()
         {
             if (Primitives.IsCreated)
             {
@@ -100,16 +100,6 @@ namespace BovineLabs.Grid.MeshA
             NextConfigId = nextConfig;
             ConnectingPrimId = primId;
         }
-    }
-
-
-    public struct PrimEndpoint
-    {
-        public int FinalTheta;
-        public int Di;
-        public int Dj;
-        public int KInTrace;
-        public int PrimId;
     }
 
 
@@ -147,7 +137,7 @@ namespace BovineLabs.Grid.MeshA
             }
         }
 
-        public unsafe void Dispose()
+        public void Dispose()
         {
             if (SuccessorsFlat.IsCreated) SuccessorsFlat.Dispose();
             if (SuccOffsets.IsCreated) SuccOffsets.Dispose();
@@ -155,41 +145,5 @@ namespace BovineLabs.Grid.MeshA
             if (InitialConfigByTheta.IsCreated) InitialConfigByTheta.Dispose();
             if (ThetaByInitialConfig.IsCreated) ThetaByInitialConfig.Dispose();
         }
-    }
-
-
-    public struct ExtendedCell : IEquatable<ExtendedCell>
-    {
-        public int X;
-        public int Y;
-        public int ConfigId;
-
-        public ExtendedCell(int x, int y, int configId)
-        {
-            X = x;
-            Y = y;
-            ConfigId = configId;
-        }
-
-        public bool Equals(ExtendedCell other)
-        {
-            return X == other.X && Y == other.Y && ConfigId == other.ConfigId;
-        }
-
-        public override int GetHashCode()
-        {
-            return X * 73856093 ^ Y * 19349663 ^ ConfigId;
-        }
-    }
-
-
-    public struct MeshSearchNode
-    {
-        public ExtendedCell Cell;
-        public float GCost;
-        public float FCost;
-        public int ParentIndex;
-        public bool IsInitial;
-        public bool KeepAfterClosed;
     }
 }

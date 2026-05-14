@@ -13,7 +13,7 @@ namespace BovineLabs.Grid.Domino
         public byte* Region;
         public int* Height;
         public byte* MatchingDir;
-        public Unity.Collections.AllocatorManager.AllocatorHandle Allocator;
+        public AllocatorManager.AllocatorHandle Allocator;
     }
 
     [BurstCompile]
@@ -31,9 +31,9 @@ namespace BovineLabs.Grid.Domino
             {
                 Allocator = a,
                 Grid = g,
-                Region = (byte*)Unity.Collections.AllocatorManager.Allocate(a, sizeof(byte), Unity.Collections.LowLevel.Unsafe.UnsafeUtility.AlignOf<byte>(), g.Length),
-                Height = (int*)Unity.Collections.AllocatorManager.Allocate(a, sizeof(int), Unity.Collections.LowLevel.Unsafe.UnsafeUtility.AlignOf<int>(), g.Length),
-                MatchingDir = (byte*)Unity.Collections.AllocatorManager.Allocate(a, sizeof(byte), Unity.Collections.LowLevel.Unsafe.UnsafeUtility.AlignOf<byte>(), g.Length)
+                Region = (byte*)AllocatorManager.Allocate(a, sizeof(byte), UnsafeUtility.AlignOf<byte>(), g.Length),
+                Height = (int*)AllocatorManager.Allocate(a, sizeof(int), UnsafeUtility.AlignOf<int>(), g.Length),
+                MatchingDir = (byte*)AllocatorManager.Allocate(a, sizeof(byte), UnsafeUtility.AlignOf<byte>(), g.Length)
             };
             return true;
         }
@@ -110,19 +110,47 @@ namespace BovineLabs.Grid.Domino
 
                 if ((x + y) % 2 == 0)
                 {
-                    GraphCutApi.AddEdgeInternal(ref cut, sourceIdx, i, 1);
+                    if (!GraphCutApi.AddEdgeInternal(ref cut, sourceIdx, i, 1))
+                    {
+                        GraphCutApi.Dispose(ref cut);
+                        return false;
+                    }
+
                     if (x + 1 < w && region[i + 1] != 0)
-                        GraphCutApi.AddEdgeInternal(ref cut, i, i + 1, 1);
+                        if (!GraphCutApi.AddEdgeInternal(ref cut, i, i + 1, 1))
+                        {
+                            GraphCutApi.Dispose(ref cut);
+                            return false;
+                        }
+
                     if (x > 0 && region[i - 1] != 0)
-                        GraphCutApi.AddEdgeInternal(ref cut, i, i - 1, 1);
+                        if (!GraphCutApi.AddEdgeInternal(ref cut, i, i - 1, 1))
+                        {
+                            GraphCutApi.Dispose(ref cut);
+                            return false;
+                        }
+
                     if (y + 1 < h && region[i + w] != 0)
-                        GraphCutApi.AddEdgeInternal(ref cut, i, i + w, 1);
+                        if (!GraphCutApi.AddEdgeInternal(ref cut, i, i + w, 1))
+                        {
+                            GraphCutApi.Dispose(ref cut);
+                            return false;
+                        }
+
                     if (y > 0 && region[i - w] != 0)
-                        GraphCutApi.AddEdgeInternal(ref cut, i, i - w, 1);
+                        if (!GraphCutApi.AddEdgeInternal(ref cut, i, i - w, 1))
+                        {
+                            GraphCutApi.Dispose(ref cut);
+                            return false;
+                        }
                 }
                 else
                 {
-                    GraphCutApi.AddEdgeInternal(ref cut, i, sinkIdx, 1);
+                    if (!GraphCutApi.AddEdgeInternal(ref cut, i, sinkIdx, 1))
+                    {
+                        GraphCutApi.Dispose(ref cut);
+                        return false;
+                    }
                 }
             }
 
@@ -168,7 +196,7 @@ namespace BovineLabs.Grid.Domino
             var region = s.Region;
             var height = s.Height;
 
-            var vis = new Unity.Collections.NativeArray<byte>(len, Allocator.Temp);
+            var vis = new NativeArray<byte>(len, Allocator.Temp);
             var vPtr = (byte*)vis.GetUnsafePtr();
             UnsafeUtility.MemSet(vPtr, 0, len);
             UnsafeUtility.MemSet(height, 0, len * 4);
@@ -281,9 +309,23 @@ namespace BovineLabs.Grid.Domino
 
         public static void Dispose(ref DominoState s)
         {
-            if (s.Region != null) { Unity.Collections.AllocatorManager.Free(s.Allocator, s.Region); s.Region = null; }
-            if (s.Height != null) { Unity.Collections.AllocatorManager.Free(s.Allocator, s.Height); s.Height = null; }
-            if (s.MatchingDir != null) { Unity.Collections.AllocatorManager.Free(s.Allocator, s.MatchingDir); s.MatchingDir = null; }
+            if (s.Region != null)
+            {
+                AllocatorManager.Free(s.Allocator, s.Region);
+                s.Region = null;
+            }
+
+            if (s.Height != null)
+            {
+                AllocatorManager.Free(s.Allocator, s.Height);
+                s.Height = null;
+            }
+
+            if (s.MatchingDir != null)
+            {
+                AllocatorManager.Free(s.Allocator, s.MatchingDir);
+                s.MatchingDir = null;
+            }
         }
     }
 }

@@ -1,3 +1,4 @@
+using System;
 using Unity.Burst;
 using Unity.Burst.CompilerServices;
 using Unity.Collections;
@@ -6,15 +7,20 @@ using Unity.Mathematics;
 
 namespace BovineLabs.Grid.FieldDStar
 {
-    public unsafe struct FieldDStarState
+    public unsafe struct FieldDStarState : IDisposable
     {
+        public void Dispose()
+        {
+            FieldDStarApi.Dispose(ref this);
+        }
+
         public Grid2D Grid;
         public int Goal;
         public float* G;
         public float* RHS;
         public float2* Flow;
         public MinHeap Heap;
-        public Unity.Collections.AllocatorManager.AllocatorHandle Allocator;
+        public AllocatorManager.AllocatorHandle Allocator;
     }
 
     [BurstCompile]
@@ -38,9 +44,9 @@ namespace BovineLabs.Grid.FieldDStar
             {
                 Allocator = a,
                 Grid = g,
-                G = (float*)Unity.Collections.AllocatorManager.Allocate(a, sizeof(float), Unity.Collections.LowLevel.Unsafe.UnsafeUtility.AlignOf<float>(), g.Length),
-                RHS = (float*)Unity.Collections.AllocatorManager.Allocate(a, sizeof(float), Unity.Collections.LowLevel.Unsafe.UnsafeUtility.AlignOf<float>(), g.Length),
-                Flow = (float2*)Unity.Collections.AllocatorManager.Allocate(a, sizeof(float2), Unity.Collections.LowLevel.Unsafe.UnsafeUtility.AlignOf<float2>(), g.Length),
+                G = (float*)AllocatorManager.Allocate(a, sizeof(float), UnsafeUtility.AlignOf<float>(), g.Length),
+                RHS = (float*)AllocatorManager.Allocate(a, sizeof(float), UnsafeUtility.AlignOf<float>(), g.Length),
+                Flow = (float2*)AllocatorManager.Allocate(a, sizeof(float2), UnsafeUtility.AlignOf<float2>(), g.Length),
                 Heap = heap
             };
             return true;
@@ -50,11 +56,13 @@ namespace BovineLabs.Grid.FieldDStar
         {
             s.Heap.Clear();
             var len = s.Grid.Length;
-            for (var i = 0; i < len; i++) {
+            for (var i = 0; i < len; i++)
+            {
                 s.G[i] = float.PositiveInfinity;
                 s.RHS[i] = float.PositiveInfinity;
                 s.Flow[i] = float2.zero;
             }
+
             return true;
         }
 
@@ -224,9 +232,24 @@ namespace BovineLabs.Grid.FieldDStar
 
         public static void Dispose(ref FieldDStarState s)
         {
-            if (s.G != null) { Unity.Collections.AllocatorManager.Free(s.Allocator, s.G); s.G = null; }
-            if (s.RHS != null) { Unity.Collections.AllocatorManager.Free(s.Allocator, s.RHS); s.RHS = null; }
-            if (s.Flow != null) { Unity.Collections.AllocatorManager.Free(s.Allocator, s.Flow); s.Flow = null; }
+            if (s.G != null)
+            {
+                AllocatorManager.Free(s.Allocator, s.G);
+                s.G = null;
+            }
+
+            if (s.RHS != null)
+            {
+                AllocatorManager.Free(s.Allocator, s.RHS);
+                s.RHS = null;
+            }
+
+            if (s.Flow != null)
+            {
+                AllocatorManager.Free(s.Allocator, s.Flow);
+                s.Flow = null;
+            }
+
             if (s.Heap.IsCreated) s.Heap.Dispose();
         }
     }

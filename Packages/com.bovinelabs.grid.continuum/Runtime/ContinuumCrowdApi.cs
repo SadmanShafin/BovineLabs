@@ -1,3 +1,4 @@
+using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Unity.Burst;
@@ -9,15 +10,16 @@ using Unity.Mathematics;
 namespace BovineLabs.Grid.Continuum
 {
     [StructLayout(LayoutKind.Sequential)]
-    public unsafe struct ContinuumCrowdState
+    public unsafe struct ContinuumCrowdState : IDisposable
     {
+        public void Dispose() => ContinuumCrowdApi.Dispose(ref this);
         public Grid2D Grid;
         public float* Density;
         public float* Speed;
         public float* Potential;
         public float2* Flow;
         public float* Divergence;
-        public Unity.Collections.AllocatorManager.AllocatorHandle Allocator;
+        public AllocatorManager.AllocatorHandle Allocator;
     }
 
     [BurstCompile]
@@ -35,11 +37,16 @@ namespace BovineLabs.Grid.Continuum
             {
                 Allocator = a,
                 Grid = g,
-                Density = (float*)Unity.Collections.AllocatorManager.Allocate(a, sizeof(float), Unity.Collections.LowLevel.Unsafe.UnsafeUtility.AlignOf<float>(), g.Length),
-                Speed = (float*)Unity.Collections.AllocatorManager.Allocate(a, sizeof(float), Unity.Collections.LowLevel.Unsafe.UnsafeUtility.AlignOf<float>(), g.Length),
-                Potential = (float*)Unity.Collections.AllocatorManager.Allocate(a, sizeof(float), Unity.Collections.LowLevel.Unsafe.UnsafeUtility.AlignOf<float>(), g.Length),
-                Flow = (float2*)Unity.Collections.AllocatorManager.Allocate(a, sizeof(float2), Unity.Collections.LowLevel.Unsafe.UnsafeUtility.AlignOf<float2>(), g.Length),
-                Divergence = (float*)Unity.Collections.AllocatorManager.Allocate(a, sizeof(float), Unity.Collections.LowLevel.Unsafe.UnsafeUtility.AlignOf<float>(), g.Length)
+                Density = (float*)AllocatorManager.Allocate(a, sizeof(float),
+                    UnsafeUtility.AlignOf<float>(), g.Length),
+                Speed = (float*)AllocatorManager.Allocate(a, sizeof(float),
+                    UnsafeUtility.AlignOf<float>(), g.Length),
+                Potential = (float*)AllocatorManager.Allocate(a, sizeof(float),
+                    UnsafeUtility.AlignOf<float>(), g.Length),
+                Flow = (float2*)AllocatorManager.Allocate(a, sizeof(float2),
+                    UnsafeUtility.AlignOf<float2>(), g.Length),
+                Divergence = (float*)AllocatorManager.Allocate(a, sizeof(float),
+                    UnsafeUtility.AlignOf<float>(), g.Length)
             };
             return true;
         }
@@ -239,11 +246,35 @@ namespace BovineLabs.Grid.Continuum
 
         public static void Dispose(ref ContinuumCrowdState s)
         {
-            if (s.Density != null) { Unity.Collections.AllocatorManager.Free(s.Allocator, s.Density); s.Density = null; }
-            if (s.Speed != null) { Unity.Collections.AllocatorManager.Free(s.Allocator, s.Speed); s.Speed = null; }
-            if (s.Potential != null) { Unity.Collections.AllocatorManager.Free(s.Allocator, s.Potential); s.Potential = null; }
-            if (s.Flow != null) { Unity.Collections.AllocatorManager.Free(s.Allocator, s.Flow); s.Flow = null; }
-            if (s.Divergence != null) { Unity.Collections.AllocatorManager.Free(s.Allocator, s.Divergence); s.Divergence = null; }
+            if (s.Density != null)
+            {
+                AllocatorManager.Free(s.Allocator, s.Density);
+                s.Density = null;
+            }
+
+            if (s.Speed != null)
+            {
+                AllocatorManager.Free(s.Allocator, s.Speed);
+                s.Speed = null;
+            }
+
+            if (s.Potential != null)
+            {
+                AllocatorManager.Free(s.Allocator, s.Potential);
+                s.Potential = null;
+            }
+
+            if (s.Flow != null)
+            {
+                AllocatorManager.Free(s.Allocator, s.Flow);
+                s.Flow = null;
+            }
+
+            if (s.Divergence != null)
+            {
+                AllocatorManager.Free(s.Allocator, s.Divergence);
+                s.Divergence = null;
+            }
         }
     }
 }

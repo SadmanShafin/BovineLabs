@@ -19,7 +19,7 @@ namespace BovineLabs.Grid.Wavestar
         public NativeArray<bool> pathFound;
         public NativeArray<float> pathLength;
 
-        public unsafe void Execute()
+        public void Execute()
         {
             pathFound[0] = false;
             pathLength[0] = 0f;
@@ -29,8 +29,8 @@ namespace BovineLabs.Grid.Wavestar
             SubvolumeData goalData;
             if (!FindGoalSubvolume(out goalData)) return;
 
-            var rawPath = new NativeList<float3>(Allocator.Temp);
-            var visited = new NativeHashSet<int>(256, Allocator.Temp);
+            var rawPath = new NativeList<float3>(Allocator.TempJob);
+            var visited = new NativeHashSet<int>(256, Allocator.TempJob);
 
             var currentPred = goalData.PredecessorCenter;
             var goalCenter = goalPos + new float3(0.5f, 0.5f, 0.5f);
@@ -53,8 +53,8 @@ namespace BovineLabs.Grid.Wavestar
                     (int)math.floor(currentPred.z));
 
                 var found = false;
-                using (var keys = costField.GetKeyArray(Allocator.Temp))
-                using (var values = costField.GetValueArray(Allocator.Temp))
+                using (var keys = costField.GetKeyArray(Allocator.TempJob))
+                using (var values = costField.GetValueArray(Allocator.TempJob))
                 {
                     for (var i = 0; i < keys.Length; i++)
                     {
@@ -78,7 +78,7 @@ namespace BovineLabs.Grid.Wavestar
 
             rawPath.Add(startPos + new float3(0.5f, 0.5f, 0.5f));
 
-            var forwardPath = new NativeList<float3>(rawPath.Length, Allocator.Temp);
+            var forwardPath = new NativeList<float3>(rawPath.Length, Allocator.TempJob);
             for (var i = rawPath.Length - 1; i >= 0; i--) forwardPath.Add(rawPath[i]);
             rawPath.Dispose();
 
@@ -103,8 +103,8 @@ namespace BovineLabs.Grid.Wavestar
         {
             goalData = default;
 
-            using (var keys = costField.GetKeyArray(Allocator.Temp))
-            using (var values = costField.GetValueArray(Allocator.Temp))
+            using (var keys = costField.GetKeyArray(Allocator.TempJob))
+            using (var values = costField.GetValueArray(Allocator.TempJob))
             {
                 for (var i = 0; i < keys.Length; i++)
                 {
@@ -148,13 +148,13 @@ namespace BovineLabs.Grid.Wavestar
         {
             if (inputPath.Length <= 2)
             {
-                var result = new NativeList<float3>(inputPath.Length, Allocator.Temp);
+                var result = new NativeList<float3>(inputPath.Length, Allocator.TempJob);
                 for (var i = 0; i < inputPath.Length; i++)
                     result.Add(inputPath[i]);
                 return result;
             }
 
-            var smoothed = new NativeList<float3>(Allocator.Temp);
+            var smoothed = new NativeList<float3>(Allocator.TempJob);
             smoothed.Add(inputPath[0]);
 
             var current = 0;

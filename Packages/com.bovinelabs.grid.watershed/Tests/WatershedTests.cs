@@ -6,7 +6,7 @@ using Unity.Collections;
 public class WatershedTests
 {
     [Test]
-    public unsafe void Create_Dimensions()
+    public void Create_Dimensions()
     {
         Assert.IsTrue(WatershedApi.TryCreate(5, 5, Allocator.Temp, out var s));
         Assert.AreEqual(25, s.Grid.Length);
@@ -14,7 +14,7 @@ public class WatershedTests
     }
 
     [Test]
-    public unsafe void FindMinima_TwoMinima()
+    public void FindMinima_TwoMinima()
     {
         Assert.IsTrue(WatershedApi.TryCreate(5, 5, Allocator.Temp, out var s));
         var height = new NativeArray<float>(25, Allocator.Temp);
@@ -86,7 +86,7 @@ public class WatershedTests
     }
 
     [Test]
-    public unsafe void Dispose_Double()
+    public void Dispose_Double()
     {
         Assert.IsTrue(WatershedApi.TryCreate(3, 3, Allocator.Temp, out var s));
         WatershedApi.Dispose(ref s);

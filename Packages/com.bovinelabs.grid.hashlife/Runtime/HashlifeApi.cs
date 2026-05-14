@@ -21,15 +21,17 @@ namespace BovineLabs.Grid.Hashlife
         public int* Values;
         public int Capacity;
         public int Count;
-        public Unity.Collections.AllocatorManager.AllocatorHandle Allocator;
+        public AllocatorManager.AllocatorHandle Allocator;
 
-        public static bool TryCreate(int capacity, Unity.Collections.AllocatorManager.AllocatorHandle allocator, out FlatHashMap map)
+        public static bool TryCreate(int capacity, AllocatorManager.AllocatorHandle allocator, out FlatHashMap map)
         {
             capacity = math.ceilpow2(capacity * 2);
             map = new FlatHashMap
             {
-                Keys = (ulong*)Unity.Collections.AllocatorManager.Allocate(allocator, sizeof(ulong), UnsafeUtility.AlignOf<ulong>(), capacity),
-                Values = (int*)Unity.Collections.AllocatorManager.Allocate(allocator, sizeof(int), UnsafeUtility.AlignOf<int>(), capacity),
+                Keys = (ulong*)AllocatorManager.Allocate(allocator, sizeof(ulong), UnsafeUtility.AlignOf<ulong>(),
+                    capacity),
+                Values =
+                    (int*)AllocatorManager.Allocate(allocator, sizeof(int), UnsafeUtility.AlignOf<int>(), capacity),
                 Capacity = capacity,
                 Count = 0,
                 Allocator = allocator
@@ -38,72 +40,80 @@ namespace BovineLabs.Grid.Hashlife
             return true;
         }
 
-        public unsafe void Dispose()
+        public void Dispose()
         {
             if (Keys != null)
             {
-                Unity.Collections.AllocatorManager.Free(Allocator, Keys);
+                AllocatorManager.Free(Allocator, Keys);
                 Keys = null;
             }
+
             if (Values != null)
             {
-                Unity.Collections.AllocatorManager.Free(Allocator, Values);
+                AllocatorManager.Free(Allocator, Values);
                 Values = null;
             }
         }
 
         public bool TryGetValue(ulong key, out int value)
         {
-            if (Count == 0) { value = 0; return false; }
-            uint mask = (uint)(Capacity - 1);
-            uint hash = (uint)(key ^ (key >> 32));
-            uint idx = hash & mask;
-
-            for (int i = 0; i < Capacity; i++)
+            if (Count == 0)
             {
-                ulong k = Keys[idx];
+                value = 0;
+                return false;
+            }
+
+            var mask = (uint)(Capacity - 1);
+            var hash = (uint)(key ^ (key >> 32));
+            var idx = hash & mask;
+
+            for (var i = 0; i < Capacity; i++)
+            {
+                var k = Keys[idx];
                 if (k == key)
                 {
                     value = Values[idx];
                     return true;
                 }
-                if (k == 0xFFFFFFFFFFFFFFFFUL)
-                {
-                    break;
-                }
+
+                if (k == 0xFFFFFFFFFFFFFFFFUL) break;
                 idx = (idx + 1) & mask;
             }
+
             value = 0;
             return false;
         }
 
-        public unsafe void Add(ulong key, int value)
+        public bool Add(ulong key, int value)
         {
-            uint mask = (uint)(Capacity - 1);
-            uint hash = (uint)(key ^ (key >> 32));
-            uint idx = hash & mask;
+            var mask = (uint)(Capacity - 1);
+            var hash = (uint)(key ^ (key >> 32));
+            var idx = hash & mask;
 
-            for (int i = 0; i < Capacity; i++)
+            for (var i = 0; i < Capacity; i++)
             {
-                ulong k = Keys[idx];
+                var k = Keys[idx];
                 if (k == 0xFFFFFFFFFFFFFFFFUL || k == key)
                 {
                     if (k == 0xFFFFFFFFFFFFFFFFUL) Count++;
                     Keys[idx] = key;
                     Values[idx] = value;
-                    return;
+                    return true;
                 }
+
                 idx = (idx + 1) & mask;
             }
+
+            return false;
         }
     }
 
-    public unsafe struct HashlifeState
+    public struct HashlifeState
     {
         public UnsafeList<HashlifeNode> Nodes;
         public FlatHashMap Intern;
         public FlatHashMap ResultCache;
-        public Unity.Collections.AllocatorManager.AllocatorHandle Allocator;
+        public AllocatorManager.AllocatorHandle Allocator;
     }
 
     [BurstCompile]
@@ -171,7 +181,12 @@ namespace BovineLabs.Grid.Hashlife
 
             id = s.Nodes.Length;
             s.Nodes.Add(node);
-            s.Intern.Add(h, id);
+            if (!s.Intern.Add(h, id))
+            {
+                id = -1;
+                return false;
+            }
+
             return true;
         }
 

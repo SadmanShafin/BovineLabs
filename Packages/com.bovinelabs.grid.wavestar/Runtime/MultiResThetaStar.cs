@@ -42,18 +42,18 @@ namespace BovineLabs.Grid.Wavestar
 
         private NativeObstacleMap obstacleMap;
 
-        public unsafe void Execute()
+        public void Execute()
         {
             obstacleMap = new NativeObstacleMap(obstacleGrid, sizeX, sizeY, sizeZ);
             pathFound[0] = false;
             goalGCost[0] = float.PositiveInfinity;
 
 
-            var open = new NativeMinPQ(Allocator.Temp);
+            var open = new NativeMinPQ(Allocator.TempJob);
 
-            var closed = new NativeHashSet<int>(sizeX * sizeY, Allocator.Temp);
+            var closed = new NativeHashSet<int>(sizeX * sizeY, Allocator.TempJob);
 
-            var fScores = new NativeHashMap<int, float>(sizeX * sizeY, Allocator.Temp);
+            var fScores = new NativeHashMap<int, float>(sizeX * sizeY, Allocator.TempJob);
 
 
             var startSV = FindFinestSubvolume(startPos, maxHeight);
@@ -146,7 +146,7 @@ namespace BovineLabs.Grid.Wavestar
 
         private NativeList<OctreeIndex> CollectNeighbors(OctreeIndex idx, NativeHashSet<int> closed)
         {
-            var neighbors = new NativeList<OctreeIndex>(Allocator.Temp);
+            var neighbors = new NativeList<OctreeIndex>(Allocator.TempJob);
 
 
             var s = idx.Size;

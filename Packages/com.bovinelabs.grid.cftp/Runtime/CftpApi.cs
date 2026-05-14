@@ -1,8 +1,10 @@
+using System;
 using System.Runtime.InteropServices;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
+using Random = Unity.Mathematics.Random;
 
 namespace BovineLabs.Grid.Cftp
 {
@@ -14,13 +16,15 @@ namespace BovineLabs.Grid.Cftp
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public unsafe struct CftpState
+
+    public unsafe struct CftpState : IDisposable
     {
+        public void Dispose() => CftpApi.Dispose(ref this);
         public Grid2D Grid;
         public byte* Low;
         public byte* High;
         public UnsafeList<CftpUpdate> Updates;
-        public Unity.Collections.AllocatorManager.AllocatorHandle Allocator;
+        public AllocatorManager.AllocatorHandle Allocator;
     }
 
     [BurstCompile]
@@ -38,8 +42,8 @@ namespace BovineLabs.Grid.Cftp
             {
                 Allocator = a,
                 Grid = g,
-                Low = (byte*)Unity.Collections.AllocatorManager.Allocate(a, sizeof(byte), Unity.Collections.LowLevel.Unsafe.UnsafeUtility.AlignOf<byte>(), g.Length),
-                High = (byte*)Unity.Collections.AllocatorManager.Allocate(a, sizeof(byte), Unity.Collections.LowLevel.Unsafe.UnsafeUtility.AlignOf<byte>(), g.Length),
+                Low = (byte*)AllocatorManager.Allocate(a, sizeof(byte), UnsafeUtility.AlignOf<byte>(), g.Length),
+                High = (byte*)AllocatorManager.Allocate(a, sizeof(byte), UnsafeUtility.AlignOf<byte>(), g.Length),
                 Updates = new UnsafeList<CftpUpdate>(maxUpdates, a)
             };
             return true;
@@ -160,8 +164,18 @@ namespace BovineLabs.Grid.Cftp
 
         public static void Dispose(ref CftpState s)
         {
-            if (s.Low != null) { Unity.Collections.AllocatorManager.Free(s.Allocator, s.Low); s.Low = null; }
-            if (s.High != null) { Unity.Collections.AllocatorManager.Free(s.Allocator, s.High); s.High = null; }
+            if (s.Low != null)
+            {
+                AllocatorManager.Free(s.Allocator, s.Low);
+                s.Low = null;
+            }
+
+            if (s.High != null)
+            {
+                AllocatorManager.Free(s.Allocator, s.High);
+                s.High = null;
+            }
+
             if (s.Updates.IsCreated) s.Updates.Dispose();
         }
     }

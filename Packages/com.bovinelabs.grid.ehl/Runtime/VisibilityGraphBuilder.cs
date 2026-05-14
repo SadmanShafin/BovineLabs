@@ -1,3 +1,4 @@
+using System;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
@@ -58,10 +59,12 @@ namespace BovineLabs.Grid.EHL
             var n = convexVerts.Length;
 
 
-            var adjLists = (UnsafeList<AdjEdge>**)UnsafeUtility.Malloc(n * sizeof(System.IntPtr), UnsafeUtility.AlignOf<System.IntPtr>(), Allocator.Temp);
+            var adjLists = (UnsafeList<AdjEdge>**)UnsafeUtility.Malloc(n * sizeof(IntPtr),
+                UnsafeUtility.AlignOf<IntPtr>(), Allocator.Temp);
             for (var i = 0; i < n; i++)
             {
-                var list = (UnsafeList<AdjEdge>*)UnsafeUtility.Malloc(sizeof(UnsafeList<AdjEdge>), UnsafeUtility.AlignOf<UnsafeList<AdjEdge>>(), Allocator.Temp);
+                var list = (UnsafeList<AdjEdge>*)UnsafeUtility.Malloc(sizeof(UnsafeList<AdjEdge>),
+                    UnsafeUtility.AlignOf<UnsafeList<AdjEdge>>(), Allocator.Temp);
                 *list = new UnsafeList<AdjEdge>(16, Allocator.Temp);
                 adjLists[i] = list;
             }
@@ -100,14 +103,14 @@ namespace BovineLabs.Grid.EHL
 
                 ConvexVertices.Add(convexVerts[i]);
                 list->Dispose();
-                Unity.Collections.LowLevel.Unsafe.UnsafeUtility.Free(list, Unity.Collections.Allocator.Temp);
+                UnsafeUtility.Free(list, Allocator.Temp);
             }
 
-            Unity.Collections.LowLevel.Unsafe.UnsafeUtility.Free(adjLists, Unity.Collections.Allocator.Temp);
+            UnsafeUtility.Free(adjLists, Allocator.Temp);
             convexVerts.Dispose();
             vertexPolyId.Dispose();
         }
-        
+
         private bool IsConvexVertex(float2 prev, float2 curr, float2 next, bool isCW)
         {
             var edge1 = curr - prev;

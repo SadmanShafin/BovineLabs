@@ -1,3 +1,4 @@
+using System;
 using System.Runtime.InteropServices;
 using Unity.Burst;
 using Unity.Collections;
@@ -17,14 +18,15 @@ namespace BovineLabs.Grid.Morse
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public unsafe struct MorseState
+    public unsafe struct MorseState : IDisposable
     {
+        public void Dispose() => MorseApi.Dispose(ref this);
         public Grid2D Grid;
         public int* Ascending;
         public int* Descending;
         public UnsafeList<CriticalPoint> Critical;
         public int* Component;
-        public Unity.Collections.AllocatorManager.AllocatorHandle Allocator;
+        public AllocatorManager.AllocatorHandle Allocator;
     }
 
     [BurstCompile]
@@ -42,10 +44,10 @@ namespace BovineLabs.Grid.Morse
             {
                 Allocator = a,
                 Grid = g,
-                Ascending = (int*)Unity.Collections.AllocatorManager.Allocate(a, sizeof(int), Unity.Collections.LowLevel.Unsafe.UnsafeUtility.AlignOf<int>(), g.Length),
-                Descending = (int*)Unity.Collections.AllocatorManager.Allocate(a, sizeof(int), Unity.Collections.LowLevel.Unsafe.UnsafeUtility.AlignOf<int>(), g.Length),
+                Ascending = (int*)AllocatorManager.Allocate(a, sizeof(int), UnsafeUtility.AlignOf<int>(), g.Length),
+                Descending = (int*)AllocatorManager.Allocate(a, sizeof(int), UnsafeUtility.AlignOf<int>(), g.Length),
                 Critical = new UnsafeList<CriticalPoint>(maxCritical, a),
-                Component = (int*)Unity.Collections.AllocatorManager.Allocate(a, sizeof(int), Unity.Collections.LowLevel.Unsafe.UnsafeUtility.AlignOf<int>(), g.Length)
+                Component = (int*)AllocatorManager.Allocate(a, sizeof(int), UnsafeUtility.AlignOf<int>(), g.Length)
             };
             return true;
         }
@@ -205,10 +207,24 @@ namespace BovineLabs.Grid.Morse
 
         public static void Dispose(ref MorseState s)
         {
-            if (s.Ascending != null) { Unity.Collections.AllocatorManager.Free(s.Allocator, s.Ascending); s.Ascending = null; }
-            if (s.Descending != null) { Unity.Collections.AllocatorManager.Free(s.Allocator, s.Descending); s.Descending = null; }
+            if (s.Ascending != null)
+            {
+                AllocatorManager.Free(s.Allocator, s.Ascending);
+                s.Ascending = null;
+            }
+
+            if (s.Descending != null)
+            {
+                AllocatorManager.Free(s.Allocator, s.Descending);
+                s.Descending = null;
+            }
+
             if (s.Critical.IsCreated) s.Critical.Dispose();
-            if (s.Component != null) { Unity.Collections.AllocatorManager.Free(s.Allocator, s.Component); s.Component = null; }
+            if (s.Component != null)
+            {
+                AllocatorManager.Free(s.Allocator, s.Component);
+                s.Component = null;
+            }
         }
     }
 }

@@ -1,3 +1,4 @@
+using System;
 using System.Runtime.InteropServices;
 using Unity.Burst;
 using Unity.Burst.CompilerServices;
@@ -8,11 +9,13 @@ using Unity.Mathematics;
 namespace BovineLabs.Grid.FastSweeping
 {
     [StructLayout(LayoutKind.Sequential)]
-    public unsafe struct FastSweepingState
+
+    public unsafe struct FastSweepingState : IDisposable
     {
+        public void Dispose() => FastSweepingApi.Dispose(ref this);
         public Grid2D Grid;
         public float* T;
-        public Unity.Collections.AllocatorManager.AllocatorHandle Allocator;
+        public AllocatorManager.AllocatorHandle Allocator;
     }
 
     [BurstCompile]
@@ -30,7 +33,7 @@ namespace BovineLabs.Grid.FastSweeping
             {
                 Allocator = a,
                 Grid = g,
-                T = (float*)Unity.Collections.AllocatorManager.Allocate(a, sizeof(float), Unity.Collections.LowLevel.Unsafe.UnsafeUtility.AlignOf<float>(), g.Length)
+                T = (float*)AllocatorManager.Allocate(a, sizeof(float), UnsafeUtility.AlignOf<float>(), g.Length)
             };
             return true;
         }
@@ -195,7 +198,11 @@ namespace BovineLabs.Grid.FastSweeping
 
         public static void Dispose(ref FastSweepingState s)
         {
-            if (s.T != null) { Unity.Collections.AllocatorManager.Free(s.Allocator, s.T); s.T = null; }
+            if (s.T != null)
+            {
+                AllocatorManager.Free(s.Allocator, s.T);
+                s.T = null;
+            }
         }
     }
 }

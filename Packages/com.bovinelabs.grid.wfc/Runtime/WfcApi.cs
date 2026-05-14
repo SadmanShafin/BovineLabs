@@ -6,8 +6,10 @@ using Unity.Mathematics;
 
 namespace BovineLabs.Grid.Wfc
 {
-    public unsafe struct WfcState
+
+    public unsafe struct WfcState : System.IDisposable
     {
+        public void Dispose() => WfcApi.Dispose(ref this);
         public Grid2D Grid;
         public int PatternCount;
         public ulong* PossibleBits;
@@ -18,7 +20,7 @@ namespace BovineLabs.Grid.Wfc
 
         public MinHeap ObserveHeap;
         public byte WfcComplete;
-        public Unity.Collections.AllocatorManager.AllocatorHandle Allocator;
+        public AllocatorManager.AllocatorHandle Allocator;
     }
 
     [BurstCompile]
@@ -34,11 +36,13 @@ namespace BovineLabs.Grid.Wfc
             {
                 Grid = g,
                 PatternCount = patternCount,
-                PossibleBits = (ulong*)Unity.Collections.AllocatorManager.Allocate(a, sizeof(ulong), Unity.Collections.LowLevel.Unsafe.UnsafeUtility.AlignOf<ulong>(), g.Length),
-                Entropy = (int*)Unity.Collections.AllocatorManager.Allocate(a, sizeof(int), Unity.Collections.LowLevel.Unsafe.UnsafeUtility.AlignOf<int>(), g.Length),
-                Compatibility = (ulong*)Unity.Collections.AllocatorManager.Allocate(a, sizeof(ulong), Unity.Collections.LowLevel.Unsafe.UnsafeUtility.AlignOf<ulong>(), patternCount * 4),
+                PossibleBits =
+                    (ulong*)AllocatorManager.Allocate(a, sizeof(ulong), UnsafeUtility.AlignOf<ulong>(), g.Length),
+                Entropy = (int*)AllocatorManager.Allocate(a, sizeof(int), UnsafeUtility.AlignOf<int>(), g.Length),
+                Compatibility = (ulong*)AllocatorManager.Allocate(a, sizeof(ulong), UnsafeUtility.AlignOf<ulong>(),
+                    patternCount * 4),
                 Queue = new UnsafeQueue<int>(a),
-                Dirty = (byte*)Unity.Collections.AllocatorManager.Allocate(a, sizeof(byte), Unity.Collections.LowLevel.Unsafe.UnsafeUtility.AlignOf<byte>(), g.Length),
+                Dirty = (byte*)AllocatorManager.Allocate(a, sizeof(byte), UnsafeUtility.AlignOf<byte>(), g.Length),
                 ObserveHeap = heap,
                 WfcComplete = 0
             };
@@ -280,11 +284,31 @@ namespace BovineLabs.Grid.Wfc
 
         public static void Dispose(ref WfcState s)
         {
-            if (s.PossibleBits != null) { Unity.Collections.AllocatorManager.Free(s.Allocator, s.PossibleBits); s.PossibleBits = null; }
-            if (s.Entropy != null) { Unity.Collections.AllocatorManager.Free(s.Allocator, s.Entropy); s.Entropy = null; }
-            if (s.Compatibility != null) { Unity.Collections.AllocatorManager.Free(s.Allocator, s.Compatibility); s.Compatibility = null; }
+            if (s.PossibleBits != null)
+            {
+                AllocatorManager.Free(s.Allocator, s.PossibleBits);
+                s.PossibleBits = null;
+            }
+
+            if (s.Entropy != null)
+            {
+                AllocatorManager.Free(s.Allocator, s.Entropy);
+                s.Entropy = null;
+            }
+
+            if (s.Compatibility != null)
+            {
+                AllocatorManager.Free(s.Allocator, s.Compatibility);
+                s.Compatibility = null;
+            }
+
             if (s.Queue.IsCreated) s.Queue.Dispose();
-            if (s.Dirty != null) { Unity.Collections.AllocatorManager.Free(s.Allocator, s.Dirty); s.Dirty = null; }
+            if (s.Dirty != null)
+            {
+                AllocatorManager.Free(s.Allocator, s.Dirty);
+                s.Dirty = null;
+            }
+
             if (s.ObserveHeap.IsCreated) s.ObserveHeap.Dispose();
         }
     }

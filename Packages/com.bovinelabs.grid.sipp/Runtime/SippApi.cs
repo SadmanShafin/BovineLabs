@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Unity.Burst;
 using Unity.Burst.CompilerServices;
@@ -30,8 +31,13 @@ namespace BovineLabs.Grid.Sipp
         public float EndTime;
     }
 
-    public unsafe struct SippState
+    public unsafe struct SippState : IDisposable
     {
+        public void Dispose()
+        {
+            SippApi.Dispose(ref this);
+        }
+
         public Grid2D Grid;
         public UnsafeList<SafeInterval> Intervals;
         public RangeI* CellIntervals;
@@ -39,7 +45,7 @@ namespace BovineLabs.Grid.Sipp
         public MinHeap Heap;
         public UnsafeList<float> BestTime;
         public UnsafeList<DynamicObstacle> Obstacles;
-        public Unity.Collections.AllocatorManager.AllocatorHandle Allocator;
+        public AllocatorManager.AllocatorHandle Allocator;
     }
 
     [BurstCompile]
@@ -56,7 +62,8 @@ namespace BovineLabs.Grid.Sipp
             {
                 Grid = g,
                 Intervals = new UnsafeList<SafeInterval>(maxIntervals, a),
-                CellIntervals = (RangeI*)Unity.Collections.AllocatorManager.Allocate(a, sizeof(RangeI), Unity.Collections.LowLevel.Unsafe.UnsafeUtility.AlignOf<RangeI>(), g.Length),
+                CellIntervals =
+                    (RangeI*)AllocatorManager.Allocate(a, sizeof(RangeI), UnsafeUtility.AlignOf<RangeI>(), g.Length),
                 Nodes = new UnsafeList<SippNode>(maxNodes, a),
                 Heap = heap,
                 BestTime = new UnsafeList<float>(maxIntervals, a),
@@ -224,7 +231,12 @@ namespace BovineLabs.Grid.Sipp
         public static void Dispose(ref SippState s)
         {
             if (s.Intervals.IsCreated) s.Intervals.Dispose();
-            if (s.CellIntervals != null) { Unity.Collections.AllocatorManager.Free(s.Allocator, s.CellIntervals); s.CellIntervals = null; }
+            if (s.CellIntervals != null)
+            {
+                AllocatorManager.Free(s.Allocator, s.CellIntervals);
+                s.CellIntervals = null;
+            }
+
             if (s.Nodes.IsCreated) s.Nodes.Dispose();
             s.Heap.Dispose();
             if (s.BestTime.IsCreated) s.BestTime.Dispose();

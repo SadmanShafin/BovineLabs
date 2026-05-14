@@ -1,8 +1,8 @@
-using Unity.Collections.LowLevel.Unsafe;
 using BovineLabs.Grid;
 using BovineLabs.Grid.Jps;
 using NUnit.Framework;
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
 
 public class JpsTests
@@ -10,20 +10,20 @@ public class JpsTests
     private JpsState state;
 
     [SetUp]
-    public unsafe void SetUp()
+    public void SetUp()
     {
         Assert.IsTrue(JpsApi.TryCreate(10, 10, Allocator.Temp, out var s));
         state = s;
     }
 
     [TearDown]
-    public unsafe void TearDown()
+    public void TearDown()
     {
         JpsApi.Dispose(ref state);
     }
 
     [Test]
-    public unsafe void StartEqualsGoal()
+    public void StartEqualsGoal()
     {
         var b = new NativeArray<byte>(100, Allocator.Temp);
         var p = new NativeList<int>(Allocator.Temp);
@@ -35,7 +35,7 @@ public class JpsTests
     }
 
     [Test]
-    public unsafe void Adjacent()
+    public void Adjacent()
     {
         var b = new NativeArray<byte>(100, Allocator.Temp);
         var p = new NativeList<int>(Allocator.Temp);
@@ -47,7 +47,7 @@ public class JpsTests
     }
 
     [Test]
-    public unsafe void OpenGrid_Distant()
+    public void OpenGrid_Distant()
     {
         var b = new NativeArray<byte>(100, Allocator.Temp);
         var p = new NativeList<int>(Allocator.Temp);
@@ -60,7 +60,7 @@ public class JpsTests
     }
 
     [Test]
-    public unsafe void BlockedGoal()
+    public void BlockedGoal()
     {
         var b = new NativeArray<byte>(100, Allocator.Temp);
         var p = new NativeList<int>(Allocator.Temp);
@@ -72,7 +72,7 @@ public class JpsTests
     }
 
     [Test]
-    public unsafe void BlockedStart()
+    public void BlockedStart()
     {
         var b = new NativeArray<byte>(100, Allocator.Temp);
         var p = new NativeList<int>(Allocator.Temp);
@@ -84,7 +84,7 @@ public class JpsTests
     }
 
     [Test]
-    public unsafe void WallAround()
+    public void WallAround()
     {
         var b = new NativeArray<byte>(100, Allocator.Temp);
         var p = new NativeList<int>(Allocator.Temp);
@@ -97,7 +97,7 @@ public class JpsTests
     }
 
     [Test]
-    public unsafe void CompletelyWalled()
+    public void CompletelyWalled()
     {
         var b = new NativeArray<byte>(100, Allocator.Temp);
         var p = new NativeList<int>(Allocator.Temp);
@@ -120,7 +120,7 @@ public class JpsTests
     }
 
     [Test]
-    public unsafe void NoBacktracking()
+    public void NoBacktracking()
     {
         var b = new NativeArray<byte>(100, Allocator.Temp);
         var p = new NativeList<int>(Allocator.Temp);
@@ -139,7 +139,7 @@ public class JpsTests
     }
 
     [Test]
-    public unsafe void Jump_ToGoal()
+    public void Jump_ToGoal()
     {
         var b = new NativeArray<byte>(100, Allocator.Temp);
         b.Fill((byte)0);
@@ -150,7 +150,7 @@ public class JpsTests
     }
 
     [Test]
-    public unsafe void Jump_HitWall()
+    public void Jump_HitWall()
     {
         var b = new NativeArray<byte>(100, Allocator.Temp);
         b.Fill((byte)0);
@@ -160,7 +160,7 @@ public class JpsTests
     }
 
     [Test]
-    public unsafe void Jump_Diagonal()
+    public void Jump_Diagonal()
     {
         var b = new NativeArray<byte>(100, Allocator.Temp);
         b.Fill((byte)0);
@@ -171,7 +171,7 @@ public class JpsTests
     }
 
     [Test]
-    public unsafe void Jump_OutOfBounds()
+    public void Jump_OutOfBounds()
     {
         var b = new NativeArray<byte>(100, Allocator.Temp);
         b.Fill((byte)0);
@@ -221,7 +221,7 @@ public class JpsTests
     }
 
     [Test]
-    public unsafe void Create_Dimensions()
+    public void Create_Dimensions()
     {
         Assert.IsTrue(JpsApi.TryCreate(10, 10, Allocator.Temp, out var s));
         Assert.AreEqual(100, s.Grid.Length);
@@ -229,7 +229,7 @@ public class JpsTests
     }
 
     [Test]
-    public unsafe void Dispose_Double()
+    public void Dispose_Double()
     {
         Assert.IsTrue(JpsApi.TryCreate(5, 5, Allocator.Temp, out var s));
         JpsApi.Dispose(ref s);
@@ -237,7 +237,7 @@ public class JpsTests
     }
 
     [Test]
-    public unsafe void FullyBlocked_NoPath()
+    public void FullyBlocked_NoPath()
     {
         Assert.IsTrue(JpsApi.TryCreate(5, 5, Allocator.Temp, out var s));
         var b = new NativeArray<byte>(25, Allocator.Temp);
@@ -250,7 +250,7 @@ public class JpsTests
     }
 
     [Test]
-    public unsafe void _2x2_Diagonal()
+    public void _2x2_Diagonal()
     {
         Assert.IsTrue(JpsApi.TryCreate(2, 2, Allocator.Temp, out var s));
         var b = new NativeArray<byte>(4, Allocator.Temp);
@@ -264,7 +264,7 @@ public class JpsTests
     }
 
     [Test]
-    public unsafe void _1x5_Linear()
+    public void _1x5_Linear()
     {
         Assert.IsTrue(JpsApi.TryCreate(5, 1, Allocator.Temp, out var s));
         var b = new NativeArray<byte>(5, Allocator.Temp);

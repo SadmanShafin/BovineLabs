@@ -53,38 +53,14 @@ namespace BovineLabs.Grid
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe void Set(int x, int y, CellState state)
+        public void Set(int x, int y, CellState state)
         {
             Cells[Index(x, y)] = state;
         }
 
-        public unsafe void Dispose()
+        public void Dispose()
         {
             if (Cells.IsCreated) Cells.Dispose();
-        }
-    }
-
-
-    public struct PathNode : IEquatable<PathNode>, IComparable<PathNode>
-    {
-        public int2 Position;
-        public float GCost;
-        public float FCost;
-        public int ParentIndex;
-
-        public int CompareTo(PathNode other)
-        {
-            return FCost.CompareTo(other.FCost);
-        }
-
-        public bool Equals(PathNode other)
-        {
-            return Position.Equals(other.Position);
-        }
-
-        public override int GetHashCode()
-        {
-            return Position.GetHashCode();
         }
     }
 
@@ -104,7 +80,7 @@ namespace BovineLabs.Grid
             NodesExplored = 0;
         }
 
-        public unsafe void Dispose()
+        public void Dispose()
         {
             if (Path.IsCreated) Path.Dispose();
         }
@@ -115,22 +91,6 @@ namespace BovineLabs.Grid
     {
         public const float CardinalCost = 1f;
         public const float DiagonalCost = 1.4142135f;
-
-        public static readonly int2[] Cardinal =
-        {
-            new(0, -1),
-            new(1, 0),
-            new(0, 1),
-            new(-1, 0)
-        };
-
-        public static readonly int2[] Diagonal =
-        {
-            new(1, -1),
-            new(1, 1),
-            new(-1, 1),
-            new(-1, -1)
-        };
 
 
         public static int GetNeighbors4(in Grid2D grid, int cell, NativeArray<int> neighbors, NativeArray<byte> blocked)

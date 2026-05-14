@@ -6,7 +6,7 @@ using Unity.Mathematics;
 public class WfcTests
 {
     [Test]
-    public unsafe void Create_Dimensions()
+    public void Create_Dimensions()
     {
         Assert.IsTrue(WfcApi.TryCreate(3, 3, 4, Allocator.Temp, out var s));
         Assert.AreEqual(9, s.Grid.Length);
@@ -51,10 +51,32 @@ public class WfcTests
     }
 
     [Test]
-    public unsafe void Dispose_Double()
+    public void Dispose_Double()
     {
         Assert.IsTrue(WfcApi.TryCreate(3, 3, 2, Allocator.Temp, out var s));
         WfcApi.Dispose(ref s);
         WfcApi.Dispose(ref s);
+    }
+
+    [Test]
+    public void Run_OutputSatisfiesAdjacency()
+    {
+        Assert.IsTrue(WfcApi.TryCreate(4, 4, 2, Allocator.Temp, out var s));
+        var sample = new NativeArray<int>(new[]
+        {
+            0, 0, 1, 1,
+            0, 0, 1, 1,
+            0, 0, 1, 1,
+            0, 0, 1, 1
+        }, Allocator.Temp);
+        Assert.IsTrue(WfcApi.TryLearnAdjacency(ref s, sample, 4, 4));
+        var output = new NativeArray<int>(16, Allocator.Temp);
+        var rng = new Random(7);
+        Assert.IsTrue(WfcApi.TryRun(ref s, ref output, ref rng));
+        for (var i = 0; i < output.Length; i++)
+            Assert.IsTrue(output[i] == 0 || output[i] == 1, $"Cell {i} must be 0 or 1");
+        WfcApi.Dispose(ref s);
+        sample.Dispose();
+        output.Dispose();
     }
 }

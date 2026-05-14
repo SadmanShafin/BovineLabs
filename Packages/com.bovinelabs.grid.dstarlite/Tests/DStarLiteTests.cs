@@ -9,7 +9,7 @@ public class DStarLiteTests
     private DStarLiteState state;
 
     [SetUp]
-    public unsafe void SetUp()
+    public void SetUp()
     {
         Assert.IsTrue(DStarLiteApi.TryCreate(10, 10, Allocator.Temp, out var s));
         state = s;
@@ -18,14 +18,14 @@ public class DStarLiteTests
     }
 
     [TearDown]
-    public unsafe void TearDown()
+    public void TearDown()
     {
         DStarLiteApi.Dispose(ref state);
         if (blocked.IsCreated) blocked.Dispose();
     }
 
     [Test]
-    public unsafe void Create_Dimensions()
+    public void Create_Dimensions()
     {
         Assert.AreEqual(100, state.Grid.Length);
     }
@@ -48,7 +48,7 @@ public class DStarLiteTests
     }
 
     [Test]
-    public unsafe void Repair_OpenGrid()
+    public void Repair_OpenGrid()
     {
         var cost = new NativeArray<float>(0, Allocator.Temp);
         Assert.IsTrue(DStarLiteApi.TryInitialize(ref state, 0, 99, blocked));
@@ -57,7 +57,7 @@ public class DStarLiteTests
     }
 
     [Test]
-    public unsafe void Repair_BlockedGoal()
+    public void Repair_BlockedGoal()
     {
         blocked[99] = 1;
         var cost = new NativeArray<float>(0, Allocator.Temp);
@@ -67,7 +67,7 @@ public class DStarLiteTests
     }
 
     [Test]
-    public unsafe void Repair_BlockedStart()
+    public void Repair_BlockedStart()
     {
         blocked[0] = 1;
         var cost = new NativeArray<float>(0, Allocator.Temp);
@@ -77,7 +77,7 @@ public class DStarLiteTests
     }
 
     [Test]
-    public unsafe void Repair_StartEqualsGoal()
+    public void Repair_StartEqualsGoal()
     {
         var cost = new NativeArray<float>(0, Allocator.Temp);
         Assert.IsTrue(DStarLiteApi.TryInitialize(ref state, 42, 42, blocked));
@@ -86,7 +86,7 @@ public class DStarLiteTests
     }
 
     [Test]
-    public unsafe void NotifyMoved()
+    public void NotifyMoved()
     {
         Assert.IsTrue(DStarLiteApi.TryInitialize(ref state, 0, 99, blocked));
         DStarLiteApi.NotifyMoved(ref state, 5);
@@ -95,7 +95,7 @@ public class DStarLiteTests
     }
 
     [Test]
-    public unsafe void Repair_1x5_Linear()
+    public void Repair_1x5_Linear()
     {
         Assert.IsTrue(DStarLiteApi.TryCreate(5, 1, Allocator.Temp, out var s));
         var b = new NativeArray<byte>(5, Allocator.Temp);
@@ -109,10 +109,51 @@ public class DStarLiteTests
     }
 
     [Test]
-    public unsafe void Dispose_Double()
+    public void Dispose_Double()
     {
         Assert.IsTrue(DStarLiteApi.TryCreate(3, 3, Allocator.Temp, out var s));
         DStarLiteApi.Dispose(ref s);
         DStarLiteApi.Dispose(ref s);
+    }
+
+    [Test]
+    public void Replan_AfterObstacleAdded_PathChanges()
+    {
+        Assert.IsTrue(DStarLiteApi.TryCreate(10, 10, Allocator.Temp, out var s));
+        var b = new NativeArray<byte>(100, Allocator.Temp);
+        b.Fill((byte)0);
+        var cost = new NativeArray<float>(0, Allocator.Temp);
+        var path1 = new NativeList<int>(Allocator.Temp);
+        var path2 = new NativeList<int>(Allocator.Temp);
+
+        Assert.IsTrue(DStarLiteApi.TryInitialize(ref s, 0, 99, b));
+        Assert.IsTrue(DStarLiteApi.TryRepair(ref s, b, cost, 10000));
+        Assert.IsTrue(DStarLiteApi.TryExtractPath(ref s, b, cost, ref path1));
+        Assert.Greater(path1.Length, 0);
+
+        b[s.Grid.ToIndex(5, 0)] = 1;
+        b[s.Grid.ToIndex(5, 1)] = 1;
+        b[s.Grid.ToIndex(5, 2)] = 1;
+        b[s.Grid.ToIndex(5, 3)] = 1;
+        b[s.Grid.ToIndex(5, 4)] = 1;
+
+        Assert.IsTrue(DStarLiteApi.TryUpdateCell(ref s, b, cost, s.Grid.ToIndex(5, 0)));
+        Assert.IsTrue(DStarLiteApi.TryUpdateCell(ref s, b, cost, s.Grid.ToIndex(5, 1)));
+        Assert.IsTrue(DStarLiteApi.TryUpdateCell(ref s, b, cost, s.Grid.ToIndex(5, 2)));
+        Assert.IsTrue(DStarLiteApi.TryUpdateCell(ref s, b, cost, s.Grid.ToIndex(5, 3)));
+        Assert.IsTrue(DStarLiteApi.TryUpdateCell(ref s, b, cost, s.Grid.ToIndex(5, 4)));
+
+        Assert.IsTrue(DStarLiteApi.TryRepair(ref s, b, cost, 10000));
+        Assert.IsTrue(DStarLiteApi.TryExtractPath(ref s, b, cost, ref path2));
+        Assert.Greater(path2.Length, 0);
+
+        for (var i = 0; i < path2.Length; i++)
+            Assert.AreEqual(0, b[path2[i]], $"Replanned path must not cross new obstacle at step {i}");
+
+        DStarLiteApi.Dispose(ref s);
+        b.Dispose();
+        cost.Dispose();
+        path1.Dispose();
+        path2.Dispose();
     }
 }

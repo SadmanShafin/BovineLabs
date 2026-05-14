@@ -5,7 +5,7 @@ using Unity.Collections;
 public class FastSweepingTests
 {
     [Test]
-    public unsafe void Create_Dimensions()
+    public void Create_Dimensions()
     {
         Assert.IsTrue(FastSweepingApi.TryCreate(5, 3, Allocator.Temp, out var s));
         Assert.AreEqual(15, s.Grid.Length);
@@ -77,7 +77,7 @@ public class FastSweepingTests
     }
 
     [Test]
-    public unsafe void Dispose_Double()
+    public void Dispose_Double()
     {
         Assert.IsTrue(FastSweepingApi.TryCreate(3, 3, Allocator.Temp, out var s));
         FastSweepingApi.Dispose(ref s);

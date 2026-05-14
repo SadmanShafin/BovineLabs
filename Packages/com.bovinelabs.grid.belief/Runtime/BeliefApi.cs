@@ -20,11 +20,16 @@ namespace BovineLabs.Grid.Belief
                 Grid = g,
                 LabelCount = labelCount,
                 Allocator = a,
-                Unary = (float*)AllocatorManager.Allocate(a, sizeof(float), UnsafeUtility.AlignOf<float>(), g.Length * labelCount),
-                Messages = (float*)AllocatorManager.Allocate(a, sizeof(float), UnsafeUtility.AlignOf<float>(), g.Length * 4 * labelCount),
-                MessagesNext = (float*)AllocatorManager.Allocate(a, sizeof(float), UnsafeUtility.AlignOf<float>(), g.Length * 4 * labelCount),
-                Belief = (float*)AllocatorManager.Allocate(a, sizeof(float), UnsafeUtility.AlignOf<float>(), g.Length * labelCount),
-                Scratch = (float*)AllocatorManager.Allocate(a, sizeof(float), UnsafeUtility.AlignOf<float>(), labelCount)
+                Unary = (float*)AllocatorManager.Allocate(a, sizeof(float), UnsafeUtility.AlignOf<float>(),
+                    g.Length * labelCount),
+                Messages = (float*)AllocatorManager.Allocate(a, sizeof(float), UnsafeUtility.AlignOf<float>(),
+                    g.Length * 4 * labelCount),
+                MessagesNext = (float*)AllocatorManager.Allocate(a, sizeof(float), UnsafeUtility.AlignOf<float>(),
+                    g.Length * 4 * labelCount),
+                Belief = (float*)AllocatorManager.Allocate(a, sizeof(float), UnsafeUtility.AlignOf<float>(),
+                    g.Length * labelCount),
+                Scratch = (float*)AllocatorManager.Allocate(a, sizeof(float), UnsafeUtility.AlignOf<float>(),
+                    labelCount)
             };
             return true;
         }
@@ -193,11 +198,35 @@ namespace BovineLabs.Grid.Belief
 
         public static void Dispose(ref BeliefState s)
         {
-            if (s.Unary != null) { Unity.Collections.AllocatorManager.Free(s.Allocator, s.Unary); s.Unary = null; }
-            if (s.Messages != null) { Unity.Collections.AllocatorManager.Free(s.Allocator, s.Messages); s.Messages = null; }
-            if (s.MessagesNext != null) { Unity.Collections.AllocatorManager.Free(s.Allocator, s.MessagesNext); s.MessagesNext = null; }
-            if (s.Belief != null) { Unity.Collections.AllocatorManager.Free(s.Allocator, s.Belief); s.Belief = null; }
-            if (s.Scratch != null) { Unity.Collections.AllocatorManager.Free(s.Allocator, s.Scratch); s.Scratch = null; }
+            if (s.Unary != null)
+            {
+                AllocatorManager.Free(s.Allocator, s.Unary);
+                s.Unary = null;
+            }
+
+            if (s.Messages != null)
+            {
+                AllocatorManager.Free(s.Allocator, s.Messages);
+                s.Messages = null;
+            }
+
+            if (s.MessagesNext != null)
+            {
+                AllocatorManager.Free(s.Allocator, s.MessagesNext);
+                s.MessagesNext = null;
+            }
+
+            if (s.Belief != null)
+            {
+                AllocatorManager.Free(s.Allocator, s.Belief);
+                s.Belief = null;
+            }
+
+            if (s.Scratch != null)
+            {
+                AllocatorManager.Free(s.Allocator, s.Scratch);
+                s.Scratch = null;
+            }
         }
     }
 }

@@ -8,7 +8,7 @@ using Unity.Mathematics;
 public class SubgoalTests
 {
     [Test]
-    public unsafe void Create_Dimensions()
+    public void Create_Dimensions()
     {
         Assert.IsTrue(SubgoalApi.TryCreate(10, 10, 100, 1000, Allocator.Temp, out var s));
         Assert.AreEqual(100, s.Grid.Length);
@@ -16,7 +16,7 @@ public class SubgoalTests
     }
 
     [Test]
-    public unsafe void Build_OpenGrid_NoSubgoals()
+    public void Build_OpenGrid_NoSubgoals()
     {
         Assert.IsTrue(SubgoalApi.TryCreate(10, 10, 100, 1000, Allocator.Temp, out var s));
         var blocked = new NativeArray<byte>(100, Allocator.Temp);
@@ -28,7 +28,7 @@ public class SubgoalTests
     }
 
     [Test]
-    public unsafe void Build_WithObstacles()
+    public void Build_WithObstacles()
     {
         Assert.IsTrue(SubgoalApi.TryCreate(10, 10, 100, 1000, Allocator.Temp, out var s));
         var blocked = new NativeArray<byte>(100, Allocator.Temp);
@@ -47,7 +47,7 @@ public class SubgoalTests
     }
 
     [Test]
-    public unsafe void Search_OpenGrid()
+    public void Search_OpenGrid()
     {
         Assert.IsTrue(SubgoalApi.TryCreate(10, 10, 100, 1000, Allocator.Temp, out var s));
         var blocked = new NativeArray<byte>(100, Allocator.Temp);
@@ -83,10 +83,41 @@ public class SubgoalTests
     }
 
     [Test]
-    public unsafe void Dispose_Double()
+    public void Dispose_Double()
     {
         Assert.IsTrue(SubgoalApi.TryCreate(5, 5, 10, 100, Allocator.Temp, out var s));
         SubgoalApi.Dispose(ref s);
         SubgoalApi.Dispose(ref s);
+    }
+
+    [Test]
+    public void Search_WithSubgoals_PathIsOptimalOrNear()
+    {
+        Assert.IsTrue(SubgoalApi.TryCreate(10, 10, 200, 5000, Allocator.Temp, out var s));
+        var blocked = new NativeArray<byte>(100, Allocator.Temp);
+        blocked.Fill((byte)0);
+        blocked[s.Grid.ToIndex(5, 0)] = 1;
+        blocked[s.Grid.ToIndex(5, 1)] = 1;
+        blocked[s.Grid.ToIndex(5, 2)] = 1;
+        blocked[s.Grid.ToIndex(5, 3)] = 1;
+        blocked[s.Grid.ToIndex(5, 4)] = 1;
+        blocked[s.Grid.ToIndex(5, 5)] = 1;
+        blocked[s.Grid.ToIndex(5, 6)] = 1;
+        blocked[s.Grid.ToIndex(5, 7)] = 1;
+        blocked[s.Grid.ToIndex(5, 8)] = 1;
+
+        Assert.IsTrue(SubgoalApi.TryBuild(ref s, blocked));
+        Assert.Greater(s.Subgoals.Length, 0, "Wall must generate subgoals");
+
+        var path = new NativeList<int>(Allocator.Temp);
+        Assert.IsTrue(SubgoalApi.TrySearch(ref s, blocked, 0, 99, ref path));
+        Assert.AreEqual(0, path[0]);
+        Assert.AreEqual(99, path[path.Length - 1]);
+        for (var i = 0; i < path.Length; i++)
+            Assert.AreEqual(0, blocked[path[i]], $"Path must not pass through obstacle at step {i}");
+
+        SubgoalApi.Dispose(ref s);
+        blocked.Dispose();
+        path.Dispose();
     }
 }

@@ -11,6 +11,6 @@ namespace BovineLabs.Grid.Belief
         public float* MessagesNext;
         public float* Belief;
         public float* Scratch;
-        public Unity.Collections.AllocatorManager.AllocatorHandle Allocator;
+        public AllocatorManager.AllocatorHandle Allocator;
     }
 }

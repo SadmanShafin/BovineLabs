@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Unity.Burst;
@@ -22,7 +23,7 @@ namespace BovineLabs.Grid.Cpd
         public Grid2D Grid;
         public UnsafeList<CpdRun> Runs;
         public RangeI* SourceRuns;
-        public Unity.Collections.AllocatorManager.AllocatorHandle Allocator;
+        public AllocatorManager.AllocatorHandle Allocator;
     }
 
     [BurstCompile]
@@ -41,7 +42,8 @@ namespace BovineLabs.Grid.Cpd
                 Allocator = a,
                 Grid = g,
                 Runs = new UnsafeList<CpdRun>(maxRuns, a),
-                SourceRuns = (RangeI*)Unity.Collections.AllocatorManager.Allocate(a, sizeof(RangeI), Unity.Collections.LowLevel.Unsafe.UnsafeUtility.AlignOf<RangeI>(), g.Length)
+                SourceRuns =
+                    (RangeI*)AllocatorManager.Allocate(a, sizeof(RangeI), UnsafeUtility.AlignOf<RangeI>(), g.Length)
             };
             return true;
         }
@@ -57,10 +59,10 @@ namespace BovineLabs.Grid.Cpd
             var h = s.Grid.Height;
             var len = s.Grid.Length;
 
-            var firstMove = new Unity.Collections.NativeArray<byte>(len, Allocator.Temp);
+            var firstMove = new NativeArray<byte>(len, Allocator.Temp);
             var fm = (byte*)firstMove.GetUnsafePtr();
-            var dist = new Unity.Collections.NativeArray<float>(len, Allocator.Temp);
-            var parent = new Unity.Collections.NativeArray<int>(len, Allocator.Temp);
+            var dist = new NativeArray<float>(len, Allocator.Temp);
+            var parent = new NativeArray<int>(len, Allocator.Temp);
             var queue = new UnsafeQueue<int>(Allocator.Temp);
 
             for (var source = 0; source < len; source++)
@@ -115,11 +117,18 @@ namespace BovineLabs.Grid.Cpd
                     }
                 }
 
+                var sortedTargets = new NativeArray<int>(len, Allocator.Temp);
+                var sortCount = 0;
+                for (var t = 0; t < len; t++)
+                    if (fm[t] != 255)
+                        sortedTargets[sortCount++] = t;
+                sortedTargets.GetSubArray(0, sortCount).Sort(new FmComparer { Fm = fm });
+
                 byte currentMove = 255;
                 var runTargetMin = -1;
-                for (var target = 0; target < len; target++)
+                for (var si = 0; si < sortCount; si++)
                 {
-                    if (fm[target] == 255) continue;
+                    var target = sortedTargets[si];
                     if (fm[target] != currentMove)
                     {
                         if (currentMove != 255)
@@ -132,6 +141,8 @@ namespace BovineLabs.Grid.Cpd
                         runTargetMin = target;
                     }
                 }
+
+                sortedTargets.Dispose();
 
                 if (currentMove != 255)
                     s.Runs.Add(new CpdRun
@@ -203,7 +214,21 @@ namespace BovineLabs.Grid.Cpd
         public static void Dispose(ref CpdState s)
         {
             if (s.Runs.IsCreated) s.Runs.Dispose();
-            if (s.SourceRuns != null) { Unity.Collections.AllocatorManager.Free(s.Allocator, s.SourceRuns); s.SourceRuns = null; }
+            if (s.SourceRuns != null)
+            {
+                AllocatorManager.Free(s.Allocator, s.SourceRuns);
+                s.SourceRuns = null;
+            }
+        }
+
+        public struct FmComparer : IComparer<int>
+        {
+            [NativeDisableUnsafePtrRestriction] public byte* Fm;
+
+            public int Compare(int a, int b)
+            {
+                return Fm[a].CompareTo(Fm[b]);
+            }
         }
     }
 }

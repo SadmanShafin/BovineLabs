@@ -9,7 +9,7 @@ namespace BovineLabs.Grid.MeshA
     {
         public static bool TryCreateCardinal8(Allocator allocator, out PrimitiveSet result)
         {
-            result = new PrimitiveSet(8, allocator);
+            result = new PrimitiveSet(64, allocator);
             int2[] offsets =
             {
                 new(0, -1),
@@ -22,9 +22,11 @@ namespace BovineLabs.Grid.MeshA
                 new(-1, -1)
             };
 
+            var primId = 0;
             for (var theta = 0; theta < 8; theta++)
+            for (var dir = 0; dir < 8; dir++)
             {
-                var offset = offsets[theta];
+                var offset = offsets[dir];
                 var length = math.length(new float2(offset.x, offset.y));
 
                 var sweptI = new NativeArray<int>(1, allocator);
@@ -33,10 +35,10 @@ namespace BovineLabs.Grid.MeshA
                 sweptJ[0] = offset.y;
 
                 var prim = new MotionPrimitive(
-                    theta,
+                    primId++,
                     theta,
                     offset,
-                    theta,
+                    dir,
                     length,
                     0f,
                     sweptI,

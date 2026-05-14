@@ -6,7 +6,7 @@ using Unity.Mathematics;
 public class GridNeighborsTests
 {
     [Test]
-    public unsafe void Center_4Neighbors()
+    public void Center_4Neighbors()
     {
         Assert.IsTrue(Grid2D.TryCreate(5, 5, out var g));
         var b = new NativeArray<byte>(g.Length, Allocator.Temp);
@@ -18,7 +18,7 @@ public class GridNeighborsTests
     }
 
     [Test]
-    public unsafe void Corner_2Neighbors()
+    public void Corner_2Neighbors()
     {
         Assert.IsTrue(Grid2D.TryCreate(5, 5, out var g));
         var b = new NativeArray<byte>(g.Length, Allocator.Temp);
@@ -30,7 +30,7 @@ public class GridNeighborsTests
     }
 
     [Test]
-    public unsafe void Edge_3Neighbors()
+    public void Edge_3Neighbors()
     {
         Assert.IsTrue(Grid2D.TryCreate(5, 5, out var g));
         var b = new NativeArray<byte>(g.Length, Allocator.Temp);
@@ -42,7 +42,7 @@ public class GridNeighborsTests
     }
 
     [Test]
-    public unsafe void Blocked_Skipped()
+    public void Blocked_Skipped()
     {
         Assert.IsTrue(Grid2D.TryCreate(3, 3, out var g));
         var b = new NativeArray<byte>(g.Length, Allocator.Temp);
@@ -55,7 +55,7 @@ public class GridNeighborsTests
     }
 
     [Test]
-    public unsafe void AllBlocked_0Neighbors()
+    public void AllBlocked_0Neighbors()
     {
         Assert.IsTrue(Grid2D.TryCreate(3, 3, out var g));
         var b = new NativeArray<byte>(g.Length, Allocator.Temp);
@@ -68,7 +68,7 @@ public class GridNeighborsTests
     }
 
     [Test]
-    public unsafe void Center_8Neighbors()
+    public void Center_8Neighbors()
     {
         Assert.IsTrue(Grid2D.TryCreate(5, 5, out var g));
         var b = new NativeArray<byte>(g.Length, Allocator.Temp);
@@ -80,7 +80,7 @@ public class GridNeighborsTests
     }
 
     [Test]
-    public unsafe void Corner_3DiagNeighbors()
+    public void Corner_3DiagNeighbors()
     {
         Assert.IsTrue(Grid2D.TryCreate(5, 5, out var g));
         var b = new NativeArray<byte>(g.Length, Allocator.Temp);
@@ -92,7 +92,7 @@ public class GridNeighborsTests
     }
 
     [Test]
-    public unsafe void DiagonalPassable_BothFree()
+    public void DiagonalPassable_BothFree()
     {
         Assert.IsTrue(Grid2D.TryCreate(5, 5, out var g));
         var b = new NativeArray<byte>(g.Length, Allocator.Temp);
@@ -102,7 +102,7 @@ public class GridNeighborsTests
     }
 
     [Test]
-    public unsafe void DiagonalPassable_OneBlocked()
+    public void DiagonalPassable_OneBlocked()
     {
         Assert.IsTrue(Grid2D.TryCreate(5, 5, out var g));
         var b = new NativeArray<byte>(g.Length, Allocator.Temp);
@@ -113,7 +113,7 @@ public class GridNeighborsTests
     }
 
     [Test]
-    public unsafe void DiagonalPassable_OutOfBounds()
+    public void DiagonalPassable_OutOfBounds()
     {
         Assert.IsTrue(Grid2D.TryCreate(3, 3, out var g));
         var b = new NativeArray<byte>(g.Length, Allocator.Temp);
@@ -123,7 +123,7 @@ public class GridNeighborsTests
     }
 
     [Test]
-    public unsafe void _1x1_NoNeighbors()
+    public void _1x1_NoNeighbors()
     {
         Assert.IsTrue(Grid2D.TryCreate(1, 1, out var g));
         var b = new NativeArray<byte>(1, Allocator.Temp);

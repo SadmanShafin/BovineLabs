@@ -7,7 +7,7 @@ using Unity.Mathematics;
 public class ContinuumCrowdTests
 {
     [Test]
-    public unsafe void Create_Dimensions()
+    public void Create_Dimensions()
     {
         Assert.IsTrue(ContinuumCrowdApi.TryCreate(10, 10, Allocator.Temp, out var s));
         Assert.AreEqual(100, s.Grid.Length);
@@ -70,7 +70,7 @@ public class ContinuumCrowdTests
     }
 
     [Test]
-    public unsafe void Dispose_Double()
+    public void Dispose_Double()
     {
         Assert.IsTrue(ContinuumCrowdApi.TryCreate(3, 3, Allocator.Temp, out var s));
         ContinuumCrowdApi.Dispose(ref s);

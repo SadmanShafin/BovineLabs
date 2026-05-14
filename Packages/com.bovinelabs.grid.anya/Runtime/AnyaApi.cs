@@ -28,6 +28,7 @@ namespace BovineLabs.Grid.Anya
                 Grid = g,
                 Heap = heap,
                 Pool = new UnsafeList<AnyaNode>(maxNodes, a.ToAllocator),
+                NodeLookup = new NativeHashMap<ulong, int>(maxNodes, a.ToAllocator),
                 Allocator = a,
                 RootGCost = (double*)AllocatorManager.Allocate(a, sizeof(double) * rootCount,
                     UnsafeUtility.AlignOf<double>())
@@ -68,6 +69,7 @@ namespace BovineLabs.Grid.Anya
         {
             s.Heap.Clear();
             s.Pool.Clear();
+            s.NodeLookup.Clear();
 
             var rootCount = (s.Grid.Width + 1) * (s.Grid.Height + 1);
             for (var i = 0; i < rootCount; i++) s.RootGCost[i] = double.PositiveInfinity;
@@ -383,13 +385,13 @@ namespace BovineLabs.Grid.Anya
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool NodeEquals(in AnyaNode a, double L, double R, int y, double2 root)
+        private static ulong NodeKey(double L, double R, int y, double2 root)
         {
-            return a.y == y
-                   && math.abs(a.L - L) < EPS
-                   && math.abs(a.R - R) < EPS
-                   && math.abs(a.Root.x - root.x) < EPS
-                   && math.abs(a.Root.y - root.y) < EPS;
+            var h = (ulong)(long)(L * 1000003) ^ (ulong)(long)(R * 999983);
+            h ^= (ulong)y * 2654435761UL;
+            h ^= (ulong)(long)(root.x * 1000033) * 40503UL;
+            h ^= (ulong)(long)(root.y * 999979) * 40507UL;
+            return h == 0 ? 1 : h;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -398,27 +400,27 @@ namespace BovineLabs.Grid.Anya
         {
             if (R - L <= EPS) return;
 
-            for (var i = 0; i < s.Pool.Length; i++)
-                if (NodeEquals(s.Pool[i], L, R, y, root))
+            var key = NodeKey(L, R, y, root);
+            if (s.NodeLookup.TryGetValue(key, out var existingIdx))
+            {
+                if (s.Pool[existingIdx].RootG <= rootG + EPS) return;
+                s.Pool[existingIdx] = new AnyaNode
                 {
-                    if (s.Pool[i].RootG <= rootG + EPS) return;
-                    s.Pool[i] = new AnyaNode
-                    {
-                        L = L, R = R, y = y, dy = dy, Root = root, RootG = rootG, Parent = parent
-                    };
-                    double xInt = goal.x;
-                    if (goal.y != root.y)
-                    {
-                        var ratio = (y - root.y) / (goal.y - root.y);
-                        xInt = root.x + (goal.x - root.x) * ratio;
-                    }
-
-                    var xOpt = math.max(L, math.min(R, xInt));
-                    var f = rootG + math.distance(root, new double2(xOpt, y)) +
-                            math.distance(new double2(xOpt, y), new double2(goal.x, goal.y));
-                    s.Heap.TryInsertOrDecrease(new DoubleHeapNode(i, f));
-                    return;
+                    L = L, R = R, y = y, dy = dy, Root = root, RootG = rootG, Parent = parent
+                };
+                double xInt = goal.x;
+                if (goal.y != root.y)
+                {
+                    var ratio = (y - root.y) / (goal.y - root.y);
+                    xInt = root.x + (goal.x - root.x) * ratio;
                 }
+
+                var xOpt = math.max(L, math.min(R, xInt));
+                var f = rootG + math.distance(root, new double2(xOpt, y)) +
+                        math.distance(new double2(xOpt, y), new double2(goal.x, goal.y));
+                s.Heap.TryInsertOrDecrease(new DoubleHeapNode(existingIdx, f));
+                return;
+            }
 
             double xInt2 = goal.x;
             if (goal.y != root.y)
@@ -442,6 +444,7 @@ namespace BovineLabs.Grid.Anya
                 RootG = rootG,
                 Parent = parent
             });
+            s.NodeLookup.TryAdd(key, idx);
             s.Heap.TryInsertOrDecrease(new DoubleHeapNode(idx, f2));
         }
 

@@ -12,6 +12,7 @@ namespace BovineLabs.Grid.Anya
         public Grid2D Grid;
         public DoubleMinHeap Heap;
         public UnsafeList<AnyaNode> Pool;
+        public NativeHashMap<ulong, int> NodeLookup;
         public double* RootGCost;
         public AllocatorManager.AllocatorHandle Allocator;
 
@@ -21,10 +22,11 @@ namespace BovineLabs.Grid.Anya
         public double BestCost;
         public byte SearchComplete;
 
-        public unsafe void Dispose()
+        public void Dispose()
         {
             if (Heap.IsCreated) Heap.Dispose();
             if (Pool.IsCreated) Pool.Dispose();
+            if (NodeLookup.IsCreated) NodeLookup.Dispose();
             if (RootGCost != null)
             {
                 AllocatorManager.Free(Allocator, RootGCost);

@@ -7,7 +7,7 @@ using Unity.Mathematics;
 public class FastMarchingTests
 {
     [Test]
-    public unsafe void Create_Dimensions()
+    public void Create_Dimensions()
     {
         Assert.IsTrue(FastMarchingApi.TryCreate(5, 5, Allocator.Temp, out var s));
         Assert.AreEqual(25, s.Grid.Length);
@@ -87,7 +87,7 @@ public class FastMarchingTests
     }
 
     [Test]
-    public unsafe void GradientFlow_NotNull()
+    public void GradientFlow_NotNull()
     {
         Assert.IsTrue(FastMarchingApi.TryCreate(5, 5, Allocator.Temp, out var s));
         var speed = new NativeArray<float>(25, Allocator.Temp);
@@ -106,7 +106,7 @@ public class FastMarchingTests
     }
 
     [Test]
-    public unsafe void Dispose_Double()
+    public void Dispose_Double()
     {
         Assert.IsTrue(FastMarchingApi.TryCreate(3, 3, Allocator.Temp, out var s));
         FastMarchingApi.Dispose(ref s);

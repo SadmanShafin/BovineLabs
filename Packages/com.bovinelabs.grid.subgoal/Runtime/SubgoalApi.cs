@@ -1,3 +1,4 @@
+using System;
 using Unity.Burst;
 using Unity.Burst.CompilerServices;
 using Unity.Collections;
@@ -12,14 +13,20 @@ namespace BovineLabs.Grid.Subgoal
         public float Cost;
     }
 
-    public unsafe struct SubgoalState
+
+    public unsafe struct SubgoalState : IDisposable
     {
+        public void Dispose()
+        {
+            SubgoalApi.Dispose(ref this);
+        }
+
         public Grid2D Grid;
         public UnsafeList<int> Subgoals;
         public int* SubgoalOfCell;
         public UnsafeList<SubgoalEdge> Edges;
         public UnsafeList<RangeI> EdgeRanges;
-        public Unity.Collections.AllocatorManager.AllocatorHandle Allocator;
+        public AllocatorManager.AllocatorHandle Allocator;
     }
 
     [BurstCompile]
@@ -34,7 +41,7 @@ namespace BovineLabs.Grid.Subgoal
             {
                 Grid = g,
                 Subgoals = new UnsafeList<int>(maxSubgoals, a),
-                SubgoalOfCell = (int*)Unity.Collections.AllocatorManager.Allocate(a, sizeof(int), Unity.Collections.LowLevel.Unsafe.UnsafeUtility.AlignOf<int>(), g.Length),
+                SubgoalOfCell = (int*)AllocatorManager.Allocate(a, sizeof(int), UnsafeUtility.AlignOf<int>(), g.Length),
                 Edges = new UnsafeList<SubgoalEdge>(maxEdges, a),
                 EdgeRanges = new UnsafeList<RangeI>(maxSubgoals, a)
             };
@@ -138,8 +145,8 @@ namespace BovineLabs.Grid.Subgoal
             var goalNode = n + 1;
             var totalNodes = n + 2;
 
-            var gArr = new Unity.Collections.NativeArray<float>(totalNodes, Allocator.Temp);
-            var parentArr = new Unity.Collections.NativeArray<int>(totalNodes, Allocator.Temp);
+            var gArr = new NativeArray<float>(totalNodes, Allocator.Temp);
+            var parentArr = new NativeArray<int>(totalNodes, Allocator.Temp);
             gArr.Fill(float.PositiveInfinity);
             parentArr.Fill(-1);
 
@@ -310,7 +317,12 @@ namespace BovineLabs.Grid.Subgoal
         public static void Dispose(ref SubgoalState s)
         {
             s.Subgoals.Dispose();
-            if (s.SubgoalOfCell != null) { Unity.Collections.AllocatorManager.Free(s.Allocator, s.SubgoalOfCell); s.SubgoalOfCell = null; }
+            if (s.SubgoalOfCell != null)
+            {
+                AllocatorManager.Free(s.Allocator, s.SubgoalOfCell);
+                s.SubgoalOfCell = null;
+            }
+
             s.Edges.Dispose();
             s.EdgeRanges.Dispose();
         }

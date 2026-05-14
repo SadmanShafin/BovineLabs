@@ -17,7 +17,7 @@ namespace BovineLabs.Grid.EHL
         public NativeList<float2> ResultWaypoints;
         public NativeList<int> ResultPathFound;
 
-        public unsafe void Execute()
+        public void Execute()
         {
             var bestDist = float.MaxValue;
             var bestHubId = -1;

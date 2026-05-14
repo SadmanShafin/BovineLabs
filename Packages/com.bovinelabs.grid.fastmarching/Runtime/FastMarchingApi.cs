@@ -1,3 +1,4 @@
+using System;
 using System.Runtime.InteropServices;
 using Unity.Burst;
 using Unity.Burst.CompilerServices;
@@ -8,13 +9,18 @@ using Unity.Mathematics;
 namespace BovineLabs.Grid.FastMarching
 {
     [StructLayout(LayoutKind.Sequential)]
-    public unsafe struct FastMarchingState
+    public unsafe struct FastMarchingState : IDisposable
     {
+        public void Dispose()
+        {
+            FastMarchingApi.Dispose(ref this);
+        }
+
         public Grid2D Grid;
         public float* T;
         public byte* State;
         public MinHeap Heap;
-        public Unity.Collections.AllocatorManager.AllocatorHandle Allocator;
+        public AllocatorManager.AllocatorHandle Allocator;
     }
 
     [BurstCompile]
@@ -38,8 +44,8 @@ namespace BovineLabs.Grid.FastMarching
             {
                 Allocator = a,
                 Grid = g,
-                T = (float*)Unity.Collections.AllocatorManager.Allocate(a, sizeof(float), Unity.Collections.LowLevel.Unsafe.UnsafeUtility.AlignOf<float>(), g.Length),
-                State = (byte*)Unity.Collections.AllocatorManager.Allocate(a, sizeof(byte), Unity.Collections.LowLevel.Unsafe.UnsafeUtility.AlignOf<byte>(), g.Length),
+                T = (float*)AllocatorManager.Allocate(a, sizeof(float), UnsafeUtility.AlignOf<float>(), g.Length),
+                State = (byte*)AllocatorManager.Allocate(a, sizeof(byte), UnsafeUtility.AlignOf<byte>(), g.Length),
                 Heap = heap
             };
             return true;
@@ -190,8 +196,18 @@ namespace BovineLabs.Grid.FastMarching
 
         public static void Dispose(ref FastMarchingState s)
         {
-            if (s.T != null) { Unity.Collections.AllocatorManager.Free(s.Allocator, s.T); s.T = null; }
-            if (s.State != null) { Unity.Collections.AllocatorManager.Free(s.Allocator, s.State); s.State = null; }
+            if (s.T != null)
+            {
+                AllocatorManager.Free(s.Allocator, s.T);
+                s.T = null;
+            }
+
+            if (s.State != null)
+            {
+                AllocatorManager.Free(s.Allocator, s.State);
+                s.State = null;
+            }
+
             if (s.Heap.IsCreated) s.Heap.Dispose();
         }
     }

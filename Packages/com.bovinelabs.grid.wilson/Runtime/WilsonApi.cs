@@ -7,14 +7,16 @@ using Unity.Mathematics;
 namespace BovineLabs.Grid.Wilson
 {
     [StructLayout(LayoutKind.Sequential)]
-    public unsafe struct WilsonState
+
+    public unsafe struct WilsonState : System.IDisposable
     {
+        public void Dispose() => WilsonApi.Dispose(ref this);
         public Grid2D Grid;
         public byte* InTree;
         public int* Parent;
         public int* WalkNext;
         public UnsafeList<int> Walk;
-        public Unity.Collections.AllocatorManager.AllocatorHandle Allocator;
+        public AllocatorManager.AllocatorHandle Allocator;
     }
 
     [BurstCompile]
@@ -27,9 +29,9 @@ namespace BovineLabs.Grid.Wilson
             s = new WilsonState
             {
                 Grid = g,
-                InTree = (byte*)Unity.Collections.AllocatorManager.Allocate(a, sizeof(byte), Unity.Collections.LowLevel.Unsafe.UnsafeUtility.AlignOf<byte>(), g.Length),
-                Parent = (int*)Unity.Collections.AllocatorManager.Allocate(a, sizeof(int), Unity.Collections.LowLevel.Unsafe.UnsafeUtility.AlignOf<int>(), g.Length),
-                WalkNext = (int*)Unity.Collections.AllocatorManager.Allocate(a, sizeof(int), Unity.Collections.LowLevel.Unsafe.UnsafeUtility.AlignOf<int>(), g.Length),
+                InTree = (byte*)AllocatorManager.Allocate(a, sizeof(byte), UnsafeUtility.AlignOf<byte>(), g.Length),
+                Parent = (int*)AllocatorManager.Allocate(a, sizeof(int), UnsafeUtility.AlignOf<int>(), g.Length),
+                WalkNext = (int*)AllocatorManager.Allocate(a, sizeof(int), UnsafeUtility.AlignOf<int>(), g.Length),
                 Walk = new UnsafeList<int>(g.Length, a)
             };
             return true;
@@ -129,9 +131,24 @@ namespace BovineLabs.Grid.Wilson
 
         public static void Dispose(ref WilsonState s)
         {
-            if (s.InTree != null) { Unity.Collections.AllocatorManager.Free(s.Allocator, s.InTree); s.InTree = null; }
-            if (s.Parent != null) { Unity.Collections.AllocatorManager.Free(s.Allocator, s.Parent); s.Parent = null; }
-            if (s.WalkNext != null) { Unity.Collections.AllocatorManager.Free(s.Allocator, s.WalkNext); s.WalkNext = null; }
+            if (s.InTree != null)
+            {
+                AllocatorManager.Free(s.Allocator, s.InTree);
+                s.InTree = null;
+            }
+
+            if (s.Parent != null)
+            {
+                AllocatorManager.Free(s.Allocator, s.Parent);
+                s.Parent = null;
+            }
+
+            if (s.WalkNext != null)
+            {
+                AllocatorManager.Free(s.Allocator, s.WalkNext);
+                s.WalkNext = null;
+            }
+
             s.Walk.Dispose();
         }
     }

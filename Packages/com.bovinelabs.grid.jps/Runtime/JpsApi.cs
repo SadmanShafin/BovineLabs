@@ -1,3 +1,4 @@
+using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Unity.Burst;
@@ -8,14 +9,19 @@ using Unity.Mathematics;
 namespace BovineLabs.Grid.Jps
 {
     [StructLayout(LayoutKind.Sequential)]
-    public unsafe struct JpsState
+    public unsafe struct JpsState : IDisposable
     {
+        public void Dispose()
+        {
+            JpsApi.Dispose(ref this);
+        }
+
         public Grid2D Grid;
         public float* G;
         public int* Parent;
         public byte* Closed;
         public MinHeap Open;
-        public Unity.Collections.AllocatorManager.AllocatorHandle Allocator;
+        public AllocatorManager.AllocatorHandle Allocator;
     }
 
     [BurstCompile]
@@ -39,9 +45,12 @@ namespace BovineLabs.Grid.Jps
             {
                 Allocator = allocator,
                 Grid = g,
-                G = (float*)Unity.Collections.AllocatorManager.Allocate(allocator, sizeof(float), Unity.Collections.LowLevel.Unsafe.UnsafeUtility.AlignOf<float>(), g.Length),
-                Parent = (int*)Unity.Collections.AllocatorManager.Allocate(allocator, sizeof(int), Unity.Collections.LowLevel.Unsafe.UnsafeUtility.AlignOf<int>(), g.Length),
-                Closed = (byte*)Unity.Collections.AllocatorManager.Allocate(allocator, sizeof(byte), Unity.Collections.LowLevel.Unsafe.UnsafeUtility.AlignOf<byte>(), g.Length),
+                G = (float*)AllocatorManager.Allocate(allocator, sizeof(float), UnsafeUtility.AlignOf<float>(),
+                    g.Length),
+                Parent =
+                    (int*)AllocatorManager.Allocate(allocator, sizeof(int), UnsafeUtility.AlignOf<int>(), g.Length),
+                Closed = (byte*)AllocatorManager.Allocate(allocator, sizeof(byte), UnsafeUtility.AlignOf<byte>(),
+                    g.Length),
                 Open = open
             };
             return true;
@@ -52,7 +61,12 @@ namespace BovineLabs.Grid.Jps
             ref NativeList<int> path)
         {
             if (!TryInitSearch(ref s, in blocked, start, goal)) return false;
-            if (start == goal) { path.Add(start); return true; }
+            if (start == goal)
+            {
+                path.Add(start);
+                return true;
+            }
+
             if (s.Open.IsEmpty) return false;
 
             var blk = (byte*)blocked.GetUnsafeReadOnlyPtr();
@@ -60,7 +74,8 @@ namespace BovineLabs.Grid.Jps
             var h = s.Grid.Height;
 
             while (!s.Open.IsEmpty)
-                if (TryStepSearch(ref s, blk, w, h, start, goal, ref path)) break;
+                if (TryStepSearch(ref s, blk, w, h, start, goal, ref path))
+                    break;
 
             return path.Length > 0;
         }
@@ -92,7 +107,8 @@ namespace BovineLabs.Grid.Jps
         }
 
         [BurstCompile]
-        public static bool TryStepSearch(ref JpsState s, byte* blk, int w, int h, int start, int goal, ref NativeList<int> path)
+        public static bool TryStepSearch(ref JpsState s, byte* blk, int w, int h, int start, int goal,
+            ref NativeList<int> path)
         {
             if (s.Open.IsEmpty) return true;
             if (!s.Open.TryPop(out var current)) return true;
@@ -210,9 +226,24 @@ namespace BovineLabs.Grid.Jps
 
         public static void Dispose(ref JpsState s)
         {
-            if (s.G != null) { Unity.Collections.AllocatorManager.Free(s.Allocator, s.G); s.G = null; }
-            if (s.Parent != null) { Unity.Collections.AllocatorManager.Free(s.Allocator, s.Parent); s.Parent = null; }
-            if (s.Closed != null) { Unity.Collections.AllocatorManager.Free(s.Allocator, s.Closed); s.Closed = null; }
+            if (s.G != null)
+            {
+                AllocatorManager.Free(s.Allocator, s.G);
+                s.G = null;
+            }
+
+            if (s.Parent != null)
+            {
+                AllocatorManager.Free(s.Allocator, s.Parent);
+                s.Parent = null;
+            }
+
+            if (s.Closed != null)
+            {
+                AllocatorManager.Free(s.Allocator, s.Closed);
+                s.Closed = null;
+            }
+
             if (s.Open.IsCreated) s.Open.Dispose();
         }
 

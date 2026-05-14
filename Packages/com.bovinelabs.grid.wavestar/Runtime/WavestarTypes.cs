@@ -159,65 +159,6 @@ namespace BovineLabs.Grid.Wavestar
     }
 
 
-    public struct MultiResCostField : IDisposable
-    {
-        private NativeHashMap<int, SubvolumeData> data;
-
-        public MultiResCostField(int capacity, Allocator allocator)
-        {
-            data = new NativeHashMap<int, SubvolumeData>(capacity, allocator);
-        }
-
-        public int Count => data.Count;
-
-        public bool TryGetValue(OctreeIndex idx, out SubvolumeData subvolData)
-        {
-            return data.TryGetValue(idx.MortonCode, out subvolData);
-        }
-
-        public unsafe void Set(OctreeIndex idx, SubvolumeData sv)
-        {
-            data[idx.MortonCode] = sv;
-        }
-
-        public bool Contains(OctreeIndex idx)
-        {
-            return data.ContainsKey(idx.MortonCode);
-        }
-
-        public unsafe void Remove(OctreeIndex idx)
-        {
-            data.Remove(idx.MortonCode);
-        }
-
-
-        public NativeHashMap<int, SubvolumeData> RawData => data;
-
-        public NativeArray<int> GetKeyArray(Allocator allocator)
-        {
-            return data.GetKeyArray(allocator);
-        }
-
-        public NativeArray<SubvolumeData> GetValueArray(Allocator allocator)
-        {
-            return data.GetValueArray(allocator);
-        }
-
-        public unsafe void Clear()
-        {
-            data.Clear();
-        }
-
-        public unsafe void Dispose()
-        {
-            if (data.IsCreated)
-                data.Dispose();
-        }
-
-        public bool IsCreated => data.IsCreated;
-    }
-
-
     public interface IObstacleMap
     {
         int SizeX { get; }
@@ -243,9 +184,9 @@ namespace BovineLabs.Grid.Wavestar
         public NativeObstacleMap(NativeArray<int> grid, int sizeX, int sizeY, int sizeZ)
         {
             this.grid = grid;
-            this.SizeX = sizeX;
-            this.SizeY = sizeY;
-            this.SizeZ = sizeZ;
+            SizeX = sizeX;
+            SizeY = sizeY;
+            SizeZ = sizeZ;
         }
 
         public int SizeX { get; }
@@ -314,12 +255,12 @@ namespace BovineLabs.Grid.Wavestar
 
         public bool IsCreated => heap.IsCreated;
 
-        public unsafe void Clear()
+        public void Clear()
         {
             heap.Clear();
         }
 
-        public unsafe void Push(OpenSetElement element)
+        public void Push(OpenSetElement element)
         {
             heap.Add(element);
             BubbleUp(heap.Length - 1);
@@ -336,7 +277,7 @@ namespace BovineLabs.Grid.Wavestar
             return root;
         }
 
-        public unsafe void Dispose()
+        public void Dispose()
         {
             if (heap.IsCreated)
                 heap.Dispose();

@@ -5,7 +5,7 @@ using Unity.Collections;
 public class SandpileTests
 {
     [Test]
-    public unsafe void Create_Dimensions()
+    public void Create_Dimensions()
     {
         Assert.IsTrue(SandpileApi.TryCreate(5, 3, Allocator.Temp, out var s));
         Assert.AreEqual(15, s.Grid.Length);
@@ -32,7 +32,7 @@ public class SandpileTests
     }
 
     [Test]
-    public unsafe void Add_Stable_NoEnqueue()
+    public void Add_Stable_NoEnqueue()
     {
         Assert.IsTrue(SandpileApi.TryCreate(3, 3, Allocator.Temp, out var s));
         SandpileApi.AddGrains(ref s, 4, 3);
@@ -41,7 +41,7 @@ public class SandpileTests
     }
 
     [Test]
-    public unsafe void Add_Unstable_Enqueues()
+    public void Add_Unstable_Enqueues()
     {
         Assert.IsTrue(SandpileApi.TryCreate(3, 3, Allocator.Temp, out var s));
         SandpileApi.AddGrains(ref s, 4, 4);
@@ -65,7 +65,7 @@ public class SandpileTests
     }
 
     [Test]
-    public unsafe void Relax_Chain()
+    public void Relax_Chain()
     {
         Assert.IsTrue(SandpileApi.TryCreate(3, 3, Allocator.Temp, out var s));
         SandpileApi.AddGrains(ref s, 4, 3);
@@ -101,7 +101,7 @@ public class SandpileTests
     }
 
     [Test]
-    public unsafe void Relax_MultipleSources()
+    public void Relax_MultipleSources()
     {
         Assert.IsTrue(SandpileApi.TryCreate(5, 5, Allocator.Temp, out var s));
         SandpileApi.AddGrains(ref s, 6, 8);
@@ -123,7 +123,7 @@ public class SandpileTests
     }
 
     [Test]
-    public unsafe void IsStable_Empty()
+    public void IsStable_Empty()
     {
         Assert.IsTrue(SandpileApi.TryCreate(3, 3, Allocator.Temp, out var s));
         Assert.IsTrue(SandpileApi.IsStable(ref s));
@@ -131,10 +131,22 @@ public class SandpileTests
     }
 
     [Test]
-    public unsafe void Dispose_Double()
+    public void Dispose_Double()
     {
         Assert.IsTrue(SandpileApi.TryCreate(3, 3, Allocator.Temp, out var s));
         SandpileApi.Dispose(ref s);
+        SandpileApi.Dispose(ref s);
+    }
+
+    [Test]
+    public unsafe void Relax_BoundaryLosesGrains()
+    {
+        Assert.IsTrue(SandpileApi.TryCreate(3, 3, Allocator.Temp, out var s));
+        SandpileApi.AddGrains(ref s, 0, 4);
+        SandpileApi.RelaxAll(ref s);
+        var total = 0;
+        for (var i = 0; i < s.Grid.Length; i++) total += s.Grains[i];
+        Assert.Less(total, 4, "Corner topple loses grains to open boundary");
         SandpileApi.Dispose(ref s);
     }
 }

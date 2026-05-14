@@ -6,7 +6,7 @@ using Unity.Mathematics;
 public class CftpTests
 {
     [Test]
-    public unsafe void Create_Dimensions()
+    public void Create_Dimensions()
     {
         Assert.IsTrue(CftpApi.TryCreate(3, 3, 100, Allocator.Temp, out var s));
         Assert.AreEqual(9, s.Grid.Length);
@@ -28,7 +28,7 @@ public class CftpTests
     }
 
     [Test]
-    public unsafe void Coalesced_NotInitially()
+    public void Coalesced_NotInitially()
     {
         Assert.IsTrue(CftpApi.TryCreate(3, 3, 100, Allocator.Temp, out var s));
         CftpApi.InitializeExtremes(ref s);
@@ -37,7 +37,7 @@ public class CftpTests
     }
 
     [Test]
-    public unsafe void GenerateUpdates()
+    public void GenerateUpdates()
     {
         Assert.IsTrue(CftpApi.TryCreate(3, 3, 1000, Allocator.Temp, out var s));
         var rng = new Random(42);
@@ -47,10 +47,23 @@ public class CftpTests
     }
 
     [Test]
-    public unsafe void Dispose_Double()
+    public void Dispose_Double()
     {
         Assert.IsTrue(CftpApi.TryCreate(3, 3, 10, Allocator.Temp, out var s));
         CftpApi.Dispose(ref s);
         CftpApi.Dispose(ref s);
+    }
+
+    [Test]
+    public void SampleExact_Coalesces()
+    {
+        Assert.IsTrue(CftpApi.TryCreate(4, 4, 10000, Allocator.Temp, out var s));
+        var rng = new Random(7);
+        var sample = new NativeArray<byte>(s.Grid.Length, Allocator.Temp);
+        Assert.IsTrue(CftpApi.TrySampleExact(ref s, ref rng, ref sample));
+        for (var i = 0; i < sample.Length; i++)
+            Assert.IsTrue(sample[i] == 0 || sample[i] == 1, "Sample must be binary");
+        CftpApi.Dispose(ref s);
+        sample.Dispose();
     }
 }

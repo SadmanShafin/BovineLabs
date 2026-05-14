@@ -8,7 +8,7 @@ namespace BovineLabs.Grid
         public int Height;
         public int Length;
 
-        public unsafe void Setup(int width, int height)
+        public void Setup(int width, int height)
         {
             Width = width;
             Height = height;
@@ -33,15 +33,9 @@ namespace BovineLabs.Grid
             return result;
         }
 
-        public int ToIndex(int2 p)
-        {
-            return p.y * Width + p.x;
-        }
+        public int ToIndex(int2 p) => p.y * Width + p.x;
 
-        public int ToIndex(int x, int y)
-        {
-            return y * Width + x;
-        }
+        public int ToIndex(int x, int y) => y * Width + x;
 
         public int2 ToCoord(int index)
         {
@@ -53,10 +47,7 @@ namespace BovineLabs.Grid
             return (uint)p.x < (uint)Width && (uint)p.y < (uint)Height;
         }
 
-        public bool InBounds(int index)
-        {
-            return (uint)index < (uint)Length;
-        }
+        public bool InBounds(int index) => (uint)index < (uint)Length;
 
         public bool TryIndex(int2 p, out int index)
         {
@@ -69,39 +60,33 @@ namespace BovineLabs.Grid
 
         public static int2 Dir4(int d)
         {
-            switch (d)
+            return d switch
             {
-                case 0: return new int2(1, 0);
-                case 1: return new int2(0, 1);
-                case 2: return new int2(-1, 0);
-                default: return new int2(0, -1);
-            }
+                0 => new int2(1, 0),
+                1 => new int2(0, 1),
+                2 => new int2(-1, 0),
+                _ => new int2(0, -1)
+            };
         }
 
         public static int2 Dir8(int d)
         {
-            switch (d)
+            return d switch
             {
-                case 0: return new int2(1, 0);
-                case 1: return new int2(1, 1);
-                case 2: return new int2(0, 1);
-                case 3: return new int2(-1, 1);
-                case 4: return new int2(-1, 0);
-                case 5: return new int2(-1, -1);
-                case 6: return new int2(0, -1);
-                default: return new int2(1, -1);
-            }
+                0 => new int2(1, 0),
+                1 => new int2(1, 1),
+                2 => new int2(0, 1),
+                3 => new int2(-1, 1),
+                4 => new int2(-1, 0),
+                5 => new int2(-1, -1),
+                6 => new int2(0, -1),
+                _ => new int2(1, -1)
+            };
         }
 
-        public static float HeuristicManhattan(int2 a, int2 b)
-        {
-            return math.abs(a.x - b.x) + math.abs(a.y - b.y);
-        }
+        public static float HeuristicManhattan(int2 a, int2 b) => math.abs(a.x - b.x) + math.abs(a.y - b.y);
 
-        public static float HeuristicEuclidean(int2 a, int2 b)
-        {
-            return math.length(new float2(a.x - b.x, a.y - b.y));
-        }
+        public static float HeuristicEuclidean(int2 a, int2 b) => math.length(new float2(a.x - b.x, a.y - b.y));
 
         public static float HeuristicOctile(int2 a, int2 b)
         {

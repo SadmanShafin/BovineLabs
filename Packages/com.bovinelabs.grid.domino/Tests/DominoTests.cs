@@ -6,7 +6,7 @@ using Unity.Collections;
 public class DominoTests
 {
     [Test]
-    public unsafe void Create_Dimensions()
+    public void Create_Dimensions()
     {
         Assert.IsTrue(DominoApi.TryCreate(4, 4, Allocator.Temp, out var s));
         Assert.AreEqual(16, s.Grid.Length);
@@ -14,7 +14,7 @@ public class DominoTests
     }
 
     [Test]
-    public unsafe void CheckTileable_Even()
+    public void CheckTileable_Even()
     {
         Assert.IsTrue(DominoApi.TryCreate(2, 2, Allocator.Temp, out var s));
         var region = new NativeArray<byte>(4, Allocator.Temp);
@@ -26,7 +26,7 @@ public class DominoTests
     }
 
     [Test]
-    public unsafe void CheckTileable_Odd()
+    public void CheckTileable_Odd()
     {
         Assert.IsTrue(DominoApi.TryCreate(3, 3, Allocator.Temp, out var s));
         var region = new NativeArray<byte>(9, Allocator.Temp);
@@ -38,7 +38,7 @@ public class DominoTests
     }
 
     [Test]
-    public unsafe void BuildTiling_2x2()
+    public void BuildTiling_2x2()
     {
         Assert.IsTrue(DominoApi.TryCreate(2, 2, Allocator.Temp, out var s));
         var region = new NativeArray<byte>(4, Allocator.Temp);
@@ -50,7 +50,7 @@ public class DominoTests
     }
 
     [Test]
-    public unsafe void BuildTiling_4x4()
+    public void BuildTiling_4x4()
     {
         Assert.IsTrue(DominoApi.TryCreate(4, 4, Allocator.Temp, out var s));
         var region = new NativeArray<byte>(16, Allocator.Temp);
@@ -63,7 +63,7 @@ public class DominoTests
     }
 
     [Test]
-    public unsafe void MutilatedChessboard_Untileable()
+    public void MutilatedChessboard_Untileable()
     {
         Assert.IsTrue(DominoApi.TryCreate(8, 8, Allocator.Temp, out var s));
         var region = new NativeArray<byte>(64, Allocator.Temp);
@@ -109,7 +109,7 @@ public class DominoTests
     }
 
     [Test]
-    public unsafe void Flip_OutOfBounds_ReturnsFalse()
+    public void Flip_OutOfBounds_ReturnsFalse()
     {
         Assert.IsTrue(DominoApi.TryCreate(2, 2, Allocator.Temp, out var s));
         var region = new NativeArray<byte>(4, Allocator.Temp);
@@ -122,10 +122,27 @@ public class DominoTests
     }
 
     [Test]
-    public unsafe void Dispose_Double()
+    public void Dispose_Double()
     {
         Assert.IsTrue(DominoApi.TryCreate(3, 3, Allocator.Temp, out var s));
         DominoApi.Dispose(ref s);
         DominoApi.Dispose(ref s);
+    }
+
+    [Test]
+    public unsafe void BuildHeightFunction_2x2_AllAssigned()
+    {
+        Assert.IsTrue(DominoApi.TryCreate(2, 2, Allocator.Temp, out var s));
+        var region = new NativeArray<byte>(4, Allocator.Temp);
+        region.Fill((byte)1);
+        DominoApi.SetRegion(ref s, region);
+        Assert.IsTrue(DominoApi.TryBuildHeightFunction(ref s));
+        var allAssigned = true;
+        for (var i = 0; i < 4; i++)
+            if (s.Region[i] != 0 && s.Height[i] == 0 && i != 0)
+                allAssigned = false;
+        Assert.IsTrue(allAssigned);
+        DominoApi.Dispose(ref s);
+        region.Dispose();
     }
 }

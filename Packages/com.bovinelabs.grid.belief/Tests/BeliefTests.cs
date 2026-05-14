@@ -6,7 +6,7 @@ using Unity.Collections;
 public class BeliefTests
 {
     [Test]
-    public unsafe void Create_Dimensions()
+    public void Create_Dimensions()
     {
         Assert.IsTrue(BeliefApi.TryCreate(5, 5, 2, Allocator.Temp, out var s));
         Assert.AreEqual(25, s.Grid.Length);
@@ -25,7 +25,7 @@ public class BeliefTests
     }
 
     [Test]
-    public unsafe void Iterate_ThenDecode()
+    public void Iterate_ThenDecode()
     {
         Assert.IsTrue(BeliefApi.TryCreate(3, 3, 2, Allocator.Temp, out var s));
         var unary = new NativeArray<float>(s.Grid.Length * 2, Allocator.Temp);
@@ -50,7 +50,7 @@ public class BeliefTests
     }
 
     [Test]
-    public unsafe void ConsensusChain()
+    public void ConsensusChain()
     {
         Assert.IsTrue(BeliefApi.TryCreate(5, 1, 2, Allocator.Temp, out var s));
         var unary = new NativeArray<float>(s.Grid.Length * 2, Allocator.Temp);
@@ -78,7 +78,7 @@ public class BeliefTests
     }
 
     [Test]
-    public unsafe void MessageClear_NoGhostBeliefs()
+    public void MessageClear_NoGhostBeliefs()
     {
         Assert.IsTrue(BeliefApi.TryCreate(3, 1, 2, Allocator.Temp, out var s));
         var unary1 = new NativeArray<float>(s.Grid.Length * 2, Allocator.Temp);
@@ -113,7 +113,7 @@ public class BeliefTests
     }
 
     [Test]
-    public unsafe void Dispose_Double()
+    public void Dispose_Double()
     {
         Assert.IsTrue(BeliefApi.TryCreate(3, 3, 2, Allocator.Temp, out var s));
         BeliefApi.Dispose(ref s);

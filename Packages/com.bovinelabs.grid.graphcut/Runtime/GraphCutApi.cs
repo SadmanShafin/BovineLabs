@@ -22,7 +22,7 @@ namespace BovineLabs.Grid.GraphCut
         public byte* SourceSide;
         public UnsafeList<int> ActiveNodes;
         public byte* InActiveNodes;
-        public Unity.Collections.AllocatorManager.AllocatorHandle Allocator;
+        public AllocatorManager.AllocatorHandle Allocator;
     }
 
     [BurstCompile]
@@ -49,12 +49,13 @@ namespace BovineLabs.Grid.GraphCut
                 EdgeFlow = new UnsafeList<int>(maxEdges, a),
                 EdgeRev = new UnsafeList<int>(maxEdges, a),
                 EdgeNext = new UnsafeList<int>(maxEdges, a),
-                EdgeHead = (int*)Unity.Collections.AllocatorManager.Allocate(a, sizeof(int), Unity.Collections.LowLevel.Unsafe.UnsafeUtility.AlignOf<int>(), nodeCount),
-                Excess = (int*)Unity.Collections.AllocatorManager.Allocate(a, sizeof(int), Unity.Collections.LowLevel.Unsafe.UnsafeUtility.AlignOf<int>(), nodeCount),
-                Height = (int*)Unity.Collections.AllocatorManager.Allocate(a, sizeof(int), Unity.Collections.LowLevel.Unsafe.UnsafeUtility.AlignOf<int>(), nodeCount),
-                SourceSide = (byte*)Unity.Collections.AllocatorManager.Allocate(a, sizeof(byte), Unity.Collections.LowLevel.Unsafe.UnsafeUtility.AlignOf<byte>(), g.Length),
+                EdgeHead = (int*)AllocatorManager.Allocate(a, sizeof(int), UnsafeUtility.AlignOf<int>(), nodeCount),
+                Excess = (int*)AllocatorManager.Allocate(a, sizeof(int), UnsafeUtility.AlignOf<int>(), nodeCount),
+                Height = (int*)AllocatorManager.Allocate(a, sizeof(int), UnsafeUtility.AlignOf<int>(), nodeCount),
+                SourceSide = (byte*)AllocatorManager.Allocate(a, sizeof(byte), UnsafeUtility.AlignOf<byte>(), g.Length),
                 ActiveNodes = new UnsafeList<int>(nodeCount, a),
-                InActiveNodes = (byte*)Unity.Collections.AllocatorManager.Allocate(a, sizeof(byte), Unity.Collections.LowLevel.Unsafe.UnsafeUtility.AlignOf<byte>(), nodeCount)
+                InActiveNodes =
+                    (byte*)AllocatorManager.Allocate(a, sizeof(byte), UnsafeUtility.AlignOf<byte>(), nodeCount)
             };
             return true;
         }
@@ -72,7 +73,7 @@ namespace BovineLabs.Grid.GraphCut
             s.EdgeRev.Clear();
             s.EdgeNext.Clear();
             var nodeCount = s.Grid.Length + 2;
-            for (int i = 0; i < nodeCount; i++) s.EdgeHead[i] = -1;
+            for (var i = 0; i < nodeCount; i++) s.EdgeHead[i] = -1;
 
             var cellCount = s.Grid.Length;
             var sourceIdx = cellCount;
@@ -84,8 +85,12 @@ namespace BovineLabs.Grid.GraphCut
 
             for (var i = 0; i < cellCount; i++)
             {
-                if (unary0Ptr[i] > 0) AddEdgeInternal(ref s, sourceIdx, i, unary0Ptr[i]);
-                if (unary1Ptr[i] > 0) AddEdgeInternal(ref s, i, sinkIdx, unary1Ptr[i]);
+                if (unary0Ptr[i] > 0)
+                    if (!AddEdgeInternal(ref s, sourceIdx, i, unary0Ptr[i]))
+                        return;
+                if (unary1Ptr[i] > 0)
+                    if (!AddEdgeInternal(ref s, i, sinkIdx, unary1Ptr[i]))
+                        return;
             }
 
             var width = s.Grid.Width;
@@ -105,15 +110,17 @@ namespace BovineLabs.Grid.GraphCut
                     if (Hint.Likely(nx >= 0 && ny >= 0 && nx < width && ny < height))
                     {
                         var neighbor = ny * width + nx;
-                        AddEdgeInternal(ref s, i, neighbor, w);
-                        AddEdgeInternal(ref s, neighbor, i, w);
+                        if (!AddEdgeInternal(ref s, i, neighbor, w)) return;
+                        if (!AddEdgeInternal(ref s, neighbor, i, w)) return;
                     }
                 }
             }
         }
 
-        public static void AddEdgeInternal(ref GraphCutState s, int u, int v, int cap)
+        public static bool AddEdgeInternal(ref GraphCutState s, int u, int v, int cap)
         {
+            if (s.EdgeTo.Length + 2 > s.EdgeTo.Capacity) return false;
+
             var uvIdx = s.EdgeTo.Length;
             var vuIdx = uvIdx + 1;
 
@@ -130,14 +137,15 @@ namespace BovineLabs.Grid.GraphCut
             s.EdgeRev.Add(uvIdx);
             s.EdgeNext.Add(s.EdgeHead[v]);
             s.EdgeHead[v] = vuIdx;
+            return true;
         }
 
         [BurstCompile]
         public static bool TrySolve(ref GraphCutState s, int sourceCell, int sinkCell)
         {
-            var u0 = new Unity.Collections.NativeArray<int>(s.Grid.Length, Allocator.Temp);
-            var u1 = new Unity.Collections.NativeArray<int>(s.Grid.Length, Allocator.Temp);
-            var pw = new Unity.Collections.NativeArray<int>(s.Grid.Length, Allocator.Temp);
+            var u0 = new NativeArray<int>(s.Grid.Length, Allocator.Temp);
+            var u1 = new NativeArray<int>(s.Grid.Length, Allocator.Temp);
+            var pw = new NativeArray<int>(s.Grid.Length, Allocator.Temp);
             if (sourceCell >= 0 && sourceCell < u0.Length) u0[sourceCell] = 1000000;
             if (sinkCell >= 0 && sinkCell < u1.Length) u1[sinkCell] = 1000000;
             for (var i = 0; i < pw.Length; i++) pw[i] = 1;
@@ -236,7 +244,7 @@ namespace BovineLabs.Grid.GraphCut
             var queue = new NativeQueue<int>(Allocator.Temp);
             queue.Enqueue(source);
 
-            var visited = new Unity.Collections.NativeArray<byte>(nodeCount, Allocator.Temp);
+            var visited = new NativeArray<byte>(nodeCount, Allocator.Temp);
             visited[source] = 1;
 
             while (queue.TryDequeue(out var u))
@@ -274,12 +282,36 @@ namespace BovineLabs.Grid.GraphCut
             s.EdgeFlow.Dispose();
             s.EdgeRev.Dispose();
             s.EdgeNext.Dispose();
-            if (s.EdgeHead != null) { Unity.Collections.AllocatorManager.Free(s.Allocator, s.EdgeHead); s.EdgeHead = null; }
-            if (s.Excess != null) { Unity.Collections.AllocatorManager.Free(s.Allocator, s.Excess); s.Excess = null; }
-            if (s.Height != null) { Unity.Collections.AllocatorManager.Free(s.Allocator, s.Height); s.Height = null; }
-            if (s.SourceSide != null) { Unity.Collections.AllocatorManager.Free(s.Allocator, s.SourceSide); s.SourceSide = null; }
+            if (s.EdgeHead != null)
+            {
+                AllocatorManager.Free(s.Allocator, s.EdgeHead);
+                s.EdgeHead = null;
+            }
+
+            if (s.Excess != null)
+            {
+                AllocatorManager.Free(s.Allocator, s.Excess);
+                s.Excess = null;
+            }
+
+            if (s.Height != null)
+            {
+                AllocatorManager.Free(s.Allocator, s.Height);
+                s.Height = null;
+            }
+
+            if (s.SourceSide != null)
+            {
+                AllocatorManager.Free(s.Allocator, s.SourceSide);
+                s.SourceSide = null;
+            }
+
             s.ActiveNodes.Dispose();
-            if (s.InActiveNodes != null) { Unity.Collections.AllocatorManager.Free(s.Allocator, s.InActiveNodes); s.InActiveNodes = null; }
+            if (s.InActiveNodes != null)
+            {
+                AllocatorManager.Free(s.Allocator, s.InActiveNodes);
+                s.InActiveNodes = null;
+            }
         }
     }
 }

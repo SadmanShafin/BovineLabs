@@ -1,3 +1,4 @@
+using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Unity.Burst;
@@ -8,8 +9,10 @@ using Unity.Mathematics;
 namespace BovineLabs.Grid.DStarLite
 {
     [StructLayout(LayoutKind.Sequential)]
-    public unsafe struct DStarLiteState
+
+    public unsafe struct DStarLiteState : IDisposable
     {
+        public void Dispose() => DStarLiteApi.Dispose(ref this);
         public Grid2D Grid;
         public int Start;
         public int Goal;
@@ -19,7 +22,7 @@ namespace BovineLabs.Grid.DStarLite
         public MinHeap Open;
         public byte* InOpen;
         public int* Parent;
-        public Unity.Collections.AllocatorManager.AllocatorHandle Allocator;
+        public AllocatorManager.AllocatorHandle Allocator;
     }
 
     [BurstCompile]
@@ -37,11 +40,14 @@ namespace BovineLabs.Grid.DStarLite
             {
                 Allocator = allocator,
                 Grid = g,
-                G = (float*)Unity.Collections.AllocatorManager.Allocate(allocator, sizeof(float), Unity.Collections.LowLevel.Unsafe.UnsafeUtility.AlignOf<float>(), g.Length),
-                RHS = (float*)Unity.Collections.AllocatorManager.Allocate(allocator, sizeof(float), Unity.Collections.LowLevel.Unsafe.UnsafeUtility.AlignOf<float>(), g.Length),
+                G = (float*)AllocatorManager.Allocate(allocator, sizeof(float), UnsafeUtility.AlignOf<float>(),
+                    g.Length),
+                RHS = (float*)AllocatorManager.Allocate(allocator, sizeof(float), UnsafeUtility.AlignOf<float>(),
+                    g.Length),
                 Open = heap,
-                InOpen = (byte*)Unity.Collections.AllocatorManager.Allocate(allocator, sizeof(byte), Unity.Collections.LowLevel.Unsafe.UnsafeUtility.AlignOf<byte>(), g.Length),
-                Parent = (int*)Unity.Collections.AllocatorManager.Allocate(allocator, sizeof(int), Unity.Collections.LowLevel.Unsafe.UnsafeUtility.AlignOf<int>(), g.Length)
+                InOpen = (byte*)AllocatorManager.Allocate(allocator, sizeof(byte), UnsafeUtility.AlignOf<byte>(),
+                    g.Length),
+                Parent = (int*)AllocatorManager.Allocate(allocator, sizeof(int), UnsafeUtility.AlignOf<int>(), g.Length)
             };
             return true;
         }
@@ -119,7 +125,7 @@ namespace BovineLabs.Grid.DStarLite
                 while (!s.Open.IsEmpty)
                 {
                     if (!s.Open.TryPeek(out var openTop)) return false;
-                    if (gPtr[openTop.Id] != rhsPtr[openTop.Id]) break;
+                    if (math.abs(gPtr[openTop.Id] - rhsPtr[openTop.Id]) > 1e-6f) break;
                     if (!s.Open.TryPop(out _)) return false;
                     inOpen[openTop.Id] = 0;
                 }
@@ -130,7 +136,7 @@ namespace BovineLabs.Grid.DStarLite
                 if (!s.Open.TryPeek(out var openTop2)) return false;
 
                 if (!LessOrEqual(openTop2.Key0, openTop2.Key1, topKey.x, topKey.y) &&
-                    rhsPtr[s.Start] == gPtr[s.Start])
+                    math.abs(rhsPtr[s.Start] - gPtr[s.Start]) <= 1e-6f)
                     return true;
 
                 if (!s.Open.TryPop(out var u)) return false;
@@ -175,7 +181,7 @@ namespace BovineLabs.Grid.DStarLite
             var costPtr = cost.IsCreated ? (float*)cost.GetUnsafeReadOnlyPtr() : null;
             var w = s.Grid.Width;
 
-            var rhsStart = (s.RHS)[s.Start];
+            var rhsStart = s.RHS[s.Start];
             if (rhsStart >= float.PositiveInfinity) return false;
             if (blk[s.Start] != 0) return false;
 
@@ -217,11 +223,30 @@ namespace BovineLabs.Grid.DStarLite
 
         public static void Dispose(ref DStarLiteState s)
         {
-            if (s.G != null) { Unity.Collections.AllocatorManager.Free(s.Allocator, s.G); s.G = null; }
-            if (s.RHS != null) { Unity.Collections.AllocatorManager.Free(s.Allocator, s.RHS); s.RHS = null; }
+            if (s.G != null)
+            {
+                AllocatorManager.Free(s.Allocator, s.G);
+                s.G = null;
+            }
+
+            if (s.RHS != null)
+            {
+                AllocatorManager.Free(s.Allocator, s.RHS);
+                s.RHS = null;
+            }
+
             if (s.Open.IsCreated) s.Open.Dispose();
-            if (s.InOpen != null) { Unity.Collections.AllocatorManager.Free(s.Allocator, s.InOpen); s.InOpen = null; }
-            if (s.Parent != null) { Unity.Collections.AllocatorManager.Free(s.Allocator, s.Parent); s.Parent = null; }
+            if (s.InOpen != null)
+            {
+                AllocatorManager.Free(s.Allocator, s.InOpen);
+                s.InOpen = null;
+            }
+
+            if (s.Parent != null)
+            {
+                AllocatorManager.Free(s.Allocator, s.Parent);
+                s.Parent = null;
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

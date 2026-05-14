@@ -1,3 +1,4 @@
+using System;
 using System.Runtime.InteropServices;
 using Unity.Burst;
 using Unity.Burst.CompilerServices;
@@ -7,13 +8,15 @@ using Unity.Collections.LowLevel.Unsafe;
 namespace BovineLabs.Grid.Sandpile
 {
     [StructLayout(LayoutKind.Sequential)]
-    public unsafe struct SandpileState
+
+    public unsafe struct SandpileState : IDisposable
     {
+        public void Dispose() => SandpileApi.Dispose(ref this);
         public Grid2D Grid;
         public int* Grains;
         public UnsafeQueue<int> Queue;
         public byte* InQueue;
-        public Unity.Collections.AllocatorManager.AllocatorHandle Allocator;
+        public AllocatorManager.AllocatorHandle Allocator;
     }
 
     [BurstCompile]
@@ -31,9 +34,11 @@ namespace BovineLabs.Grid.Sandpile
             {
                 Allocator = allocator,
                 Grid = g,
-                Grains = (int*)Unity.Collections.AllocatorManager.Allocate(allocator, sizeof(int), Unity.Collections.LowLevel.Unsafe.UnsafeUtility.AlignOf<int>(), g.Length),
+                Grains =
+                    (int*)AllocatorManager.Allocate(allocator, sizeof(int), UnsafeUtility.AlignOf<int>(), g.Length),
                 Queue = new UnsafeQueue<int>(allocator),
-                InQueue = (byte*)Unity.Collections.AllocatorManager.Allocate(allocator, sizeof(byte), Unity.Collections.LowLevel.Unsafe.UnsafeUtility.AlignOf<byte>(), g.Length)
+                InQueue = (byte*)AllocatorManager.Allocate(allocator, sizeof(byte), UnsafeUtility.AlignOf<byte>(),
+                    g.Length)
             };
             return true;
         }
@@ -157,9 +162,18 @@ namespace BovineLabs.Grid.Sandpile
 
         public static void Dispose(ref SandpileState s)
         {
-            if (s.Grains != null) { Unity.Collections.AllocatorManager.Free(s.Allocator, s.Grains); s.Grains = null; }
+            if (s.Grains != null)
+            {
+                AllocatorManager.Free(s.Allocator, s.Grains);
+                s.Grains = null;
+            }
+
             if (s.Queue.IsCreated) s.Queue.Dispose();
-            if (s.InQueue != null) { Unity.Collections.AllocatorManager.Free(s.Allocator, s.InQueue); s.InQueue = null; }
+            if (s.InQueue != null)
+            {
+                AllocatorManager.Free(s.Allocator, s.InQueue);
+                s.InQueue = null;
+            }
         }
     }
 }

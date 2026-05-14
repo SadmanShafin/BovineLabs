@@ -14,11 +14,11 @@ namespace BovineLabs.Grid
 
         public int Capacity;
         public int Count;
-        public Allocator Allocator;
+        public AllocatorManager.AllocatorHandle Allocator;
 
         public bool IsCreated => Data != null;
 
-        public static bool TryCreate(int maxId, Allocator allocator, out MinHeap result)
+        public static bool TryCreate(int maxId, AllocatorManager.AllocatorHandle allocator, out MinHeap result)
         {
             if (maxId <= 0)
             {
@@ -28,10 +28,10 @@ namespace BovineLabs.Grid
 
             result = new MinHeap
             {
-                Data = (HeapNode*)UnsafeUtility.Malloc(UnsafeUtility.SizeOf<HeapNode>() * maxId,
-                    UnsafeUtility.AlignOf<HeapNode>(), allocator),
-                Positions = (int*)UnsafeUtility.Malloc(UnsafeUtility.SizeOf<int>() * maxId,
-                    UnsafeUtility.AlignOf<int>(), allocator),
+                Data = (HeapNode*)AllocatorManager.Allocate(allocator, UnsafeUtility.SizeOf<HeapNode>(),
+                    UnsafeUtility.AlignOf<HeapNode>(), maxId),
+                Positions = (int*)AllocatorManager.Allocate(allocator, UnsafeUtility.SizeOf<int>(),
+                    UnsafeUtility.AlignOf<int>(), maxId),
                 Capacity = maxId,
                 Count = 0,
                 Allocator = allocator
@@ -45,7 +45,7 @@ namespace BovineLabs.Grid
 
         public bool IsEmpty => Count == 0;
 
-        public unsafe void Clear()
+        public void Clear()
         {
             Count = 0;
             UnsafeUtility.MemSet(Positions, 0xFF, (long)Capacity * UnsafeUtility.SizeOf<int>());
@@ -137,12 +137,12 @@ namespace BovineLabs.Grid
             return true;
         }
 
-        public unsafe void Dispose()
+        public void Dispose()
         {
             if (Data != null)
             {
-                UnsafeUtility.Free(Data, Allocator);
-                UnsafeUtility.Free(Positions, Allocator);
+                AllocatorManager.Free(Allocator, Data);
+                AllocatorManager.Free(Allocator, Positions);
                 Data = null;
                 Positions = null;
             }

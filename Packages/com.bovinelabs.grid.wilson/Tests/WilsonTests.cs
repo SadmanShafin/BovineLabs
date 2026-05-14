@@ -6,7 +6,7 @@ using Unity.Mathematics;
 public class WilsonTests
 {
     [Test]
-    public unsafe void Create_Dimensions()
+    public void Create_Dimensions()
     {
         Assert.IsTrue(WilsonApi.TryCreate(5, 5, Allocator.Temp, out var s));
         Assert.AreEqual(25, s.Grid.Length);
@@ -64,7 +64,7 @@ public class WilsonTests
     }
 
     [Test]
-    public unsafe void ExtractMazeWalls()
+    public void ExtractMazeWalls()
     {
         Assert.IsTrue(WilsonApi.TryCreate(3, 3, Allocator.Temp, out var s));
         var rng = new Random(42);
@@ -83,7 +83,7 @@ public class WilsonTests
     }
 
     [Test]
-    public unsafe void Dispose_Double()
+    public void Dispose_Double()
     {
         Assert.IsTrue(WilsonApi.TryCreate(3, 3, Allocator.Temp, out var s));
         WilsonApi.Dispose(ref s);

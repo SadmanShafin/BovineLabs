@@ -7,7 +7,7 @@ using Unity.Mathematics;
 public class AnyaTests
 {
     [Test]
-    public unsafe void Create_Dimensions()
+    public void Create_Dimensions()
     {
         Assert.IsTrue(AnyaApi.TryCreate(10, 10, 100, Allocator.Temp, out var s));
         Assert.AreEqual(100, s.Grid.Length);
@@ -15,7 +15,7 @@ public class AnyaTests
     }
 
     [Test]
-    public unsafe void Search_DirectLine()
+    public void Search_DirectLine()
     {
         Assert.IsTrue(AnyaApi.TryCreate(10, 10, 1000, Allocator.Temp, out var s));
         var blocked = new NativeArray<byte>(100, Allocator.Temp);
@@ -34,7 +34,7 @@ public class AnyaTests
     }
 
     [Test]
-    public unsafe void Search_BlockedGoal()
+    public void Search_BlockedGoal()
     {
         Assert.IsTrue(AnyaApi.TryCreate(10, 10, 1000, Allocator.Temp, out var s));
         var blocked = new NativeArray<byte>(100, Allocator.Temp);
@@ -52,7 +52,7 @@ public class AnyaTests
     }
 
     [Test]
-    public unsafe void Search_WithWall()
+    public void Search_WithWall()
     {
         Assert.IsTrue(AnyaApi.TryCreate(10, 10, 10000, Allocator.Temp, out var s));
         var blocked = new NativeArray<byte>(100, Allocator.Temp);
@@ -70,7 +70,7 @@ public class AnyaTests
     }
 
     [Test]
-    public unsafe void Search_EuclideanCost_OpenGrid()
+    public void Search_EuclideanCost_OpenGrid()
     {
         Assert.IsTrue(AnyaApi.TryCreate(10, 10, 4000, Allocator.Temp, out var s));
         var blocked = new NativeArray<byte>(100, Allocator.Temp);
@@ -93,7 +93,7 @@ public class AnyaTests
     }
 
     [Test]
-    public unsafe void Search_CornerHugging()
+    public void Search_CornerHugging()
     {
         Assert.IsTrue(AnyaApi.TryCreate(5, 5, 4000, Allocator.Temp, out var s));
         var blocked = new NativeArray<byte>(25, Allocator.Temp);
@@ -111,36 +111,69 @@ public class AnyaTests
     }
 
     [Test]
-    public unsafe void Search_FullyBlocked_NoPath()
+    public void Search_FullyBlocked_NoPath()
     {
         Assert.IsTrue(AnyaApi.TryCreate(5, 5, 1000, Allocator.Temp, out var s));
         var blocked = new NativeArray<byte>(25, Allocator.Temp);
         blocked.Fill((byte)1);
         var path = new NativeList<int2>(Allocator.Temp);
-        int2 startV = new int2(0, 0);
-        int2 goalV = new int2(4, 4);
+        var startV = new int2(0, 0);
+        var goalV = new int2(4, 4);
         Assert.IsFalse(AnyaApi.TrySearch(ref s, blocked, ref startV, ref goalV, ref path));
-        AnyaApi.Dispose(ref s); blocked.Dispose(); path.Dispose();
+        AnyaApi.Dispose(ref s);
+        blocked.Dispose();
+        path.Dispose();
     }
 
     [Test]
-    public unsafe void Search_OutOfBounds_NoPath()
+    public void Search_OutOfBounds_NoPath()
     {
         Assert.IsTrue(AnyaApi.TryCreate(5, 5, 1000, Allocator.Temp, out var s));
         var blocked = new NativeArray<byte>(25, Allocator.Temp);
         blocked.Fill((byte)0);
         var path = new NativeList<int2>(Allocator.Temp);
-        int2 startV = new int2(-1, 0);
-        int2 goalV = new int2(4, 4);
+        var startV = new int2(-1, 0);
+        var goalV = new int2(4, 4);
         Assert.IsFalse(AnyaApi.TrySearch(ref s, blocked, ref startV, ref goalV, ref path));
-        AnyaApi.Dispose(ref s); blocked.Dispose(); path.Dispose();
+        AnyaApi.Dispose(ref s);
+        blocked.Dispose();
+        path.Dispose();
     }
 
     [Test]
-    public unsafe void Dispose_Double()
+    public void Dispose_Double()
     {
         Assert.IsTrue(AnyaApi.TryCreate(5, 5, 100, Allocator.Temp, out var s));
         AnyaApi.Dispose(ref s);
         AnyaApi.Dispose(ref s);
+    }
+
+    [Test]
+    public void Incremental_StepByStep_SameResultAsTrySearch()
+    {
+        Assert.IsTrue(AnyaApi.TryCreate(10, 10, 10000, Allocator.Temp, out var s));
+        var blocked = new NativeArray<byte>(100, Allocator.Temp);
+        blocked.Fill((byte)0);
+        var startV = new int2(0, 0);
+        var goalV = new int2(9, 9);
+
+        var path1 = new NativeList<int2>(Allocator.Temp);
+        Assert.IsTrue(AnyaApi.TrySearch(ref s, blocked, ref startV, ref goalV, ref path1));
+
+        var path2 = new NativeList<int2>(Allocator.Temp);
+        var startV2 = new int2(0, 0);
+        var goalV2 = new int2(9, 9);
+        Assert.IsTrue(AnyaApi.TryInitSearch(ref s, blocked, ref startV2, ref goalV2));
+        if (s.SearchComplete == 0)
+            while (!s.Heap.IsEmpty)
+                if (AnyaApi.TryStepSearch(ref s, blocked))
+                    break;
+        Assert.IsTrue(AnyaApi.TryExtractPath(ref s, ref path2));
+        Assert.AreEqual(path1.Length, path2.Length, "Incremental and batch paths must have same length");
+
+        AnyaApi.Dispose(ref s);
+        blocked.Dispose();
+        path1.Dispose();
+        path2.Dispose();
     }
 }
