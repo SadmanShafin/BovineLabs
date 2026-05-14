@@ -9,10 +9,13 @@ using Unity.Mathematics;
 namespace BovineLabs.Grid.DStarLite
 {
     [StructLayout(LayoutKind.Sequential)]
-
     public unsafe struct DStarLiteState : IDisposable
     {
-        public void Dispose() => DStarLiteApi.Dispose(ref this);
+        public void Dispose()
+        {
+            DStarLiteApi.Dispose(ref this);
+        }
+
         public Grid2D Grid;
         public int Start;
         public int Goal;

@@ -12,7 +12,11 @@ namespace BovineLabs.Grid.Continuum
     [StructLayout(LayoutKind.Sequential)]
     public unsafe struct ContinuumCrowdState : IDisposable
     {
-        public void Dispose() => ContinuumCrowdApi.Dispose(ref this);
+        public void Dispose()
+        {
+            ContinuumCrowdApi.Dispose(ref this);
+        }
+
         public Grid2D Grid;
         public float* Density;
         public float* Speed;

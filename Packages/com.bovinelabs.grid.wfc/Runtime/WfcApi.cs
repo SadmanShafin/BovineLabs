@@ -1,15 +1,20 @@
+using System;
 using Unity.Burst;
 using Unity.Burst.CompilerServices;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
+using Random = Unity.Mathematics.Random;
 
 namespace BovineLabs.Grid.Wfc
 {
-
-    public unsafe struct WfcState : System.IDisposable
+    public unsafe struct WfcState : IDisposable
     {
-        public void Dispose() => WfcApi.Dispose(ref this);
+        public void Dispose()
+        {
+            WfcApi.Dispose(ref this);
+        }
+
         public Grid2D Grid;
         public int PatternCount;
         public ulong* PossibleBits;

@@ -9,10 +9,13 @@ using Unity.Mathematics;
 namespace BovineLabs.Grid.FastSweeping
 {
     [StructLayout(LayoutKind.Sequential)]
-
     public unsafe struct FastSweepingState : IDisposable
     {
-        public void Dispose() => FastSweepingApi.Dispose(ref this);
+        public void Dispose()
+        {
+            FastSweepingApi.Dispose(ref this);
+        }
+
         public Grid2D Grid;
         public float* T;
         public AllocatorManager.AllocatorHandle Allocator;

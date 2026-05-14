@@ -7,7 +7,7 @@ using Unity.Mathematics;
 
 namespace BovineLabs.Grid.EHL
 {
-    public unsafe static class EHLIndexer
+    public static class EHLIndexer
     {
         public static bool TryBuild(
             NativeArray<ConvexVertex> convexVertices,

@@ -16,10 +16,13 @@ namespace BovineLabs.Grid.Cftp
     }
 
     [StructLayout(LayoutKind.Sequential)]
-
     public unsafe struct CftpState : IDisposable
     {
-        public void Dispose() => CftpApi.Dispose(ref this);
+        public void Dispose()
+        {
+            CftpApi.Dispose(ref this);
+        }
+
         public Grid2D Grid;
         public byte* Low;
         public byte* High;

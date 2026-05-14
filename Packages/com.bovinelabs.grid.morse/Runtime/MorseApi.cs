@@ -20,7 +20,11 @@ namespace BovineLabs.Grid.Morse
     [StructLayout(LayoutKind.Sequential)]
     public unsafe struct MorseState : IDisposable
     {
-        public void Dispose() => MorseApi.Dispose(ref this);
+        public void Dispose()
+        {
+            MorseApi.Dispose(ref this);
+        }
+
         public Grid2D Grid;
         public int* Ascending;
         public int* Descending;

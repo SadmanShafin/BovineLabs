@@ -8,10 +8,13 @@ using Unity.Collections.LowLevel.Unsafe;
 namespace BovineLabs.Grid.Sandpile
 {
     [StructLayout(LayoutKind.Sequential)]
-
     public unsafe struct SandpileState : IDisposable
     {
-        public void Dispose() => SandpileApi.Dispose(ref this);
+        public void Dispose()
+        {
+            SandpileApi.Dispose(ref this);
+        }
+
         public Grid2D Grid;
         public int* Grains;
         public UnsafeQueue<int> Queue;

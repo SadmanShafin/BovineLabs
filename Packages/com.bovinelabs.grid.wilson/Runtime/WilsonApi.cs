@@ -1,16 +1,20 @@
+using System;
 using System.Runtime.InteropServices;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
-using Unity.Mathematics;
+using Random = Unity.Mathematics.Random;
 
 namespace BovineLabs.Grid.Wilson
 {
     [StructLayout(LayoutKind.Sequential)]
-
-    public unsafe struct WilsonState : System.IDisposable
+    public unsafe struct WilsonState : IDisposable
     {
-        public void Dispose() => WilsonApi.Dispose(ref this);
+        public void Dispose()
+        {
+            WilsonApi.Dispose(ref this);
+        }
+
         public Grid2D Grid;
         public byte* InTree;
         public int* Parent;

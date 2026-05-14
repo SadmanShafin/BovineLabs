@@ -33,9 +33,15 @@ namespace BovineLabs.Grid
             return result;
         }
 
-        public int ToIndex(int2 p) => p.y * Width + p.x;
+        public int ToIndex(int2 p)
+        {
+            return p.y * Width + p.x;
+        }
 
-        public int ToIndex(int x, int y) => y * Width + x;
+        public int ToIndex(int x, int y)
+        {
+            return y * Width + x;
+        }
 
         public int2 ToCoord(int index)
         {
@@ -47,7 +53,10 @@ namespace BovineLabs.Grid
             return (uint)p.x < (uint)Width && (uint)p.y < (uint)Height;
         }
 
-        public bool InBounds(int index) => (uint)index < (uint)Length;
+        public bool InBounds(int index)
+        {
+            return (uint)index < (uint)Length;
+        }
 
         public bool TryIndex(int2 p, out int index)
         {
@@ -84,9 +93,15 @@ namespace BovineLabs.Grid
             };
         }
 
-        public static float HeuristicManhattan(int2 a, int2 b) => math.abs(a.x - b.x) + math.abs(a.y - b.y);
+        public static float HeuristicManhattan(int2 a, int2 b)
+        {
+            return math.abs(a.x - b.x) + math.abs(a.y - b.y);
+        }
 
-        public static float HeuristicEuclidean(int2 a, int2 b) => math.length(new float2(a.x - b.x, a.y - b.y));
+        public static float HeuristicEuclidean(int2 a, int2 b)
+        {
+            return math.length(new float2(a.x - b.x, a.y - b.y));
+        }
 
         public static float HeuristicOctile(int2 a, int2 b)
         {

@@ -74,5 +74,4 @@ namespace BovineLabs.Grid.Tests
             Assert.AreEqual(5f, GridHeuristics.Manhattan(new int2(0, 0), new int2(3, 2)), 0.001f);
         }
     }
-
 }
