@@ -12,7 +12,6 @@ namespace BovineLabs.Grid.Hashlife
         public int ChildNE;
         public int ChildSW;
         public int ChildSE;
-        public ulong Hash;
     }
 
     public unsafe struct FlatHashMap
@@ -113,7 +112,6 @@ namespace BovineLabs.Grid.Hashlife
         public UnsafeList<HashlifeNode> Nodes;
         public FlatHashMap Intern;
         public FlatHashMap ResultCache;
-        public AllocatorManager.AllocatorHandle Allocator;
     }
 
     [BurstCompile]
@@ -121,23 +119,32 @@ namespace BovineLabs.Grid.Hashlife
     {
         public static bool TryCreate(int maxNodes, Allocator a, out HashlifeState result)
         {
-            FlatHashMap.TryCreate(maxNodes, a, out var internMap);
-            FlatHashMap.TryCreate(maxNodes, a, out var cacheMap);
+            if (!FlatHashMap.TryCreate(maxNodes, a, out var internMap))
+            {
+                result = default;
+                return false;
+            }
+
+            if (!FlatHashMap.TryCreate(maxNodes, a, out var cacheMap))
+            {
+                internMap.Dispose();
+                result = default;
+                return false;
+            }
 
             result = new HashlifeState
             {
-                Allocator = a,
                 Nodes = new UnsafeList<HashlifeNode>(maxNodes, a),
                 Intern = internMap,
                 ResultCache = cacheMap
             };
 
-            CreateLeaf(ref result, 0, out _);
-            CreateLeaf(ref result, 1, out _);
+            if (!TryCreateLeaf(ref result, 0)) return false;
+            if (!TryCreateLeaf(ref result, 1)) return false;
             return true;
         }
 
-        private static bool CreateLeaf(ref HashlifeState s, byte alive, out int id)
+        private static bool TryCreateLeaf(ref HashlifeState s, byte alive)
         {
             var node = new HashlifeNode
             {
@@ -145,10 +152,9 @@ namespace BovineLabs.Grid.Hashlife
                 ChildNW = alive,
                 ChildNE = 0,
                 ChildSW = 0,
-                ChildSE = 0,
-                Hash = 0
+                ChildSE = 0
             };
-            return TryInternNode(ref s, ref node, out id);
+            return TryInternNode(ref s, ref node, out _);
         }
 
         [BurstCompile]
@@ -161,8 +167,7 @@ namespace BovineLabs.Grid.Hashlife
                 ChildNW = nw,
                 ChildNE = ne,
                 ChildSW = sw,
-                ChildSE = se,
-                Hash = 0
+                ChildSE = se
             };
             return TryInternNode(ref s, ref node, out id);
         }
@@ -171,7 +176,6 @@ namespace BovineLabs.Grid.Hashlife
         private static bool TryInternNode(ref HashlifeState s, ref HashlifeNode node, out int id)
         {
             var h = Hash(node);
-            node.Hash = h;
 
             if (s.Intern.TryGetValue(h, out var existing))
             {

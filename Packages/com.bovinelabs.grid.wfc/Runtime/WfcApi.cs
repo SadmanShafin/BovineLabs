@@ -40,6 +40,7 @@ namespace BovineLabs.Grid.Wfc
             s = new WfcState
             {
                 Grid = g,
+                Allocator = a,
                 PatternCount = patternCount,
                 PossibleBits =
                     (ulong*)AllocatorManager.Allocate(a, sizeof(ulong), UnsafeUtility.AlignOf<ulong>(), g.Length),
@@ -57,9 +58,7 @@ namespace BovineLabs.Grid.Wfc
         [BurstCompile]
         public static bool TryInitializeAllPossible(ref WfcState s)
         {
-            var all = 0UL;
-            if (s.PatternCount == 64) all = ulong.MaxValue;
-            else all = (1UL << s.PatternCount) - 1;
+            var all = s.PatternCount == 64 ? ulong.MaxValue : (1UL << s.PatternCount) - 1;
 
             var len = s.Grid.Length;
             var possiblePtr = s.PossibleBits;
@@ -174,7 +173,8 @@ namespace BovineLabs.Grid.Wfc
             if (!TryInitWfc(ref s)) return false;
 
             while (s.WfcComplete == 0)
-                TryObserveStep(ref s, ref rng);
+                if (!TryObserveStep(ref s, ref rng))
+                    break;
 
             if (s.WfcComplete == 2) return false;
 
@@ -246,7 +246,12 @@ namespace BovineLabs.Grid.Wfc
                     temp &= ~(1UL << pattern);
                 }
 
-                TryObserve(ref s, bestCell, pattern);
+                if (!TryObserve(ref s, bestCell, pattern))
+                {
+                    s.WfcComplete = 2;
+                    return false;
+                }
+
                 if (!TryPropagate(ref s))
                 {
                     s.WfcComplete = 2;

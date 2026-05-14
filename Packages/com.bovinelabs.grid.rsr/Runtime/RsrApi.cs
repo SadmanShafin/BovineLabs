@@ -153,7 +153,7 @@ namespace BovineLabs.Grid.Rsr
         public static void GetSuccessors(ref RsrState s, int cell, in NativeArray<byte> blocked,
             ref NativeList<int> successors)
         {
-            TryGetSuccessors(ref s, cell, in blocked, ref successors);
+            _ = TryGetSuccessors(ref s, cell, in blocked, ref successors);
         }
 
         [BurstCompile]

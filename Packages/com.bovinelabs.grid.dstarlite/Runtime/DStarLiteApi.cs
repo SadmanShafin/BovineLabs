@@ -82,7 +82,7 @@ namespace BovineLabs.Grid.DStarLite
             if (blk[goal] != 0) return false;
 
             rhsPtr[goal] = 0f;
-            var key = CalculateKey(gPtr, rhsPtr, s.Start, s.Goal, s.Grid, s.Km, goal);
+            var key = CalculateKey(gPtr, rhsPtr, s.Start, s.Grid, s.Km, goal);
             if (!s.Open.TryInsertOrDecrease(new HeapNode(goal, key.x, key.y))) return false;
             inOpen[goal] = 1;
             return true;
@@ -120,7 +120,6 @@ namespace BovineLabs.Grid.DStarLite
             var parentPtr = s.Parent;
             var blk = (byte*)blocked.GetUnsafeReadOnlyPtr();
             var costPtr = cost.IsCreated ? (float*)cost.GetUnsafeReadOnlyPtr() : null;
-            var w = s.Grid.Width;
 
             var pops = 0;
             while (pops < maxPops)
@@ -135,7 +134,7 @@ namespace BovineLabs.Grid.DStarLite
 
                 if (s.Open.IsEmpty) break;
 
-                var topKey = CalculateKey(gPtr, rhsPtr, s.Start, s.Goal, s.Grid, s.Km, s.Start);
+                var topKey = CalculateKey(gPtr, rhsPtr, s.Start, s.Grid, s.Km, s.Start);
                 if (!s.Open.TryPeek(out var openTop2)) return false;
 
                 if (!LessOrEqual(openTop2.Key0, openTop2.Key1, topKey.x, topKey.y) &&
@@ -148,7 +147,7 @@ namespace BovineLabs.Grid.DStarLite
 
                 var uid = u.Id;
                 var uKey = new float2(u.Key0, u.Key1);
-                var trueKey = CalculateKey(gPtr, rhsPtr, s.Start, s.Goal, s.Grid, s.Km, uid);
+                var trueKey = CalculateKey(gPtr, rhsPtr, s.Start, s.Grid, s.Km, uid);
 
                 if (Less(uKey.x, uKey.y, trueKey.x, trueKey.y))
                 {
@@ -159,7 +158,7 @@ namespace BovineLabs.Grid.DStarLite
                 {
                     gPtr[uid] = rhsPtr[uid];
                     if (!TryUpdateSuccessors(gPtr, rhsPtr, inOpen, parentPtr, blk, costPtr, ref s.Open, s.Grid, s.Goal,
-                            s.Start, s.Km, w, uid)) return false;
+                            s.Start, s.Km, uid)) return false;
                 }
                 else
                 {
@@ -167,7 +166,7 @@ namespace BovineLabs.Grid.DStarLite
                     if (!TryUpdateVertex(gPtr, rhsPtr, inOpen, parentPtr, blk, costPtr, ref s.Open, s.Grid, s.Goal,
                             s.Start, s.Km, uid)) return false;
                     if (!TryUpdateSuccessors(gPtr, rhsPtr, inOpen, parentPtr, blk, costPtr, ref s.Open, s.Grid, s.Goal,
-                            s.Start, s.Km, w, uid)) return false;
+                            s.Start, s.Km, uid)) return false;
                 }
             }
 
@@ -208,7 +207,7 @@ namespace BovineLabs.Grid.DStarLite
 
                     var edgeCost = GetEdgeCost(w, costPtr, current, ni, blk);
                     var total = edgeCost + gPtr[ni];
-                    if (total < bestCost || (total == bestCost && gPtr[ni] < bestG))
+                    if (total < bestCost || (math.abs(total - bestCost) < 1e-6f && gPtr[ni] < bestG))
                     {
                         bestCost = total;
                         bestG = gPtr[ni];
@@ -253,7 +252,7 @@ namespace BovineLabs.Grid.DStarLite
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static float2 CalculateKey(float* gPtr, float* rhsPtr, int start, int goal, Grid2D grid, float km,
+        private static float2 CalculateKey(float* gPtr, float* rhsPtr, int start, Grid2D grid, float km,
             int cell)
         {
             var minGRhs = math.min(gPtr[cell], rhsPtr[cell]);
@@ -289,9 +288,9 @@ namespace BovineLabs.Grid.DStarLite
                 rhsPtr[cell] = minRhs;
             }
 
-            if (gPtr[cell] != rhsPtr[cell])
+            if (math.abs(gPtr[cell] - rhsPtr[cell]) > 1e-6f)
             {
-                var key = CalculateKey(gPtr, rhsPtr, start, goal, grid, km, cell);
+                var key = CalculateKey(gPtr, rhsPtr, start, grid, km, cell);
                 if (!open.TryInsertOrDecrease(new HeapNode(cell, key.x, key.y))) return false;
                 inOpen[cell] = 1;
             }
@@ -307,7 +306,7 @@ namespace BovineLabs.Grid.DStarLite
         private static bool TryUpdateSuccessors(
             float* gPtr, float* rhsPtr, byte* inOpen, int* parentPtr,
             byte* blk, float* costPtr,
-            ref MinHeap open, Grid2D grid, int goal, int start, float km, int w, int cell)
+            ref MinHeap open, Grid2D grid, int goal, int start, float km, int cell)
         {
             var cp = grid.ToCoord(cell);
             for (var d = 0; d < 8; d++)
@@ -337,13 +336,13 @@ namespace BovineLabs.Grid.DStarLite
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool LessOrEqual(float k0a, float k1a, float k0b, float k1b)
         {
-            return k0a != k0b ? k0a <= k0b : k1a <= k1b;
+            return math.abs(k0a - k0b) > 1e-6f ? k0a <= k0b : k1a <= k1b;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool Less(float k0a, float k1a, float k0b, float k1b)
         {
-            return k0a != k0b ? k0a < k0b : k1a < k1b;
+            return math.abs(k0a - k0b) > 1e-6f ? k0a < k0b : k1a < k1b;
         }
     }
 }

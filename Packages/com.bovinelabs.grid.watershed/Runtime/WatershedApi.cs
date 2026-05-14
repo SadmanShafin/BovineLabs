@@ -188,23 +188,23 @@ namespace BovineLabs.Grid.Watershed
                 var lblU = label[u];
 
                 if (ux > 0)
-                    if (!TryFloodNeighbor(label, st, ht, w, h, u - 1, lblU, s))
+                    if (!TryFloodNeighbor(label, st, ht, u - 1, lblU, s))
                         return false;
                 if (ux + 1 < w)
-                    if (!TryFloodNeighbor(label, st, ht, w, h, u + 1, lblU, s))
+                    if (!TryFloodNeighbor(label, st, ht, u + 1, lblU, s))
                         return false;
                 if (uy > 0)
-                    if (!TryFloodNeighbor(label, st, ht, w, h, u - w, lblU, s))
+                    if (!TryFloodNeighbor(label, st, ht, u - w, lblU, s))
                         return false;
                 if (uy + 1 < h)
-                    if (!TryFloodNeighbor(label, st, ht, w, h, u + w, lblU, s))
+                    if (!TryFloodNeighbor(label, st, ht, u + w, lblU, s))
                         return false;
             }
 
             return true;
         }
 
-        private static bool TryFloodNeighbor(int* label, byte* st, float* ht, int w, int h, int ni, int lblU,
+        private static bool TryFloodNeighbor(int* label, byte* st, float* ht, int ni, int lblU,
             WatershedState s)
         {
             if (st[ni] == 2) return true;

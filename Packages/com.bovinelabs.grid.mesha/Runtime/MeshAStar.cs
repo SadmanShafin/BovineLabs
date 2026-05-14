@@ -17,7 +17,8 @@ namespace BovineLabs.Grid.MeshA
             float weight = 1.0f,
             Allocator allocator = Allocator.Temp)
         {
-            TryFindPath(grid, primSet, meshGraph, start, goal, out var result, startTheta, weight, allocator);
+            if (!TryFindPath(grid, primSet, meshGraph, start, goal, out var result, startTheta, weight, allocator))
+                return result;
             return result;
         }
 
@@ -44,7 +45,6 @@ namespace BovineLabs.Grid.MeshA
                 PrimSet = primSet,
                 Start = start,
                 Goal = goal,
-                StartTheta = startTheta,
                 Weight = weight,
                 Path = result.Path,
                 Found = found,

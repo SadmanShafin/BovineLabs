@@ -10,7 +10,6 @@ namespace BovineLabs.Grid.Sipp
 {
     public struct SafeInterval
     {
-        public int Cell;
         public float Start;
         public float End;
     }
@@ -20,7 +19,6 @@ namespace BovineLabs.Grid.Sipp
         public int Cell;
         public int IntervalIdx;
         public float Time;
-        public float F;
         public int Parent;
     }
 
@@ -61,6 +59,7 @@ namespace BovineLabs.Grid.Sipp
             s = new SippState
             {
                 Grid = g,
+                Allocator = a,
                 Intervals = new UnsafeList<SafeInterval>(maxIntervals, a),
                 CellIntervals =
                     (RangeI*)AllocatorManager.Allocate(a, sizeof(RangeI), UnsafeUtility.AlignOf<RangeI>(), g.Length),
@@ -100,13 +99,13 @@ namespace BovineLabs.Grid.Sipp
                     var obsStart = obsPtr[obsIdx].StartTime;
                     var obsEnd = obsPtr[obsIdx].EndTime;
 
-                    if (t < obsStart) s.Intervals.Add(new SafeInterval { Cell = i, Start = t, End = obsStart });
+                    if (t < obsStart) s.Intervals.Add(new SafeInterval { Start = t, End = obsStart });
                     t = math.max(t, obsEnd);
                     obsIdx++;
                 }
 
                 if (t < float.PositiveInfinity)
-                    s.Intervals.Add(new SafeInterval { Cell = i, Start = t, End = float.PositiveInfinity });
+                    s.Intervals.Add(new SafeInterval { Start = t, End = float.PositiveInfinity });
 
                 s.CellIntervals[i] = new RangeI(start, s.Intervals.Length - start);
             }
@@ -150,7 +149,7 @@ namespace BovineLabs.Grid.Sipp
             if (startIntervalIdx < 0) return false;
 
             s.Nodes.Add(new SippNode
-                { Cell = start, IntervalIdx = startIntervalIdx, Time = startTime, F = startTime, Parent = -1 });
+                { Cell = start, IntervalIdx = startIntervalIdx, Time = startTime, Parent = -1 });
             if (!s.Heap.TryInsertOrDecrease(new HeapNode(0, startTime))) return false;
             bestTimePtr[startIntervalIdx] = startTime;
 
@@ -198,7 +197,7 @@ namespace BovineLabs.Grid.Sipp
                                 var newNodeId = s.Nodes.Length;
                                 s.Nodes.Add(new SippNode
                                 {
-                                    Cell = ni, IntervalIdx = iv, Time = earliestArrival, F = earliestArrival + h,
+                                    Cell = ni, IntervalIdx = iv, Time = earliestArrival,
                                     Parent = nodeId
                                 });
                                 if (!s.Heap.TryInsertOrDecrease(new HeapNode(newNodeId, earliestArrival + h)))

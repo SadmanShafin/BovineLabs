@@ -179,13 +179,13 @@ namespace BovineLabs.Grid.Anya
                 var cellY = math.min(u.y, ny);
                 if (cellY < 0 || cellY >= h) continue;
 
-                ExpandCorners(ref s, in u, uIdx, dir, cellY, ny, w, h, blk, goal);
+                ExpandCorners(ref s, in u, uIdx, cellY, w, h, blk, goal);
 
                 var pL = u.L;
                 var pR = u.R;
-                if (u.Root.y != u.y)
+                if ((int)u.Root.y != u.y)
                 {
-                    var forwardDir = u.y > u.Root.y ? 1 : -1;
+                    var forwardDir = u.y > (int)u.Root.y ? 1 : -1;
                     if (dir != forwardDir) continue;
 
                     var ratio = (ny - u.Root.y) / (u.y - u.Root.y);
@@ -278,9 +278,7 @@ namespace BovineLabs.Grid.Anya
             ref AnyaState s,
             in AnyaNode u,
             int uIdx,
-            int dir,
             int cellY,
-            int ny,
             int w,
             int h,
             byte* blk,
@@ -409,7 +407,7 @@ namespace BovineLabs.Grid.Anya
                     L = L, R = R, y = y, dy = dy, Root = root, RootG = rootG, Parent = parent
                 };
                 double xInt = goal.x;
-                if (goal.y != root.y)
+                if (goal.y != (int)root.y)
                 {
                     var ratio = (y - root.y) / (goal.y - root.y);
                     xInt = root.x + (goal.x - root.x) * ratio;
@@ -423,7 +421,7 @@ namespace BovineLabs.Grid.Anya
             }
 
             double xInt2 = goal.x;
-            if (goal.y != root.y)
+            if (goal.y != (int)root.y)
             {
                 var ratio = (y - root.y) / (goal.y - root.y);
                 xInt2 = root.x + (goal.x - root.x) * ratio;

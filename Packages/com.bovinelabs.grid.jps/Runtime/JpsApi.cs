@@ -102,7 +102,7 @@ namespace BovineLabs.Grid.Jps
             if (start == goal) return true;
 
             g[start] = 0f;
-            s.Open.TryInsertOrDecrease(new HeapNode(start, Octile(0, 0, s.Grid.ToCoord(start), s.Grid.ToCoord(goal))));
+            s.Open.TryInsertOrDecrease(new HeapNode(start, Octile(s.Grid.ToCoord(start), s.Grid.ToCoord(goal))));
             return true;
         }
 
@@ -121,8 +121,7 @@ namespace BovineLabs.Grid.Jps
 
             if (cid == goal)
             {
-                TryExtractPath(s.Parent, goal, start, ref path);
-                return true;
+                return TryExtractPath(s.Parent, goal, start, ref path);
             }
 
             var cp = s.Grid.ToCoord(cid);
@@ -134,12 +133,12 @@ namespace BovineLabs.Grid.Jps
                 {
                     if (closed[jumpIdx] != 0) continue;
                     var jp = s.Grid.ToCoord(jumpIdx);
-                    var cost = g[cid] + Octile(0, 0, cp, jp);
+                    var cost = g[cid] + Octile(cp, jp);
                     if (cost < g[jumpIdx])
                     {
                         g[jumpIdx] = cost;
                         parent[jumpIdx] = cid;
-                        var f = cost + Octile(0, 0, jp, s.Grid.ToCoord(goal));
+                        var f = cost + Octile(jp, s.Grid.ToCoord(goal));
                         s.Open.TryInsertOrDecrease(new HeapNode(jumpIdx, f));
                     }
                 }
@@ -248,7 +247,7 @@ namespace BovineLabs.Grid.Jps
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static float Octile(int _, int __, int2 a, int2 b)
+        private static float Octile(int2 a, int2 b)
         {
             var d = math.abs(a - b);
             return math.max(d.x, d.y) + 0.4142135f * math.min(d.x, d.y);

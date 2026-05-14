@@ -15,7 +15,6 @@ namespace BovineLabs.Grid.MeshA
         public PrimitiveSet PrimSet;
         public int2 Start;
         public int2 Goal;
-        public int StartTheta;
         public float Weight;
 
         public NativeList<int2> Path;
@@ -42,8 +41,7 @@ namespace BovineLabs.Grid.MeshA
             UnsafeUtility.MemSet(parentMap, 0xFF, (long)totalStates * UnsafeUtility.SizeOf<int>()); // -1
             UnsafeUtility.MemSet(closed, 0, (long)closedWords * UnsafeUtility.SizeOf<uint>());
 
-            var heap = new MinHeap();
-            if (!MinHeap.TryCreate(totalStates, Allocator.Temp, out heap))
+            if (!MinHeap.TryCreate(totalStates, Allocator.Temp, out var heap))
             {
                 UnsafeUtility.Free(gCosts, Allocator.Temp);
                 UnsafeUtility.Free(parentMap, Allocator.Temp);

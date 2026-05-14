@@ -28,6 +28,7 @@ namespace BovineLabs.Grid.Thinning
             s = new ThinningState
             {
                 Grid = g,
+                Allocator = a,
                 Mark = (byte*)AllocatorManager.Allocate(a, sizeof(byte), UnsafeUtility.AlignOf<byte>(), g.Length),
                 Frontier = new UnsafeList<int>(g.Length, a)
             };

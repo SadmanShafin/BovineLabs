@@ -79,7 +79,7 @@ namespace BovineLabs.Grid.FieldDStar
             while (!s.Heap.IsEmpty)
             {
                 if (!s.Heap.TryPeek(out var top)) return false;
-                if (s.G[top.Id] != s.RHS[top.Id]) break;
+                if (math.abs(s.G[top.Id] - s.RHS[top.Id]) > 1e-6f) break;
                 if (!s.Heap.TryPop(out _)) return false;
             }
 
@@ -146,7 +146,7 @@ namespace BovineLabs.Grid.FieldDStar
 
             rhsPtr[cell] = bestRHS;
 
-            if (gPtr[cell] != rhsPtr[cell])
+            if (math.abs(gPtr[cell] - rhsPtr[cell]) > 1e-6f)
             {
                 var key = math.min(gPtr[cell], rhsPtr[cell]);
                 s.Heap.TryInsertOrDecrease(new HeapNode(cell, key));

@@ -10,6 +10,12 @@ namespace BovineLabs.Grid.Cbs
     {
         public int Start;
         public int Goal;
+
+        public AgentTask(int start, int goal)
+        {
+            Start = start;
+            Goal = goal;
+        }
     }
 
     public struct CbsConstraint
@@ -42,7 +48,6 @@ namespace BovineLabs.Grid.Cbs
         public byte SolveComplete;
         public int AgentCount;
         public int SolutionNode;
-        public AllocatorManager.AllocatorHandle Allocator;
     }
 
     [BurstCompile]
@@ -58,7 +63,6 @@ namespace BovineLabs.Grid.Cbs
 
             result = new CbsState
             {
-                Allocator = a,
                 Grid = g,
                 Nodes = new UnsafeList<CbsNode>(maxNodes, a),
                 Constraints = new UnsafeList<CbsConstraint>(maxNodes * 10, a),
@@ -157,19 +161,19 @@ namespace BovineLabs.Grid.Cbs
 
             if (conflictType == 0)
             {
-                if (!TryExpandChild(ref s, PIdx, a1,
+                if (!TryExpandChild(ref s, PIdx,
                         new CbsConstraint { Agent = a1, Cell = cell, CellFrom = -1, Time = t }, blocked, agents,
                         s.AgentCount)) return false;
-                if (!TryExpandChild(ref s, PIdx, a2,
+                if (!TryExpandChild(ref s, PIdx,
                         new CbsConstraint { Agent = a2, Cell = cell, CellFrom = -1, Time = t }, blocked, agents,
                         s.AgentCount)) return false;
             }
             else
             {
-                if (!TryExpandChild(ref s, PIdx, a1,
+                if (!TryExpandChild(ref s, PIdx,
                         new CbsConstraint { Agent = a1, Cell = cellTo, CellFrom = cellFrom, Time = t }, blocked, agents,
                         s.AgentCount)) return false;
-                if (!TryExpandChild(ref s, PIdx, a2,
+                if (!TryExpandChild(ref s, PIdx,
                         new CbsConstraint { Agent = a2, Cell = cellFrom, CellFrom = cellTo, Time = t }, blocked, agents,
                         s.AgentCount)) return false;
             }
@@ -312,7 +316,7 @@ namespace BovineLabs.Grid.Cbs
         }
 
         [BurstCompile]
-        private static bool TryExpandChild(ref CbsState s, int parentIdx, int agent, CbsConstraint constraint,
+        private static bool TryExpandChild(ref CbsState s, int parentIdx, CbsConstraint constraint,
             byte* blocked, AgentTask* agents, int agentCount)
         {
             if (Hint.Unlikely(s.Constraints.Length >= s.Constraints.Capacity)) return false;

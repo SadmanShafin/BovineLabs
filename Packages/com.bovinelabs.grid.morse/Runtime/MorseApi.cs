@@ -120,7 +120,7 @@ namespace BovineLabs.Grid.Morse
         [BurstCompile]
         public static void TraceManifolds(ref MorseState s)
         {
-            TryTraceManifolds(ref s);
+            _ = TryTraceManifolds(ref s);
         }
 
         [BurstCompile]

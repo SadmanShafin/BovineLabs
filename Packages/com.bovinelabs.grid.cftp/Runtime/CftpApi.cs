@@ -94,7 +94,6 @@ namespace BovineLabs.Grid.Cftp
             var high = s.High;
             var w = s.Grid.Width;
             var h = s.Grid.Height;
-            var len = s.Grid.Length;
 
             for (var i = 0; i < s.Updates.Length; i++)
             {
@@ -153,7 +152,7 @@ namespace BovineLabs.Grid.Cftp
 
             for (var attempt = 0; attempt < 20; attempt++)
             {
-                TryGeneratePastUpdates(ref s, ref rng, 1 << attempt);
+                if (!TryGeneratePastUpdates(ref s, ref rng, 1 << attempt)) return false;
                 Replay(ref s);
                 if (Coalesced(ref s))
                 {

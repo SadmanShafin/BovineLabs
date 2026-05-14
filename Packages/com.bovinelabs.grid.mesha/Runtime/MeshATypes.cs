@@ -12,7 +12,6 @@ namespace BovineLabs.Grid.MeshA
         public int2 GoalOffset;
         public int GoalTheta;
         public float ArcLength;
-        public float HeadingChange;
 
 
         public NativeArray<int> SweptCellsI;
@@ -20,14 +19,13 @@ namespace BovineLabs.Grid.MeshA
         public int SweptCellCount;
 
         public MotionPrimitive(int id, int startTheta, int2 goalOffset, int goalTheta,
-            float arcLength, float headingChange, NativeArray<int> sweptI, NativeArray<int> sweptJ)
+            float arcLength, NativeArray<int> sweptI, NativeArray<int> sweptJ)
         {
             Id = id;
             StartTheta = startTheta;
             GoalOffset = goalOffset;
             GoalTheta = goalTheta;
             ArcLength = arcLength;
-            HeadingChange = headingChange;
             SweptCellsI = sweptI;
             SweptCellsJ = sweptJ;
             SweptCellCount = sweptI.Length;
@@ -115,12 +113,10 @@ namespace BovineLabs.Grid.MeshA
 
         public NativeArray<int> ThetaByInitialConfig;
 
-        public int NumHeadings;
         public int MaxConfigs;
 
         public MeshGraphData(int numHeadings, int maxConfigs, Allocator allocator)
         {
-            NumHeadings = numHeadings;
             MaxConfigs = maxConfigs;
             SuccessorsFlat = default;
             SuccOffsets = new NativeArray<int>(maxConfigs, allocator);

@@ -10,7 +10,6 @@ namespace BovineLabs.Grid.Subgoal
     public struct SubgoalEdge
     {
         public int To;
-        public float Cost;
     }
 
 
@@ -40,6 +39,7 @@ namespace BovineLabs.Grid.Subgoal
             s = new SubgoalState
             {
                 Grid = g,
+                Allocator = a,
                 Subgoals = new UnsafeList<int>(maxSubgoals, a),
                 SubgoalOfCell = (int*)AllocatorManager.Allocate(a, sizeof(int), UnsafeUtility.AlignOf<int>(), g.Length),
                 Edges = new UnsafeList<SubgoalEdge>(maxEdges, a),
@@ -112,7 +112,7 @@ namespace BovineLabs.Grid.Subgoal
                     if (i == j) continue;
                     var pj = s.Grid.ToCoord(s.Subgoals[j]);
                     if (LineOfSight(in s.Grid, blockedPtr, ref pi, ref pj))
-                        s.Edges.Add(new SubgoalEdge { To = j, Cost = math.distance(pi, pj) });
+                        s.Edges.Add(new SubgoalEdge { To = j });
                 }
 
                 s.EdgeRanges.Add(new RangeI(edgeStart, s.Edges.Length - edgeStart));

@@ -40,7 +40,6 @@ namespace BovineLabs.Grid.MeshA
                     offset,
                     dir,
                     length,
-                    0f,
                     sweptI,
                     sweptJ
                 );
@@ -70,7 +69,7 @@ namespace BovineLabs.Grid.MeshA
                 var sj1 = new NativeArray<int>(1, allocator);
                 si1[0] = dir.x;
                 sj1[0] = dir.y;
-                result.Add(new MotionPrimitive(primId++, theta, dir, theta, baseLen, 0f, si1, sj1));
+                result.Add(new MotionPrimitive(primId++, theta, dir, theta, baseLen, si1, sj1));
 
 
                 var si2 = new NativeArray<int>(2, allocator);
@@ -79,7 +78,7 @@ namespace BovineLabs.Grid.MeshA
                 sj2[0] = dir.y;
                 si2[1] = dir.x * 2;
                 sj2[1] = dir.y * 2;
-                result.Add(new MotionPrimitive(primId++, theta, dir * 2, theta, baseLen * 2, 0f, si2, sj2));
+                result.Add(new MotionPrimitive(primId++, theta, dir * 2, theta, baseLen * 2, si2, sj2));
 
 
                 var nextTheta = (theta + 1) % 8;
@@ -94,7 +93,7 @@ namespace BovineLabs.Grid.MeshA
                 si3[2] = endOff.x;
                 sj3[2] = endOff.y;
                 var arcLen = math.length(new float2(endOff.x, endOff.y));
-                result.Add(new MotionPrimitive(primId++, theta, endOff, nextTheta, arcLen, math.PI / 4f, si3, sj3));
+                result.Add(new MotionPrimitive(primId++, theta, endOff, nextTheta, arcLen, si3, sj3));
             }
 
             return true;
