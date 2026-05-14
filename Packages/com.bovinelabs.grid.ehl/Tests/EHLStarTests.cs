@@ -1,10 +1,7 @@
-using System;
+using System.Runtime.InteropServices;
 using NUnit.Framework;
-using Unity.Burst;
 using Unity.Collections;
-using Unity.Jobs;
 using Unity.Mathematics;
-using BovineLabs.Grid.EHL;
 
 namespace BovineLabs.Grid.EHL.Tests
 {
@@ -13,13 +10,13 @@ namespace BovineLabs.Grid.EHL.Tests
     {
         private const float Eps = 0.1f;
 
-        private EHLIndex BuildTestIndex(int2 gridDims = new int2(), long memoryBudget = 10_000_000)
+        private EHLIndex BuildTestIndex(int2 gridDims = new(), long memoryBudget = 10_000_000)
         {
             if (gridDims.Equals(new int2(0, 0)))
                 gridDims = new int2(10, 10);
 
-            float2 mapMin = new float2(0f, 0f);
-            float2 mapMax = new float2(10f, 10f);
+            var mapMin = new float2(0f, 0f);
+            var mapMax = new float2(10f, 10f);
 
             var polygonVertices = new NativeArray<float2>(8, Allocator.Persistent);
             polygonVertices[0] = new float2(3f, 7f);
@@ -141,19 +138,20 @@ namespace BovineLabs.Grid.EHL.Tests
         public void VisibilityGraph_EdgesCorrect()
         {
             var index = BuildTestIndex();
-            int totalEdges = 0;
-            for (int v = 0; v < index.ConvexVertices.Length; v++)
+            var totalEdges = 0;
+            for (var v = 0; v < index.ConvexVertices.Length; v++)
             {
-                int offset = index.AdjOffsets[v];
-                int count = index.AdjCounts[v];
+                var offset = index.AdjOffsets[v];
+                var count = index.AdjCounts[v];
                 totalEdges += count;
-                for (int e = 0; e < count; e++)
+                for (var e = 0; e < count; e++)
                 {
                     var edge = index.AdjEdges[offset + e];
                     Assert.AreNotEqual(v, edge.TargetVertexId, "Self-loops should not exist in visibility graph");
                     Assert.IsTrue(edge.Distance > 0f, $"Edge distance should be positive, got {edge.Distance}");
                 }
             }
+
             Assert.AreEqual(totalEdges % 2, 0, "Edge count should be even (bidirectional)");
             index.Dispose();
         }
@@ -162,33 +160,37 @@ namespace BovineLabs.Grid.EHL.Tests
         public void HubLabels_CoverAllPairs()
         {
             var index = BuildTestIndex();
-            int n = index.ConvexVertices.Length;
-            for (int v1 = 0; v1 < n; v1++)
+            var n = index.ConvexVertices.Length;
+            for (var v1 = 0; v1 < n; v1++)
             {
-                int off1 = index.HubOffsets[v1];
-                int cnt1 = index.HubCounts[v1];
-                for (int v2 = v1 + 1; v2 < n; v2++)
+                var off1 = index.HubOffsets[v1];
+                var cnt1 = index.HubCounts[v1];
+                for (var v2 = v1 + 1; v2 < n; v2++)
                 {
-                    int off2 = index.HubOffsets[v2];
-                    int cnt2 = index.HubCounts[v2];
-                    bool foundCommon = false;
+                    var off2 = index.HubOffsets[v2];
+                    var cnt2 = index.HubCounts[v2];
+                    var foundCommon = false;
                     int i = off1, j = off2;
                     int end1 = off1 + cnt1, end2 = off2 + cnt2;
                     while (i < end1 && j < end2)
                     {
-                        int h1 = index.HubLabels[i].HubVertexId;
-                        int h2 = index.HubLabels[j].HubVertexId;
+                        var h1 = index.HubLabels[i].HubVertexId;
+                        var h2 = index.HubLabels[j].HubVertexId;
                         if (h1 == h2)
                         {
                             foundCommon = true;
                             break;
                         }
-                        else if (h1 < h2) i++;
+
+                        if (h1 < h2) i++;
                         else j++;
                     }
-                    Assert.IsTrue(foundCommon || cnt1 == 0 || cnt2 == 0, $"Vertices {v1} and {v2} should share at least one hub in their labels");
+
+                    Assert.IsTrue(foundCommon || cnt1 == 0 || cnt2 == 0,
+                        $"Vertices {v1} and {v2} should share at least one hub in their labels");
                 }
             }
+
             index.Dispose();
         }
 
@@ -198,8 +200,9 @@ namespace BovineLabs.Grid.EHL.Tests
             var index = BuildTestIndex();
             var result = EHLStarQuery.Query(ref index, new float2(1f, 1f), new float2(2f, 1f));
             Assert.IsTrue(result.PathFound, "Path should be found for unobstructed query");
-            float expectedDist = 1.0f;
-            Assert.AreEqual(expectedDist, result.Distance, Eps, $"Expected distance ~{expectedDist}, got {result.Distance}");
+            var expectedDist = 1.0f;
+            Assert.AreEqual(expectedDist, result.Distance, Eps,
+                $"Expected distance ~{expectedDist}, got {result.Distance}");
             result.Dispose();
             index.Dispose();
         }
@@ -219,9 +222,9 @@ namespace BovineLabs.Grid.EHL.Tests
         [Test]
         public void Query_NoPath_WhenBlocked()
         {
-            float2 mapMin = new float2(0f, 0f);
-            float2 mapMax = new float2(10f, 10f);
-            int2 gridDims = new int2(10, 10);
+            var mapMin = new float2(0f, 0f);
+            var mapMax = new float2(10f, 10f);
+            var gridDims = new int2(10, 10);
             var polygonVertices = new NativeArray<float2>(4, Allocator.Persistent);
             polygonVertices[0] = new float2(5f, 10f);
             polygonVertices[1] = new float2(6f, 10f);
@@ -280,11 +283,12 @@ namespace BovineLabs.Grid.EHL.Tests
         public void MemoryBudget_Respected_AfterCompression()
         {
             long budget = 50000;
-            int2 gridDims = new int2(5, 5);
+            var gridDims = new int2(5, 5);
             var index = BuildTestIndex(gridDims, budget);
-            long actualMemory = index.ViaLabels.Length * System.Runtime.InteropServices.Marshal.SizeOf<ViaLabel>();
+            long actualMemory = index.ViaLabels.Length * Marshal.SizeOf<ViaLabel>();
             Assert.IsTrue(index.ViaLabels.Length >= 0, "Via-labels should exist after compression");
-            Assert.IsTrue(index.Cells.Length == gridDims.x * gridDims.y, $"Should have {gridDims.x * gridDims.y} cells, got {index.Cells.Length}");
+            Assert.IsTrue(index.Cells.Length == gridDims.x * gridDims.y,
+                $"Should have {gridDims.x * gridDims.y} cells, got {index.Cells.Length}");
             index.Dispose();
         }
 
@@ -295,9 +299,8 @@ namespace BovineLabs.Grid.EHL.Tests
             var result1 = EHLStarQuery.Query(ref index, new float2(1f, 1f), new float2(2f, 1f));
             var result2 = EHLStarQuery.Query(ref index, new float2(1f, 1f), new float2(5f, 1f));
             if (result1.PathFound && result2.PathFound)
-            {
-                Assert.IsTrue(result2.Distance >= result1.Distance, $"Distance to farther point ({result2.Distance}) should be >= closer point ({result1.Distance})");
-            }
+                Assert.IsTrue(result2.Distance >= result1.Distance,
+                    $"Distance to farther point ({result2.Distance}) should be >= closer point ({result1.Distance})");
             result1.Dispose();
             result2.Dispose();
             index.Dispose();
@@ -307,11 +310,11 @@ namespace BovineLabs.Grid.EHL.Tests
         public void Index_CellLookup_ReturnsCorrectCell()
         {
             var index = BuildTestIndex();
-            int cell00 = index.CellIndex(new float2(0.5f, 0.5f));
+            var cell00 = index.CellIndex(new float2(0.5f, 0.5f));
             Assert.AreEqual(0, cell00, "Point (0.5,0.5) should be in cell 0");
-            int cellLast = index.CellIndex(new float2(9.5f, 9.5f));
+            var cellLast = index.CellIndex(new float2(9.5f, 9.5f));
             Assert.AreEqual(99, cellLast, "Point (9.5,9.5) should be in last cell");
-            int cell25 = index.CellIndex(new float2(5.5f, 2.5f));
+            var cell25 = index.CellIndex(new float2(5.5f, 2.5f));
             Assert.AreEqual(25, cell25, "Point (5.5,2.5) should be in cell 25");
             index.Dispose();
         }
@@ -320,15 +323,16 @@ namespace BovineLabs.Grid.EHL.Tests
         public void Query_PathContainsSourceAndTarget()
         {
             var index = BuildTestIndex();
-            float2 src = new float2(1f, 1f);
-            float2 tgt = new float2(2f, 2f);
+            var src = new float2(1f, 1f);
+            var tgt = new float2(2f, 2f);
             var result = EHLStarQuery.Query(ref index, src, tgt);
             if (result.PathFound && result.Waypoints.Length >= 2)
             {
                 Assert.IsTrue(math.lengthsq(result.Waypoints[0] - src) < 0.01f, "First waypoint should be at source");
-                float2 lastWP = result.Waypoints[result.Waypoints.Length - 1];
+                var lastWP = result.Waypoints[result.Waypoints.Length - 1];
                 Assert.IsTrue(math.lengthsq(lastWP - tgt) < 0.01f, "Last waypoint should be at target");
             }
+
             result.Dispose();
             index.Dispose();
         }

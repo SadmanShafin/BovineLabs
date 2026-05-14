@@ -1,18 +1,27 @@
 {
   "name": "com.bovinelabs.grid.mesha.tests",
   "rootNamespace": "",
-  "references": ["Unity.Burst",
+  "references": [
+    "Unity.Burst",
     "Unity.Collections",
     "Unity.Mathematics",
     "Unity.Jobs",
-    "com.bovinelabs.grid", "com.bovinelabs.grid.mesha"],
-  "includePlatforms": ["Editor"],
+    "com.bovinelabs.grid",
+    "com.bovinelabs.grid.mesha"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
   "excludePlatforms": [],
   "allowUnsafeCode": true,
   "overrideReferences": true,
-  "precompiledReferences": ["nunit.framework.dll"],
+  "precompiledReferences": [
+    "nunit.framework.dll"
+  ],
   "autoReferenced": false,
-  "defineConstraints": ["UNITY_INCLUDE_TESTS"],
+  "defineConstraints": [
+    "UNITY_INCLUDE_TESTS"
+  ],
   "versionDefines": [],
   "noEngineReferences": false
 }

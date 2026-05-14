@@ -1,4 +1,3 @@
-using System;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
@@ -6,8 +5,6 @@ using Unity.Mathematics;
 
 namespace BovineLabs.Grid.EHL
 {
-
-
     [BurstCompile]
     public struct EHLStarQueryJob : IJob
     {
@@ -22,10 +19,10 @@ namespace BovineLabs.Grid.EHL
 
         public void Execute()
         {
-            float bestDist = float.MaxValue;
-            int bestHubId = -1;
-            int bestViaSource = -1;
-            int bestViaTarget = -1;
+            var bestDist = float.MaxValue;
+            var bestHubId = -1;
+            var bestViaSource = -1;
+            var bestViaTarget = -1;
 
 
             if (IsDirectlyVisible(Source, Target, Index.ObstacleEdges))
@@ -37,9 +34,8 @@ namespace BovineLabs.Grid.EHL
             }
             else
             {
-
-                int cs = Index.CellIndex(Source);
-                int ct = Index.CellIndex(Target);
+                var cs = Index.CellIndex(Source);
+                var ct = Index.CellIndex(Target);
 
                 var cellS = Index.Cells[cs];
                 var cellT = Index.Cells[ct];
@@ -52,29 +48,28 @@ namespace BovineLabs.Grid.EHL
                 int i = 0, j = 0;
                 while (i < labelsS.Length && j < labelsT.Length)
                 {
-                    int hubS = labelsS[i].HubVertexId;
-                    int hubT = labelsT[j].HubVertexId;
+                    var hubS = labelsS[i].HubVertexId;
+                    var hubT = labelsT[j].HubVertexId;
 
                     if (hubS == hubT)
                     {
-
                         var labelS = labelsS[i];
                         var labelT = labelsT[j];
 
 
-                        float2 visVertS = Index.ConvexVertices[labelS.VisibleVertexId].Position;
-                        float distSrcToVis = math.distance(Source, visVertS);
-                        float cellDistS = math.distance(cellS.Center, visVertS);
-                        float dVisToHubS = labelS.HubDistance - cellDistS;
-                        float vdistS = distSrcToVis + math.max(0f, dVisToHubS);
+                        var visVertS = Index.ConvexVertices[labelS.VisibleVertexId].Position;
+                        var distSrcToVis = math.distance(Source, visVertS);
+                        var cellDistS = math.distance(cellS.Center, visVertS);
+                        var dVisToHubS = labelS.HubDistance - cellDistS;
+                        var vdistS = distSrcToVis + math.max(0f, dVisToHubS);
 
-                        float2 visVertT = Index.ConvexVertices[labelT.VisibleVertexId].Position;
-                        float distTgtToVis = math.distance(Target, visVertT);
-                        float cellDistT = math.distance(cellT.Center, visVertT);
-                        float dVisToHubT = labelT.HubDistance - cellDistT;
-                        float vdistT = distTgtToVis + math.max(0f, dVisToHubT);
+                        var visVertT = Index.ConvexVertices[labelT.VisibleVertexId].Position;
+                        var distTgtToVis = math.distance(Target, visVertT);
+                        var cellDistT = math.distance(cellT.Center, visVertT);
+                        var dVisToHubT = labelT.HubDistance - cellDistT;
+                        var vdistT = distTgtToVis + math.max(0f, dVisToHubT);
 
-                        float totalDist = vdistS + vdistT;
+                        var totalDist = vdistS + vdistT;
 
                         if (totalDist < bestDist)
                         {
@@ -111,8 +106,7 @@ namespace BovineLabs.Grid.EHL
 
                 if (bestViaSource >= 0)
                 {
-
-                    float2 viaSPos = Index.ConvexVertices[bestViaSource].Position;
+                    var viaSPos = Index.ConvexVertices[bestViaSource].Position;
                     if (math.lengthsq(viaSPos - Source) > 1e-6f)
                         waypoints.Add(viaSPos);
 
@@ -120,13 +114,13 @@ namespace BovineLabs.Grid.EHL
                     if (bestViaSource != bestHubId && bestHubId >= 0)
                     {
                         var path = new NativeList<int>(Allocator.Temp);
-                        int current = bestViaSource;
-                        long key = (long)current * Index.ConvexVertices.Length + bestHubId;
+                        var current = bestViaSource;
+                        var key = (long)current * Index.ConvexVertices.Length + bestHubId;
 
-                        int safety = 0;
+                        var safety = 0;
                         while (current != bestHubId && safety < 1000)
                         {
-                            if (Index.SuccessorMap.TryGetValue(key, out int next))
+                            if (Index.SuccessorMap.TryGetValue(key, out var next))
                             {
                                 if (next == current || next < 0)
                                     break;
@@ -138,12 +132,13 @@ namespace BovineLabs.Grid.EHL
                             {
                                 break;
                             }
+
                             safety++;
                         }
 
-                        for (int p = 0; p < path.Length; p++)
+                        for (var p = 0; p < path.Length; p++)
                         {
-                            float2 wp = Index.ConvexVertices[path[p]].Position;
+                            var wp = Index.ConvexVertices[path[p]].Position;
 
                             if (math.lengthsq(wp - waypoints[waypoints.Length - 1]) > 1e-6f)
                                 waypoints.Add(wp);
@@ -155,7 +150,7 @@ namespace BovineLabs.Grid.EHL
 
                     if (bestHubId >= 0)
                     {
-                        float2 hubPos = Index.ConvexVertices[bestHubId].Position;
+                        var hubPos = Index.ConvexVertices[bestHubId].Position;
                         if (math.lengthsq(hubPos - waypoints[waypoints.Length - 1]) > 1e-6f)
                             waypoints.Add(hubPos);
                     }
@@ -164,13 +159,13 @@ namespace BovineLabs.Grid.EHL
                     if (bestHubId != bestViaTarget && bestHubId >= 0)
                     {
                         var path2 = new NativeList<int>(Allocator.Temp);
-                        int current = bestHubId;
-                        long key = (long)current * Index.ConvexVertices.Length + bestViaTarget;
+                        var current = bestHubId;
+                        var key = (long)current * Index.ConvexVertices.Length + bestViaTarget;
 
-                        int safety = 0;
+                        var safety = 0;
                         while (current != bestViaTarget && safety < 1000)
                         {
-                            if (Index.SuccessorMap.TryGetValue(key, out int next))
+                            if (Index.SuccessorMap.TryGetValue(key, out var next))
                             {
                                 if (next == current || next < 0)
                                     break;
@@ -182,12 +177,13 @@ namespace BovineLabs.Grid.EHL
                             {
                                 break;
                             }
+
                             safety++;
                         }
 
-                        for (int p = 0; p < path2.Length; p++)
+                        for (var p = 0; p < path2.Length; p++)
                         {
-                            float2 wp = Index.ConvexVertices[path2[p]].Position;
+                            var wp = Index.ConvexVertices[path2[p]].Position;
                             if (math.lengthsq(wp - waypoints[waypoints.Length - 1]) > 1e-6f)
                                 waypoints.Add(wp);
                         }
@@ -196,7 +192,7 @@ namespace BovineLabs.Grid.EHL
                     }
 
 
-                    float2 viaTPos = Index.ConvexVertices[bestViaTarget].Position;
+                    var viaTPos = Index.ConvexVertices[bestViaTarget].Position;
                     if (math.lengthsq(viaTPos - waypoints[waypoints.Length - 1]) > 1e-6f)
                         waypoints.Add(viaTPos);
                 }
@@ -205,7 +201,7 @@ namespace BovineLabs.Grid.EHL
                 if (math.lengthsq(Target - waypoints[waypoints.Length - 1]) > 1e-6f)
                     waypoints.Add(Target);
 
-                for (int w = 0; w < waypoints.Length; w++)
+                for (var w = 0; w < waypoints.Length; w++)
                     ResultWaypoints.Add(waypoints[w]);
 
                 waypoints.Dispose();
@@ -219,25 +215,25 @@ namespace BovineLabs.Grid.EHL
 
         private bool IsDirectlyVisible(float2 a, float2 b, NativeArray<ObstacleEdge> edges)
         {
-            float2 ab = b - a;
-            float lenSq = math.lengthsq(ab);
+            var ab = b - a;
+            var lenSq = math.lengthsq(ab);
             if (lenSq < 1e-10f) return true;
 
-            for (int e = 0; e < edges.Length; e++)
+            for (var e = 0; e < edges.Length; e++)
             {
-                float2 c = edges[e].A;
-                float2 d = edges[e].B;
+                var c = edges[e].A;
+                var d = edges[e].B;
 
-                float2 d1 = ab;
-                float2 d2 = d - c;
-                float cross = d1.x * d2.y - d1.y * d2.x;
+                var d1 = ab;
+                var d2 = d - c;
+                var cross = d1.x * d2.y - d1.y * d2.x;
 
                 const float eps = 1e-10f;
                 if (math.abs(cross) < eps) continue;
 
-                float2 d3 = c - a;
-                float t = (d3.x * d2.y - d3.y * d2.x) / cross;
-                float u = (d3.x * d1.y - d3.y * d1.x) / cross;
+                var d3 = c - a;
+                var t = (d3.x * d2.y - d3.y * d2.x) / cross;
+                var u = (d3.x * d1.y - d3.y * d1.x) / cross;
 
                 const float margin = 1e-5f;
                 if (t > margin && t < 1.0f - margin && u > margin && u < 1.0f - margin)
@@ -251,8 +247,6 @@ namespace BovineLabs.Grid.EHL
 
     public static class EHLStarQuery
     {
-
-
         public static EHLQueryResult Query(ref EHLIndex index, float2 source, float2 target)
         {
             var resultDist = new NativeList<float>(Allocator.Temp);
@@ -266,7 +260,7 @@ namespace BovineLabs.Grid.EHL
                 Target = target,
                 ResultDistance = resultDist,
                 ResultWaypoints = resultWP,
-                ResultPathFound = resultFound,
+                ResultPathFound = resultFound
             };
 
 
@@ -277,7 +271,7 @@ namespace BovineLabs.Grid.EHL
             {
                 result.PathFound = true;
                 result.Distance = resultDist[0];
-                for (int i = 0; i < resultWP.Length; i++)
+                for (var i = 0; i < resultWP.Length; i++)
                     result.Waypoints.Add(resultWP[i]);
             }
             else
@@ -314,7 +308,7 @@ namespace BovineLabs.Grid.EHL
                 Target = target,
                 ResultDistance = resultDist,
                 ResultWaypoints = resultWP,
-                ResultPathFound = resultFound,
+                ResultPathFound = resultFound
             };
 
             return job.Schedule(dependency);

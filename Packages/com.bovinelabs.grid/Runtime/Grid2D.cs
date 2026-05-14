@@ -22,6 +22,7 @@ namespace BovineLabs.Grid
                 result = default;
                 return false;
             }
+
             result = new Grid2D { Width = width, Height = height, Length = width * height };
             return true;
         }
@@ -104,8 +105,8 @@ namespace BovineLabs.Grid
 
         public static float HeuristicOctile(int2 a, int2 b)
         {
-            int dx = math.abs(a.x - b.x);
-            int dy = math.abs(a.y - b.y);
+            var dx = math.abs(a.x - b.x);
+            var dy = math.abs(a.y - b.y);
             return dx + dy + (1.4142135f - 2f) * math.min(dx, dy);
         }
     }

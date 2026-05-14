@@ -4,11 +4,9 @@ using Unity.Collections.LowLevel.Unsafe;
 
 namespace BovineLabs.Grid
 {
-
     public unsafe struct UnsafeFastQueue<T> : IDisposable where T : unmanaged
     {
-        [NativeDisableUnsafePtrRestriction]
-        public T* Data;
+        [NativeDisableUnsafePtrRestriction] public T* Data;
         public int Head;
         public int Tail;
         public int Capacity;
@@ -22,7 +20,8 @@ namespace BovineLabs.Grid
         {
             return new UnsafeFastQueue<T>
             {
-                Data = (T*)UnsafeUtility.Malloc(UnsafeUtility.SizeOf<T>() * capacity, UnsafeUtility.AlignOf<T>(), allocator),
+                Data = (T*)UnsafeUtility.Malloc(UnsafeUtility.SizeOf<T>() * capacity, UnsafeUtility.AlignOf<T>(),
+                    allocator),
                 Head = 0,
                 Tail = 0,
                 Capacity = capacity,
@@ -42,6 +41,7 @@ namespace BovineLabs.Grid
                 item = default;
                 return false;
             }
+
             item = Data[Head++];
             return true;
         }

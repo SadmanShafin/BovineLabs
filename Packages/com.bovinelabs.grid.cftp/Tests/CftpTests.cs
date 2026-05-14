@@ -1,21 +1,34 @@
+using BovineLabs.Grid.Cftp;
 using NUnit.Framework;
 using Unity.Collections;
-using BovineLabs.Grid.Cftp;
+using Unity.Mathematics;
 
 public class CftpTests
 {
-    [Test] public void Create_Dimensions()
-    { Assert.IsTrue(CftpApi.TryCreate(3, 3, 100, Allocator.Temp, out var s)); Assert.AreEqual(9, s.Grid.Length); CftpApi.Dispose(ref s); }
-
-    [Test] public void InitializeExtremes()
+    [Test]
+    public void Create_Dimensions()
     {
         Assert.IsTrue(CftpApi.TryCreate(3, 3, 100, Allocator.Temp, out var s));
-        CftpApi.InitializeExtremes(ref s);
-        for (int i = 0; i < s.Grid.Length; i++) { Assert.AreEqual(0, s.Low[i]); Assert.AreEqual(1, s.High[i]); }
+        Assert.AreEqual(9, s.Grid.Length);
         CftpApi.Dispose(ref s);
     }
 
-    [Test] public void Coalesced_NotInitially()
+    [Test]
+    public void InitializeExtremes()
+    {
+        Assert.IsTrue(CftpApi.TryCreate(3, 3, 100, Allocator.Temp, out var s));
+        CftpApi.InitializeExtremes(ref s);
+        for (var i = 0; i < s.Grid.Length; i++)
+        {
+            Assert.AreEqual(0, s.Low[i]);
+            Assert.AreEqual(1, s.High[i]);
+        }
+
+        CftpApi.Dispose(ref s);
+    }
+
+    [Test]
+    public void Coalesced_NotInitially()
     {
         Assert.IsTrue(CftpApi.TryCreate(3, 3, 100, Allocator.Temp, out var s));
         CftpApi.InitializeExtremes(ref s);
@@ -23,14 +36,21 @@ public class CftpTests
         CftpApi.Dispose(ref s);
     }
 
-    [Test] public void GenerateUpdates()
+    [Test]
+    public void GenerateUpdates()
     {
         Assert.IsTrue(CftpApi.TryCreate(3, 3, 1000, Allocator.Temp, out var s));
-        var rng = new Unity.Mathematics.Random(42);
+        var rng = new Random(42);
         Assert.IsTrue(CftpApi.TryGeneratePastUpdates(ref s, ref rng, 5));
         Assert.AreEqual(45, s.Updates.Length);
         CftpApi.Dispose(ref s);
     }
 
-    [Test] public void Dispose_Double() { Assert.IsTrue(CftpApi.TryCreate(3, 3, 10, Allocator.Temp, out var s)); CftpApi.Dispose(ref s); CftpApi.Dispose(ref s); }
+    [Test]
+    public void Dispose_Double()
+    {
+        Assert.IsTrue(CftpApi.TryCreate(3, 3, 10, Allocator.Temp, out var s));
+        CftpApi.Dispose(ref s);
+        CftpApi.Dispose(ref s);
+    }
 }

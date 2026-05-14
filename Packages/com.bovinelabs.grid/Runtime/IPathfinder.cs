@@ -1,12 +1,9 @@
 using System;
-using Unity.Burst;
 using Unity.Collections;
 using Unity.Mathematics;
 
 namespace BovineLabs.Grid
 {
-
-
     public interface IPathfinder : IDisposable
     {
         PathResult FindPath(int2 start, int2 goal, Allocator allocator);
@@ -20,7 +17,6 @@ namespace BovineLabs.Grid
         private NativeArray<int> ids;
         private NativeArray<int> heapToNode;
         private NativeArray<int> nodeToHeap;
-        private int count;
         private int capacity;
 
         public NativeMinHeap(int initialCapacity, Allocator allocator)
@@ -31,48 +27,51 @@ namespace BovineLabs.Grid
             ids = new NativeArray<int>(capacity, allocator);
             heapToNode = new NativeArray<int>(capacity, allocator);
             nodeToHeap = new NativeArray<int>(capacity, allocator);
-            count = 0;
-            for (int i = 0; i < capacity; i++) nodeToHeap[i] = -1;
+            Count = 0;
+            for (var i = 0; i < capacity; i++) nodeToHeap[i] = -1;
         }
 
-        public int Count => count;
+        public int Count { get; private set; }
 
         public void Push(int nodeId, float priority)
         {
-            if (count >= capacity) Resize();
-            int heapIdx = count;
+            if (Count >= capacity) Resize();
+            var heapIdx = Count;
             priorities[heapIdx] = priority;
             ids[heapIdx] = nodeId;
             nodeToHeap[nodeId] = heapIdx;
             heapToNode[heapIdx] = nodeId;
-            count++;
+            Count++;
             SiftUp(heapIdx);
         }
 
         public int Pop()
         {
-            int nodeId = ids[0];
+            var nodeId = ids[0];
             nodeToHeap[nodeId] = -1;
-            count--;
-            if (count > 0)
+            Count--;
+            if (Count > 0)
             {
-                ids[0] = ids[count];
-                priorities[0] = priorities[count];
-                heapToNode[0] = heapToNode[count];
+                ids[0] = ids[Count];
+                priorities[0] = priorities[Count];
+                heapToNode[0] = heapToNode[Count];
                 nodeToHeap[ids[0]] = 0;
                 SiftDown(0);
             }
+
             return nodeId;
         }
 
-        public bool Contains(int nodeId) =>
-            nodeId >= 0 && nodeId < capacity && nodeToHeap[nodeId] >= 0;
+        public bool Contains(int nodeId)
+        {
+            return nodeId >= 0 && nodeId < capacity && nodeToHeap[nodeId] >= 0;
+        }
 
         public void TryUpdate(int nodeId, float newPriority)
         {
             if (!Contains(nodeId)) return;
-            int heapIdx = nodeToHeap[nodeId];
-            float old = priorities[heapIdx];
+            var heapIdx = nodeToHeap[nodeId];
+            var old = priorities[heapIdx];
             priorities[heapIdx] = newPriority;
             if (newPriority < old) SiftUp(heapIdx);
             else SiftDown(heapIdx);
@@ -82,7 +81,7 @@ namespace BovineLabs.Grid
         {
             while (idx > 0)
             {
-                int parent = (idx - 1) / 2;
+                var parent = (idx - 1) / 2;
                 if (priorities[idx] >= priorities[parent]) break;
                 Swap(idx, parent);
                 idx = parent;
@@ -93,11 +92,11 @@ namespace BovineLabs.Grid
         {
             while (true)
             {
-                int smallest = idx;
-                int left = 2 * idx + 1;
-                int right = 2 * idx + 2;
-                if (left < count && priorities[left] < priorities[smallest]) smallest = left;
-                if (right < count && priorities[right] < priorities[smallest]) smallest = right;
+                var smallest = idx;
+                var left = 2 * idx + 1;
+                var right = 2 * idx + 2;
+                if (left < Count && priorities[left] < priorities[smallest]) smallest = left;
+                if (right < Count && priorities[right] < priorities[smallest]) smallest = right;
                 if (smallest == idx) break;
                 Swap(idx, smallest);
                 idx = smallest;
@@ -106,29 +105,41 @@ namespace BovineLabs.Grid
 
         private void Swap(int a, int b)
         {
-            float tmpP = priorities[a]; priorities[a] = priorities[b]; priorities[b] = tmpP;
-            int tmpId = ids[a]; ids[a] = ids[b]; ids[b] = tmpId;
-            int tmpH = heapToNode[a]; heapToNode[a] = heapToNode[b]; heapToNode[b] = tmpH;
+            var tmpP = priorities[a];
+            priorities[a] = priorities[b];
+            priorities[b] = tmpP;
+            var tmpId = ids[a];
+            ids[a] = ids[b];
+            ids[b] = tmpId;
+            var tmpH = heapToNode[a];
+            heapToNode[a] = heapToNode[b];
+            heapToNode[b] = tmpH;
             nodeToHeap[ids[a]] = a;
             nodeToHeap[ids[b]] = b;
         }
 
-        private Allocator resizeAllocator;
+        private readonly Allocator resizeAllocator;
 
         private void Resize()
         {
-            int newCap = capacity * 2;
+            var newCap = capacity * 2;
             var newP = new NativeArray<float>(newCap, resizeAllocator);
             var newIds = new NativeArray<int>(newCap, resizeAllocator);
             var newH2N = new NativeArray<int>(newCap, resizeAllocator);
             var newN2H = new NativeArray<int>(newCap, resizeAllocator);
-            NativeArray<float>.Copy(priorities, newP, count);
-            NativeArray<int>.Copy(ids, newIds, count);
-            NativeArray<int>.Copy(heapToNode, newH2N, count);
+            NativeArray<float>.Copy(priorities, newP, Count);
+            NativeArray<int>.Copy(ids, newIds, Count);
+            NativeArray<int>.Copy(heapToNode, newH2N, Count);
             NativeArray<int>.Copy(nodeToHeap, newN2H, capacity);
-            for (int i = capacity; i < newCap; i++) newN2H[i] = -1;
-            priorities.Dispose(); ids.Dispose(); heapToNode.Dispose(); nodeToHeap.Dispose();
-            priorities = newP; ids = newIds; heapToNode = newH2N; nodeToHeap = newN2H;
+            for (var i = capacity; i < newCap; i++) newN2H[i] = -1;
+            priorities.Dispose();
+            ids.Dispose();
+            heapToNode.Dispose();
+            nodeToHeap.Dispose();
+            priorities = newP;
+            ids = newIds;
+            heapToNode = newH2N;
+            nodeToHeap = newN2H;
             capacity = newCap;
         }
 

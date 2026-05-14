@@ -1,15 +1,19 @@
+using BovineLabs.Grid.FieldDStar;
 using NUnit.Framework;
 using Unity.Collections;
-using Unity.Mathematics;
-using BovineLabs.Grid;
-using BovineLabs.Grid.FieldDStar;
 
 public class FieldDStarTests
 {
-    [Test] public void Create_Dimensions()
-    { Assert.IsTrue(FieldDStarApi.TryCreate(5, 5, Allocator.Temp, out var s)); Assert.AreEqual(25, s.Grid.Length); FieldDStarApi.Dispose(ref s); }
+    [Test]
+    public void Create_Dimensions()
+    {
+        Assert.IsTrue(FieldDStarApi.TryCreate(5, 5, Allocator.Temp, out var s));
+        Assert.AreEqual(25, s.Grid.Length);
+        FieldDStarApi.Dispose(ref s);
+    }
 
-    [Test] public void SetGoal()
+    [Test]
+    public void SetGoal()
     {
         Assert.IsTrue(FieldDStarApi.TryCreate(5, 5, Allocator.Temp, out var s));
         Assert.IsTrue(FieldDStarApi.TrySetGoal(ref s, 24));
@@ -17,13 +21,15 @@ public class FieldDStarTests
         FieldDStarApi.Dispose(ref s);
     }
 
-    [Test] public void Step_OpenGrid()
+    [Test]
+    public void Step_OpenGrid()
     {
         Assert.IsTrue(FieldDStarApi.TryCreate(5, 5, Allocator.Temp, out var s));
         var cost = new NativeArray<float>(25, Allocator.Temp);
-        for (int i = 0; i < 25; i++) cost[i] = 1f;
+        for (var i = 0; i < 25; i++) cost[i] = 1f;
         Assert.IsTrue(FieldDStarApi.TrySetGoal(ref s, 24));
         Assert.IsTrue(FieldDStarApi.TryStep(ref s, cost));
-        FieldDStarApi.Dispose(ref s); cost.Dispose();
+        FieldDStarApi.Dispose(ref s);
+        cost.Dispose();
     }
 }

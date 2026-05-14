@@ -1,10 +1,8 @@
 using System.Runtime.InteropServices;
 using Unity.Burst;
-using Unity.Burst.CompilerServices;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
-using BovineLabs.Grid;
 
 namespace BovineLabs.Grid.Kasteleyn
 {
@@ -21,7 +19,7 @@ namespace BovineLabs.Grid.Kasteleyn
     }
 
     [BurstCompile]
-    public unsafe static class KasteleynApi
+    public static unsafe class KasteleynApi
     {
         public static bool TryCreate(int width, int height, int maxEdges, Allocator a, out KasteleynState result)
         {
@@ -39,7 +37,7 @@ namespace BovineLabs.Grid.Kasteleyn
                 EdgeCoords = new UnsafeList<int2>(maxEdges, a),
                 Matrix = new NativeArray<double>(g.Length * g.Length, a),
                 VertexCount = 0,
-                CellToVertex = new NativeArray<int>(g.Length, a),
+                CellToVertex = new NativeArray<int>(g.Length, a)
             };
             return true;
         }
@@ -55,64 +53,67 @@ namespace BovineLabs.Grid.Kasteleyn
         {
             s.Edges.Clear();
             s.EdgeCoords.Clear();
-            byte* region = (byte*)s.Region.GetUnsafePtr();
-            int* c2v = (int*)s.CellToVertex.GetUnsafePtr();
-            int w = s.Grid.Width;
-            int h = s.Grid.Height;
-            int len = s.Grid.Length;
+            var region = (byte*)s.Region.GetUnsafePtr();
+            var c2v = (int*)s.CellToVertex.GetUnsafePtr();
+            var w = s.Grid.Width;
+            var h = s.Grid.Height;
+            var len = s.Grid.Length;
 
-            int count = 0;
-            for (int i = 0; i < len; i++)
+            var count = 0;
+            for (var i = 0; i < len; i++)
                 c2v[i] = region[i] != 0 ? count++ : -1;
             s.VertexCount = count;
 
-            for (int i = 0; i < len; i++)
+            for (var i = 0; i < len; i++)
             {
                 if (c2v[i] < 0) continue;
-                int x = i % w;
-                int y = i / w;
+                var x = i % w;
+                var y = i / w;
                 if (x + 1 < w && c2v[i + 1] >= 0)
                 {
                     s.Edges.Add(new int2(c2v[i], c2v[i + 1]));
                     s.EdgeCoords.Add(new int2(i, i + 1));
                 }
+
                 if (y + 1 < h && c2v[i + w] >= 0)
                 {
                     s.Edges.Add(new int2(c2v[i], c2v[i + w]));
                     s.EdgeCoords.Add(new int2(i, i + w));
                 }
             }
+
             return true;
         }
 
         [BurstCompile]
         public static bool TryOrientKasteleyn(ref KasteleynState s)
         {
-            double* mat = (double*)s.Matrix.GetUnsafePtr();
-            int n = s.VertexCount;
-            int len = n * n;
-            for (int i = 0; i < len; i++) mat[i] = 0.0;
+            var mat = (double*)s.Matrix.GetUnsafePtr();
+            var n = s.VertexCount;
+            var len = n * n;
+            for (var i = 0; i < len; i++) mat[i] = 0.0;
 
-            int2* edges = (int2*)s.Edges.Ptr;
-            int2* edgeCoords = (int2*)s.EdgeCoords.Ptr;
-            int w = s.Grid.Width;
+            var edges = s.Edges.Ptr;
+            var edgeCoords = s.EdgeCoords.Ptr;
+            var w = s.Grid.Width;
 
-            for (int i = 0; i < s.Edges.Length; i++)
+            for (var i = 0; i < s.Edges.Length; i++)
             {
-                int eA = edges[i].x;
-                int eB = edges[i].y;
-                int cellA = edgeCoords[i].x;
-                int cellB = edgeCoords[i].y;
-                int ax = cellA % w;
-                int bx = cellB % w;
+                var eA = edges[i].x;
+                var eB = edges[i].y;
+                var cellA = edgeCoords[i].x;
+                var cellB = edgeCoords[i].y;
+                var ax = cellA % w;
+                var bx = cellB % w;
 
                 int sign;
-                if (ax == bx) sign = (ax % 2 == 0) ? 1 : -1;
+                if (ax == bx) sign = ax % 2 == 0 ? 1 : -1;
                 else sign = 1;
 
                 mat[eA * n + eB] = sign;
                 mat[eB * n + eA] = -sign;
             }
+
             return true;
         }
 
@@ -123,38 +124,45 @@ namespace BovineLabs.Grid.Kasteleyn
             if (s.VertexCount == 0) return false;
             if (s.VertexCount % 2 != 0) return true;
 
-            int n = s.VertexCount;
+            var n = s.VertexCount;
             var mat = new NativeArray<double>(n * n, Allocator.Temp);
             UnsafeUtility.MemCpy(mat.GetUnsafePtr(), s.Matrix.GetUnsafeReadOnlyPtr(), n * n * 8);
-            double* m = (double*)mat.GetUnsafePtr();
+            var m = (double*)mat.GetUnsafePtr();
 
-            double det = 1.0;
-            for (int col = 0; col < n; col++)
+            var det = 1.0;
+            for (var col = 0; col < n; col++)
             {
-                int pivot = -1;
-                for (int row = col; row < n; row++)
+                var pivot = -1;
+                for (var row = col; row < n; row++)
+                    if (math.abs(m[row * n + col]) > 1e-10)
+                    {
+                        pivot = row;
+                        break;
+                    }
+
+                if (pivot < 0)
                 {
-                    if (math.abs(m[row * n + col]) > 1e-10) { pivot = row; break; }
+                    det = 0;
+                    break;
                 }
-                if (pivot < 0) { det = 0; break; }
 
                 if (pivot != col)
                 {
                     det = -det;
-                    for (int j = 0; j < n; j++)
+                    for (var j = 0; j < n; j++)
                     {
-                        double tmp = m[col * n + j];
+                        var tmp = m[col * n + j];
                         m[col * n + j] = m[pivot * n + j];
                         m[pivot * n + j] = tmp;
                     }
                 }
 
                 det *= m[col * n + col];
-                double invPivot = 1.0 / m[col * n + col];
-                for (int row = col + 1; row < n; row++)
+                var invPivot = 1.0 / m[col * n + col];
+                for (var row = col + 1; row < n; row++)
                 {
-                    double factor = m[row * n + col] * invPivot;
-                    for (int j = col; j < n; j++)
+                    var factor = m[row * n + col] * invPivot;
+                    for (var j = col; j < n; j++)
                         m[row * n + j] -= factor * m[col * n + j];
                 }
             }

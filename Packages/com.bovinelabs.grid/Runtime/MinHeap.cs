@@ -1,20 +1,16 @@
-using System;
-using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
-using Unity.Mathematics;
 using Unity.Burst;
 using Unity.Burst.CompilerServices;
+using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 
 namespace BovineLabs.Grid
 {
     [BurstCompile]
     public unsafe struct MinHeap
     {
-        [NativeDisableUnsafePtrRestriction]
-        public HeapNode* Data;
-        [NativeDisableUnsafePtrRestriction]
-        public int* Positions;
-        
+        [NativeDisableUnsafePtrRestriction] public HeapNode* Data;
+        [NativeDisableUnsafePtrRestriction] public int* Positions;
+
         public int Capacity;
         public int Count;
         public Allocator Allocator;
@@ -31,13 +27,15 @@ namespace BovineLabs.Grid
 
             result = new MinHeap
             {
-                Data = (HeapNode*)UnsafeUtility.Malloc(UnsafeUtility.SizeOf<HeapNode>() * maxId, UnsafeUtility.AlignOf<HeapNode>(), allocator),
-                Positions = (int*)UnsafeUtility.Malloc(UnsafeUtility.SizeOf<int>() * maxId, UnsafeUtility.AlignOf<int>(), allocator),
+                Data = (HeapNode*)UnsafeUtility.Malloc(UnsafeUtility.SizeOf<HeapNode>() * maxId,
+                    UnsafeUtility.AlignOf<HeapNode>(), allocator),
+                Positions = (int*)UnsafeUtility.Malloc(UnsafeUtility.SizeOf<int>() * maxId,
+                    UnsafeUtility.AlignOf<int>(), allocator),
                 Capacity = maxId,
                 Count = 0,
                 Allocator = allocator
             };
-            
+
             result.Clear();
             return true;
         }
@@ -57,7 +55,7 @@ namespace BovineLabs.Grid
         {
             if (Hint.Unlikely((uint)node.Id >= (uint)Capacity)) return false;
 
-            int pos = Positions[node.Id];
+            var pos = Positions[node.Id];
             if (pos >= 0)
             {
                 if (Less(node, Data[pos]))
@@ -69,11 +67,12 @@ namespace BovineLabs.Grid
             else
             {
                 if (Hint.Unlikely(Count >= Capacity)) return false;
-                int idx = Count++;
+                var idx = Count++;
                 Data[idx] = node;
                 Positions[node.Id] = idx;
                 SiftUp(idx);
             }
+
             return true;
         }
 
@@ -89,7 +88,7 @@ namespace BovineLabs.Grid
             result = Data[0];
             Positions[result.Id] = -1;
 
-            int last = --Count;
+            var last = --Count;
             if (Hint.Likely(last > 0))
             {
                 Data[0] = Data[last];
@@ -104,11 +103,11 @@ namespace BovineLabs.Grid
         public bool TryRemove(int id)
         {
             if (Hint.Unlikely((uint)id >= (uint)Capacity)) return false;
-            int pos = Positions[id];
+            var pos = Positions[id];
             if (pos < 0) return false;
 
             Positions[id] = -1;
-            int last = --Count;
+            var last = --Count;
             if (pos < last)
             {
                 Data[pos] = Data[last];
@@ -116,10 +115,14 @@ namespace BovineLabs.Grid
                 SiftUp(pos);
                 SiftDown(pos);
             }
+
             return true;
         }
 
-        public bool Contains(int id) => (uint)id < (uint)Capacity && Positions[id] >= 0;
+        public bool Contains(int id)
+        {
+            return (uint)id < (uint)Capacity && Positions[id] >= 0;
+        }
 
         public bool TryPeek(out HeapNode result)
         {
@@ -128,6 +131,7 @@ namespace BovineLabs.Grid
                 result = default;
                 return false;
             }
+
             result = Data[0];
             return true;
         }
@@ -147,7 +151,7 @@ namespace BovineLabs.Grid
         {
             while (i > 0)
             {
-                int parent = (i - 1) >> 1;
+                var parent = (i - 1) >> 1;
                 if (!Less(Data[i], Data[parent])) break;
                 Swap(i, parent);
                 i = parent;
@@ -158,9 +162,9 @@ namespace BovineLabs.Grid
         {
             while (true)
             {
-                int left = (i << 1) + 1;
-                int right = left + 1;
-                int smallest = i;
+                var left = (i << 1) + 1;
+                var right = left + 1;
+                var smallest = i;
 
                 if (left < Count && Less(Data[left], Data[smallest])) smallest = left;
                 if (right < Count && Less(Data[right], Data[smallest])) smallest = right;
@@ -191,7 +195,7 @@ namespace BovineLabs.Grid
     {
         public static void Fill<T>(this NativeArray<T> arr, T value) where T : unmanaged
         {
-            for (int i = 0; i < arr.Length; i++)
+            for (var i = 0; i < arr.Length; i++)
                 arr[i] = value;
         }
     }

@@ -4,7 +4,6 @@ using Unity.Burst.CompilerServices;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
-using BovineLabs.Grid;
 
 namespace BovineLabs.Grid.FastMarching
 {
@@ -18,7 +17,7 @@ namespace BovineLabs.Grid.FastMarching
     }
 
     [BurstCompile]
-    public unsafe static class FastMarchingApi
+    public static unsafe class FastMarchingApi
     {
         public static bool TryCreate(int width, int height, Allocator a, out FastMarchingState result)
         {
@@ -39,7 +38,7 @@ namespace BovineLabs.Grid.FastMarching
                 Grid = g,
                 T = new NativeArray<float>(g.Length, a),
                 State = new NativeArray<byte>(g.Length, a),
-                Heap = heap,
+                Heap = heap
             };
             return true;
         }
@@ -47,14 +46,19 @@ namespace BovineLabs.Grid.FastMarching
         [BurstCompile]
         public static void InitializeSources(ref FastMarchingState s, in NativeArray<int> sources)
         {
-            float* t = (float*)s.T.GetUnsafePtr();
-            byte* st = (byte*)s.State.GetUnsafePtr();
-            int len = s.Grid.Length;
-            for (int i = 0; i < len; i++) { t[i] = float.PositiveInfinity; st[i] = 0; }
+            var t = (float*)s.T.GetUnsafePtr();
+            var st = (byte*)s.State.GetUnsafePtr();
+            var len = s.Grid.Length;
+            for (var i = 0; i < len; i++)
+            {
+                t[i] = float.PositiveInfinity;
+                st[i] = 0;
+            }
+
             s.Heap.Clear();
 
-            int* src = (int*)sources.GetUnsafeReadOnlyPtr();
-            for (int i = 0; i < sources.Length; i++)
+            var src = (int*)sources.GetUnsafeReadOnlyPtr();
+            for (var i = 0; i < sources.Length; i++)
             {
                 t[src[i]] = 0f;
                 st[src[i]] = 1;
@@ -68,16 +72,16 @@ namespace BovineLabs.Grid.FastMarching
             if (s.Heap.IsEmpty) return false;
 
             if (!s.Heap.TryPop(out var node)) return false;
-            int u = node.Id;
+            var u = node.Id;
             s.State[u] = 2;
 
-            float* t = (float*)s.T.GetUnsafePtr();
-            byte* st = (byte*)s.State.GetUnsafePtr();
-            float* spd = (float*)speed.GetUnsafePtr();
-            int w = s.Grid.Width;
-            int h = s.Grid.Height;
-            int ux = u % w;
-            int uy = u / w;
+            var t = (float*)s.T.GetUnsafePtr();
+            var st = (byte*)s.State.GetUnsafePtr();
+            var spd = (float*)speed.GetUnsafePtr();
+            var w = s.Grid.Width;
+            var h = s.Grid.Height;
+            var ux = u % w;
+            var uy = u / w;
 
             if (ux + 1 < w) TryAccept(t, st, spd, w, h, u + 1, ref s);
             if (uy + 1 < h) TryAccept(t, st, spd, w, h, u + w, ref s);
@@ -90,7 +94,7 @@ namespace BovineLabs.Grid.FastMarching
         private static void TryAccept(float* t, byte* st, float* spd, int w, int h, int ni, ref FastMarchingState s)
         {
             if (st[ni] == 2) return;
-            float tNew = SolveEikonal(t, st, spd, w, h, ni);
+            var tNew = SolveEikonal(t, st, spd, w, h, ni);
             if (tNew < t[ni])
             {
                 t[ni] = tNew;
@@ -102,31 +106,53 @@ namespace BovineLabs.Grid.FastMarching
         [BurstCompile]
         public static bool TryPropagateAll(ref FastMarchingState s, in NativeArray<float> speed)
         {
-            while (TryPropagateStep(ref s, in speed)) { }
+            while (TryPropagateStep(ref s, in speed))
+            {
+            }
+
             return true;
         }
 
         private static float SolveEikonal(float* t, byte* st, float* spd, int w, int h, int idx)
         {
-            float sp = spd[idx];
+            var sp = spd[idx];
             if (Hint.Unlikely(sp <= 0f)) return float.PositiveInfinity;
 
-            int px = idx % w;
-            int py = idx / w;
+            var px = idx % w;
+            var py = idx / w;
 
-            float tx = float.PositiveInfinity;
-            float ty = float.PositiveInfinity;
+            var tx = float.PositiveInfinity;
+            var ty = float.PositiveInfinity;
 
-            if (px > 0 && st[idx - 1] == 2) { float v = t[idx - 1]; if (v < tx) tx = v; }
-            if (px + 1 < w && st[idx + 1] == 2) { float v = t[idx + 1]; if (v < tx) tx = v; }
-            if (py > 0 && st[idx - w] == 2) { float v = t[idx - w]; if (v < ty) ty = v; }
-            if (py + 1 < h && st[idx + w] == 2) { float v = t[idx + w]; if (v < ty) ty = v; }
+            if (px > 0 && st[idx - 1] == 2)
+            {
+                var v = t[idx - 1];
+                if (v < tx) tx = v;
+            }
 
-            float invSpeed = 1f / sp;
+            if (px + 1 < w && st[idx + 1] == 2)
+            {
+                var v = t[idx + 1];
+                if (v < tx) tx = v;
+            }
+
+            if (py > 0 && st[idx - w] == 2)
+            {
+                var v = t[idx - w];
+                if (v < ty) ty = v;
+            }
+
+            if (py + 1 < h && st[idx + w] == 2)
+            {
+                var v = t[idx + w];
+                if (v < ty) ty = v;
+            }
+
+            var invSpeed = 1f / sp;
             if (float.IsPositiveInfinity(tx)) return ty + invSpeed;
             if (float.IsPositiveInfinity(ty)) return tx + invSpeed;
 
-            float diff = math.abs(tx - ty);
+            var diff = math.abs(tx - ty);
             return diff < invSpeed
                 ? (tx + ty + math.sqrt(2f * invSpeed * invSpeed - diff * diff)) * 0.5f
                 : math.min(tx, ty) + invSpeed;
@@ -135,17 +161,17 @@ namespace BovineLabs.Grid.FastMarching
         [BurstCompile]
         public static void BuildGradientFlow(ref FastMarchingState s, ref NativeArray<float2> flow)
         {
-            float* t = (float*)s.T.GetUnsafePtr();
-            float2* fl = (float2*)flow.GetUnsafePtr();
-            int w = s.Grid.Width;
-            int h = s.Grid.Height;
-            int len = s.Grid.Length;
+            var t = (float*)s.T.GetUnsafePtr();
+            var fl = (float2*)flow.GetUnsafePtr();
+            var w = s.Grid.Width;
+            var h = s.Grid.Height;
+            var len = s.Grid.Length;
 
-            for (int i = 0; i < len; i++)
+            for (var i = 0; i < len; i++)
             {
-                int x = i % w;
-                int y = i / w;
-                float2 grad = float2.zero;
+                var x = i % w;
+                var y = i / w;
+                var grad = float2.zero;
 
                 if (x > 0 && x < w - 1) grad.x = (t[i + 1] - t[i - 1]) * 0.5f;
                 else if (x > 0) grad.x = t[i] - t[i - 1];
@@ -155,7 +181,7 @@ namespace BovineLabs.Grid.FastMarching
                 else if (y > 0) grad.y = t[i] - t[i - w];
                 else if (y < h - 1) grad.y = t[i + w] - t[i];
 
-                float lenSq = math.lengthsq(grad);
+                var lenSq = math.lengthsq(grad);
                 fl[i] = lenSq > 0f ? -grad * math.rsqrt(lenSq) : float2.zero;
             }
         }

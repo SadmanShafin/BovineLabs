@@ -1,91 +1,135 @@
+using BovineLabs.Grid;
 using NUnit.Framework;
 using Unity.Collections;
 using Unity.Mathematics;
-using BovineLabs.Grid;
 
 public class GridNeighborsTests
 {
-    [Test] public void Center_4Neighbors()
+    [Test]
+    public void Center_4Neighbors()
     {
-        Assert.IsTrue(Grid2D.TryCreate(5, 5, out var g)); var b = new NativeArray<byte>(g.Length, Allocator.Temp); var n = new NativeArray<int>(4, Allocator.Temp);
+        Assert.IsTrue(Grid2D.TryCreate(5, 5, out var g));
+        var b = new NativeArray<byte>(g.Length, Allocator.Temp);
+        var n = new NativeArray<int>(4, Allocator.Temp);
         b.Fill((byte)0);
         Assert.AreEqual(4, GridNeighbors.GetNeighbors4(g, g.ToIndex(2, 2), n, b));
-        b.Dispose(); n.Dispose();
+        b.Dispose();
+        n.Dispose();
     }
 
-    [Test] public void Corner_2Neighbors()
+    [Test]
+    public void Corner_2Neighbors()
     {
-        Assert.IsTrue(Grid2D.TryCreate(5, 5, out var g)); var b = new NativeArray<byte>(g.Length, Allocator.Temp); var n = new NativeArray<int>(4, Allocator.Temp);
+        Assert.IsTrue(Grid2D.TryCreate(5, 5, out var g));
+        var b = new NativeArray<byte>(g.Length, Allocator.Temp);
+        var n = new NativeArray<int>(4, Allocator.Temp);
         b.Fill((byte)0);
         Assert.AreEqual(2, GridNeighbors.GetNeighbors4(g, g.ToIndex(0, 0), n, b));
-        b.Dispose(); n.Dispose();
+        b.Dispose();
+        n.Dispose();
     }
 
-    [Test] public void Edge_3Neighbors()
+    [Test]
+    public void Edge_3Neighbors()
     {
-        Assert.IsTrue(Grid2D.TryCreate(5, 5, out var g)); var b = new NativeArray<byte>(g.Length, Allocator.Temp); var n = new NativeArray<int>(4, Allocator.Temp);
+        Assert.IsTrue(Grid2D.TryCreate(5, 5, out var g));
+        var b = new NativeArray<byte>(g.Length, Allocator.Temp);
+        var n = new NativeArray<int>(4, Allocator.Temp);
         b.Fill((byte)0);
         Assert.AreEqual(3, GridNeighbors.GetNeighbors4(g, g.ToIndex(0, 2), n, b));
-        b.Dispose(); n.Dispose();
+        b.Dispose();
+        n.Dispose();
     }
 
-    [Test] public void Blocked_Skipped()
+    [Test]
+    public void Blocked_Skipped()
     {
-        Assert.IsTrue(Grid2D.TryCreate(3, 3, out var g)); var b = new NativeArray<byte>(g.Length, Allocator.Temp); var n = new NativeArray<int>(4, Allocator.Temp);
-        b.Fill((byte)0); b[g.ToIndex(2, 1)] = 1;
+        Assert.IsTrue(Grid2D.TryCreate(3, 3, out var g));
+        var b = new NativeArray<byte>(g.Length, Allocator.Temp);
+        var n = new NativeArray<int>(4, Allocator.Temp);
+        b.Fill((byte)0);
+        b[g.ToIndex(2, 1)] = 1;
         Assert.AreEqual(3, GridNeighbors.GetNeighbors4(g, g.ToIndex(1, 1), n, b));
-        b.Dispose(); n.Dispose();
+        b.Dispose();
+        n.Dispose();
     }
 
-    [Test] public void AllBlocked_0Neighbors()
+    [Test]
+    public void AllBlocked_0Neighbors()
     {
-        Assert.IsTrue(Grid2D.TryCreate(3, 3, out var g)); var b = new NativeArray<byte>(g.Length, Allocator.Temp); var n = new NativeArray<int>(4, Allocator.Temp);
-        b.Fill((byte)1); b[g.ToIndex(1, 1)] = 0;
+        Assert.IsTrue(Grid2D.TryCreate(3, 3, out var g));
+        var b = new NativeArray<byte>(g.Length, Allocator.Temp);
+        var n = new NativeArray<int>(4, Allocator.Temp);
+        b.Fill((byte)1);
+        b[g.ToIndex(1, 1)] = 0;
         Assert.AreEqual(0, GridNeighbors.GetNeighbors4(g, g.ToIndex(1, 1), n, b));
-        b.Dispose(); n.Dispose();
+        b.Dispose();
+        n.Dispose();
     }
 
-    [Test] public void Center_8Neighbors()
+    [Test]
+    public void Center_8Neighbors()
     {
-        Assert.IsTrue(Grid2D.TryCreate(5, 5, out var g)); var b = new NativeArray<byte>(g.Length, Allocator.Temp); var n = new NativeArray<int>(8, Allocator.Temp);
+        Assert.IsTrue(Grid2D.TryCreate(5, 5, out var g));
+        var b = new NativeArray<byte>(g.Length, Allocator.Temp);
+        var n = new NativeArray<int>(8, Allocator.Temp);
         b.Fill((byte)0);
         Assert.AreEqual(8, GridNeighbors.GetNeighbors8(g, g.ToIndex(2, 2), n, b));
-        b.Dispose(); n.Dispose();
+        b.Dispose();
+        n.Dispose();
     }
 
-    [Test] public void Corner_3DiagNeighbors()
+    [Test]
+    public void Corner_3DiagNeighbors()
     {
-        Assert.IsTrue(Grid2D.TryCreate(5, 5, out var g)); var b = new NativeArray<byte>(g.Length, Allocator.Temp); var n = new NativeArray<int>(8, Allocator.Temp);
+        Assert.IsTrue(Grid2D.TryCreate(5, 5, out var g));
+        var b = new NativeArray<byte>(g.Length, Allocator.Temp);
+        var n = new NativeArray<int>(8, Allocator.Temp);
         b.Fill((byte)0);
         Assert.AreEqual(3, GridNeighbors.GetNeighbors8(g, g.ToIndex(0, 0), n, b));
-        b.Dispose(); n.Dispose();
+        b.Dispose();
+        n.Dispose();
     }
 
-    [Test] public void DiagonalPassable_BothFree()
+    [Test]
+    public void DiagonalPassable_BothFree()
     {
-        Assert.IsTrue(Grid2D.TryCreate(5, 5, out var g)); var b = new NativeArray<byte>(g.Length, Allocator.Temp); b.Fill((byte)0);
+        Assert.IsTrue(Grid2D.TryCreate(5, 5, out var g));
+        var b = new NativeArray<byte>(g.Length, Allocator.Temp);
+        b.Fill((byte)0);
         Assert.IsTrue(GridNeighbors.IsDiagonalPassable(g, new int2(2, 2), new int2(1, 1), b));
         b.Dispose();
     }
 
-    [Test] public void DiagonalPassable_OneBlocked()
+    [Test]
+    public void DiagonalPassable_OneBlocked()
     {
-        Assert.IsTrue(Grid2D.TryCreate(5, 5, out var g)); var b = new NativeArray<byte>(g.Length, Allocator.Temp); b.Fill((byte)0); b[g.ToIndex(3, 2)] = 1;
+        Assert.IsTrue(Grid2D.TryCreate(5, 5, out var g));
+        var b = new NativeArray<byte>(g.Length, Allocator.Temp);
+        b.Fill((byte)0);
+        b[g.ToIndex(3, 2)] = 1;
         Assert.IsFalse(GridNeighbors.IsDiagonalPassable(g, new int2(2, 2), new int2(1, 1), b));
         b.Dispose();
     }
 
-    [Test] public void DiagonalPassable_OutOfBounds()
+    [Test]
+    public void DiagonalPassable_OutOfBounds()
     {
-        Assert.IsTrue(Grid2D.TryCreate(3, 3, out var g)); var b = new NativeArray<byte>(g.Length, Allocator.Temp); b.Fill((byte)0);
+        Assert.IsTrue(Grid2D.TryCreate(3, 3, out var g));
+        var b = new NativeArray<byte>(g.Length, Allocator.Temp);
+        b.Fill((byte)0);
         Assert.IsFalse(GridNeighbors.IsDiagonalPassable(g, new int2(0, 0), new int2(-1, -1), b));
         b.Dispose();
     }
 
-    [Test] public void _1x1_NoNeighbors()
+    [Test]
+    public void _1x1_NoNeighbors()
     {
-        Assert.IsTrue(Grid2D.TryCreate(1, 1, out var g)); var b = new NativeArray<byte>(1, Allocator.Temp); var n = new NativeArray<int>(4, Allocator.Temp);
+        Assert.IsTrue(Grid2D.TryCreate(1, 1, out var g));
+        var b = new NativeArray<byte>(1, Allocator.Temp);
+        var n = new NativeArray<int>(4, Allocator.Temp);
         Assert.AreEqual(0, GridNeighbors.GetNeighbors4(g, 0, n, b));
-        b.Dispose(); n.Dispose();
+        b.Dispose();
+        n.Dispose();
     }
 }

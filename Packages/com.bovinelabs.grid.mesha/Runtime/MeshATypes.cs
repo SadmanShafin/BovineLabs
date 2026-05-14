@@ -1,13 +1,10 @@
 using System;
 using System.Runtime.CompilerServices;
-using Unity.Burst;
 using Unity.Collections;
 using Unity.Mathematics;
 
 namespace BovineLabs.Grid.MeshA
 {
-
-
     public struct MotionPrimitive
     {
         public int Id;
@@ -40,13 +37,14 @@ namespace BovineLabs.Grid.MeshA
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsCollisionFree(in NativeGrid2D grid, int baseX, int baseY, int startIdx)
         {
-            for (int k = startIdx; k < SweptCellCount; k++)
+            for (var k = startIdx; k < SweptCellCount; k++)
             {
-                int cx = baseX + SweptCellsI[k];
-                int cy = baseY + SweptCellsJ[k];
+                var cx = baseX + SweptCellsI[k];
+                var cy = baseY + SweptCellsJ[k];
                 if (!grid.InBounds(new int2(cx, cy)) || !grid.IsFree(new int2(cx, cy)))
                     return false;
             }
+
             return true;
         }
     }
@@ -65,7 +63,7 @@ namespace BovineLabs.Grid.MeshA
 
         public void Add(MotionPrimitive prim)
         {
-            int idx = Primitives.Length;
+            var idx = Primitives.Length;
             Primitives.Add(prim);
             PrimsByHeading.Add(prim.StartTheta, idx);
         }
@@ -79,8 +77,10 @@ namespace BovineLabs.Grid.MeshA
                     if (p.SweptCellsI.IsCreated) p.SweptCellsI.Dispose();
                     if (p.SweptCellsJ.IsCreated) p.SweptCellsJ.Dispose();
                 }
+
                 Primitives.Dispose();
             }
+
             if (PrimsByHeading.IsCreated) PrimsByHeading.Dispose();
         }
     }
@@ -115,7 +115,6 @@ namespace BovineLabs.Grid.MeshA
 
     public struct MeshGraphData : IDisposable
     {
-
         public NativeArray<SuccessorTransition> SuccessorsFlat;
         public NativeArray<int> SuccOffsets;
         public NativeArray<int> SuccCounts;
@@ -139,8 +138,13 @@ namespace BovineLabs.Grid.MeshA
             InitialConfigByTheta = new NativeArray<int>(numHeadings, allocator);
             ThetaByInitialConfig = new NativeArray<int>(maxConfigs, allocator);
 
-            for (int i = 0; i < numHeadings; i++) InitialConfigByTheta[i] = -1;
-            for (int i = 0; i < maxConfigs; i++) { ThetaByInitialConfig[i] = -1; SuccOffsets[i] = 0; SuccCounts[i] = 0; }
+            for (var i = 0; i < numHeadings; i++) InitialConfigByTheta[i] = -1;
+            for (var i = 0; i < maxConfigs; i++)
+            {
+                ThetaByInitialConfig[i] = -1;
+                SuccOffsets[i] = 0;
+                SuccCounts[i] = 0;
+            }
         }
 
         public void Dispose()
@@ -167,8 +171,15 @@ namespace BovineLabs.Grid.MeshA
             ConfigId = configId;
         }
 
-        public bool Equals(ExtendedCell other) => X == other.X && Y == other.Y && ConfigId == other.ConfigId;
-        public override int GetHashCode() => X * 73856093 ^ Y * 19349663 ^ ConfigId;
+        public bool Equals(ExtendedCell other)
+        {
+            return X == other.X && Y == other.Y && ConfigId == other.ConfigId;
+        }
+
+        public override int GetHashCode()
+        {
+            return X * 73856093 ^ Y * 19349663 ^ ConfigId;
+        }
     }
 
 

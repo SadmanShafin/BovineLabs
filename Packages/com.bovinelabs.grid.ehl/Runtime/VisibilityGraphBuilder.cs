@@ -1,4 +1,3 @@
-using System;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
@@ -6,57 +5,46 @@ using Unity.Mathematics;
 
 namespace BovineLabs.Grid.EHL
 {
-
-
     [BurstCompile]
     public struct VisibilityGraphBuilderJob : IJob
     {
-
         public NativeArray<int> PolyOffsets;
         public NativeArray<int> PolyCounts;
         public NativeArray<float2> PolygonVertices;
-
-
         public NativeArray<ObstacleEdge> ObstacleEdges;
-
-
         public NativeList<ConvexVertex> ConvexVertices;
-
-
         public NativeList<AdjEdge> AdjEdgesOut;
-
-
         public NativeList<int> AdjOffsetsOut;
         public NativeList<int> AdjCountsOut;
 
         public void Execute()
         {
-
-            int totalPolygons = PolyOffsets.Length;
+            var totalPolygons = PolyOffsets.Length;
             var convexVerts = new NativeList<ConvexVertex>(Allocator.Temp);
             var vertexPolyId = new NativeList<int>(Allocator.Temp);
 
-            for (int p = 0; p < totalPolygons; p++)
+            for (var p = 0; p < totalPolygons; p++)
             {
-                int offset = PolyOffsets[p];
-                int count = PolyCounts[p];
+                var offset = PolyOffsets[p];
+                var count = PolyCounts[p];
 
 
-                float signedArea = 0f;
-                for (int i = 0; i < count; i++)
+                var signedArea = 0f;
+                for (var i = 0; i < count; i++)
                 {
-                    float2 a = PolygonVertices[offset + i];
-                    float2 b = PolygonVertices[offset + (i + 1) % count];
+                    var a = PolygonVertices[offset + i];
+                    var b = PolygonVertices[offset + (i + 1) % count];
                     signedArea += a.x * b.y - b.x * a.y;
                 }
-                bool isCCW = signedArea > 0f;
-                bool isCW = !isCCW;
 
-                for (int i = 0; i < count; i++)
+                var isCCW = signedArea > 0f;
+                var isCW = !isCCW;
+
+                for (var i = 0; i < count; i++)
                 {
-                    float2 prev = PolygonVertices[offset + (i - 1 + count) % count];
-                    float2 curr = PolygonVertices[offset + i];
-                    float2 next = PolygonVertices[offset + (i + 1) % count];
+                    var prev = PolygonVertices[offset + (i - 1 + count) % count];
+                    var curr = PolygonVertices[offset + i];
+                    var next = PolygonVertices[offset + (i + 1) % count];
 
                     if (IsConvexVertex(prev, curr, next, isCW))
                     {
@@ -66,37 +54,33 @@ namespace BovineLabs.Grid.EHL
                 }
             }
 
-            int n = convexVerts.Length;
+            var n = convexVerts.Length;
 
 
             var adjLists = new NativeArray<NativeList<AdjEdge>>(n, Allocator.Temp);
-            for (int i = 0; i < n; i++)
+            for (var i = 0; i < n; i++)
                 adjLists[i] = new NativeList<AdjEdge>(Allocator.Temp);
 
-            for (int i = 0; i < n; i++)
+            for (var i = 0; i < n; i++)
+            for (var j = i + 1; j < n; j++)
             {
-                for (int j = i + 1; j < n; j++)
+                if (vertexPolyId[i] == vertexPolyId[j])
+                    continue;
+
+                var a = convexVerts[i].Position;
+                var b = convexVerts[j].Position;
+
+                if (AreCoVisible(a, b, i, j, convexVerts, ObstacleEdges))
                 {
-
-
-                    if (vertexPolyId[i] == vertexPolyId[j])
-                        continue;
-
-                    float2 a = convexVerts[i].Position;
-                    float2 b = convexVerts[j].Position;
-
-                    if (AreCoVisible(a, b, i, j, convexVerts, ObstacleEdges))
-                    {
-                        float dist = math.distance(a, b);
-                        adjLists[i].Add(new AdjEdge(j, dist));
-                        adjLists[j].Add(new AdjEdge(i, dist));
-                    }
+                    var dist = math.distance(a, b);
+                    adjLists[i].Add(new AdjEdge(j, dist));
+                    adjLists[j].Add(new AdjEdge(i, dist));
                 }
             }
 
 
-            int edgeOffset = 0;
-            for (int i = 0; i < n; i++)
+            var edgeOffset = 0;
+            for (var i = 0; i < n; i++)
             {
                 var list = adjLists[i];
 
@@ -107,10 +91,7 @@ namespace BovineLabs.Grid.EHL
                 AdjCountsOut.Add(list.Length);
                 edgeOffset += list.Length;
 
-                for (int e = 0; e < list.Length; e++)
-                {
-                    AdjEdgesOut.Add(list[e]);
-                }
+                for (var e = 0; e < list.Length; e++) AdjEdgesOut.Add(list[e]);
 
                 ConvexVertices.Add(convexVerts[i]);
                 list.Dispose();
@@ -120,19 +101,17 @@ namespace BovineLabs.Grid.EHL
             convexVerts.Dispose();
             vertexPolyId.Dispose();
         }
-
-
+        
         private bool IsConvexVertex(float2 prev, float2 curr, float2 next, bool isCW)
         {
-            float2 edge1 = curr - prev;
-            float2 edge2 = next - curr;
-            float cross = edge1.x * edge2.y - edge1.y * edge2.x;
+            var edge1 = curr - prev;
+            var edge2 = next - curr;
+            var cross = edge1.x * edge2.y - edge1.y * edge2.x;
 
 
             const float eps = 1e-6f;
-            return isCW ? (cross < -eps) : (cross > eps);
+            return isCW ? cross < -eps : cross > eps;
         }
-
 
         private bool AreCoVisible(
             float2 a,
@@ -142,15 +121,15 @@ namespace BovineLabs.Grid.EHL
             NativeList<ConvexVertex> convexVerts,
             NativeArray<ObstacleEdge> edges)
         {
-            float2 ab = b - a;
-            float lenSq = math.lengthsq(ab);
+            var ab = b - a;
+            var lenSq = math.lengthsq(ab);
             if (lenSq < 1e-10f)
                 return false;
 
-            for (int e = 0; e < edges.Length; e++)
+            for (var e = 0; e < edges.Length; e++)
             {
-                float2 c = edges[e].A;
-                float2 d = edges[e].B;
+                var c = edges[e].A;
+                var d = edges[e].B;
 
 
                 if (PointsEqual(a, c) || PointsEqual(a, d) || PointsEqual(b, c) || PointsEqual(b, d))
@@ -166,21 +145,17 @@ namespace BovineLabs.Grid.EHL
 
         private bool SegmentsIntersect(float2 p1, float2 p2, float2 p3, float2 p4)
         {
-            float2 d1 = p2 - p1;
-            float2 d2 = p4 - p3;
+            var d1 = p2 - p1;
+            var d2 = p4 - p3;
 
-            float cross = d1.x * d2.y - d1.y * d2.x;
+            var cross = d1.x * d2.y - d1.y * d2.x;
             const float eps = 1e-10f;
 
-            if (math.abs(cross) < eps)
-            {
+            if (math.abs(cross) < eps) return false;
 
-                return false;
-            }
-
-            float2 d3 = p3 - p1;
-            float t = (d3.x * d2.y - d3.y * d2.x) / cross;
-            float u = (d3.x * d1.y - d3.y * d1.x) / cross;
+            var d3 = p3 - p1;
+            var t = (d3.x * d2.y - d3.y * d2.x) / cross;
+            var u = (d3.x * d1.y - d3.y * d1.x) / cross;
 
             const float margin = 1e-6f;
             return t > margin && t < 1.0f - margin && u > margin && u < 1.0f - margin;
@@ -195,8 +170,6 @@ namespace BovineLabs.Grid.EHL
 
     public static class VisibilityGraphBuilder
     {
-
-
         public static JobHandle Build(
             NativeArray<int> polyOffsets,
             NativeArray<int> polyCounts,
@@ -222,7 +195,7 @@ namespace BovineLabs.Grid.EHL
                 ConvexVertices = convexVertices,
                 AdjEdgesOut = adjEdges,
                 AdjOffsetsOut = adjOffsets,
-                AdjCountsOut = adjCounts,
+                AdjCountsOut = adjCounts
             };
 
             return job.Schedule(dependency);

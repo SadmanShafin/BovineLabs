@@ -1,4 +1,3 @@
-using System;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
@@ -6,13 +5,9 @@ using Unity.Mathematics;
 
 namespace BovineLabs.Grid.Wavestar
 {
-
-
     [BurstCompile]
     public struct MultiResThetaStarJob : IJob
     {
-
-
         public int3 startPos;
 
 
@@ -61,22 +56,22 @@ namespace BovineLabs.Grid.Wavestar
             var fScores = new NativeHashMap<int, float>(sizeX * sizeY, Allocator.Temp);
 
 
-            OctreeIndex startSV = FindFinestSubvolume(startPos, maxHeight);
-            OctreeIndex goalSV = FindFinestSubvolume(goalPos, maxHeight);
+            var startSV = FindFinestSubvolume(startPos, maxHeight);
+            var goalSV = FindFinestSubvolume(goalPos, maxHeight);
 
 
-            float3 startCenter = startSV.Center;
-            float startG = 0f;
-            float startH = math.distance(startCenter, (float3)goalPos);
-            float startF = startG + startH;
+            var startCenter = startSV.Center;
+            var startG = 0f;
+            var startH = math.distance(startCenter, goalPos);
+            var startF = startG + startH;
 
             var startData = new SubvolumeData(startPos.x, startPos.y, startPos.z, startG);
             costField.TryAdd(startSV.MortonCode, startData);
             open.Push(new OpenSetElement(startSV, startF));
             fScores[startSV.MortonCode] = startF;
 
-            int iterations = 0;
-            int maxIterations = sizeX * sizeY * sizeZ * 4;
+            var iterations = 0;
+            var maxIterations = sizeX * sizeY * sizeZ * 4;
 
             while (open.Count > 0 && iterations < maxIterations)
             {
@@ -109,11 +104,12 @@ namespace BovineLabs.Grid.Wavestar
 
 
                 var neighbors = CollectNeighbors(currentIdx, closed);
-                for (int i = 0; i < neighbors.Length; i++)
+                for (var i = 0; i < neighbors.Length; i++)
                 {
                     var neighborIdx = neighbors[i];
                     UpdateSubvolume(ref open, ref fScores, ref closed, currentIdx, currentData, neighborIdx, goalSV);
                 }
+
                 neighbors.Dispose();
             }
 
@@ -132,13 +128,12 @@ namespace BovineLabs.Grid.Wavestar
 
         private OctreeIndex FindFinestSubvolume(int3 pos, int startHeight)
         {
-
-            for (int h = startHeight; h >= 0; h--)
+            for (var h = startHeight; h >= 0; h--)
             {
-                int s = 1 << h;
-                int sx = pos.x >> h;
-                int sy = pos.y >> h;
-                int sz = pos.z >> h;
+                var s = 1 << h;
+                var sx = pos.x >> h;
+                var sy = pos.y >> h;
+                var sz = pos.z >> h;
                 var sv = new OctreeIndex(sx, sy, sz, h);
                 if (obstacleMap.IsSubvolumeTraversable(sv))
                     return sv;
@@ -154,71 +149,62 @@ namespace BovineLabs.Grid.Wavestar
             var neighbors = new NativeList<OctreeIndex>(Allocator.Temp);
 
 
-            int s = idx.Size;
+            var s = idx.Size;
 
 
-            for (int dz = -1; dz <= 1; dz++)
+            for (var dz = -1; dz <= 1; dz++)
+            for (var dy = -1; dy <= 1; dy++)
+            for (var dx = -1; dx <= 1; dx++)
             {
-                for (int dy = -1; dy <= 1; dy++)
+                if (dx == 0 && dy == 0 && dz == 0)
+                    continue;
+
+                var nx = idx.x + dx;
+                var ny = idx.y + dy;
+                var nz = idx.z + dz;
+
+
+                for (var nh = math.max(idx.height - 1, minHeight); nh <= math.min(idx.height + 1, maxHeight); nh++)
                 {
-                    for (int dx = -1; dx <= 1; dx++)
+                    var deltaH = nh - idx.height;
+                    int cnx, cny, cnz;
+                    if (deltaH >= 0)
                     {
-                        if (dx == 0 && dy == 0 && dz == 0)
-                            continue;
-
-                        int nx = idx.x + dx;
-                        int ny = idx.y + dy;
-                        int nz = idx.z + dz;
-
-
-                        for (int nh = math.max(idx.height - 1, minHeight); nh <= math.min(idx.height + 1, maxHeight); nh++)
-                        {
-
-                            int deltaH = nh - idx.height;
-                            int cnx, cny, cnz;
-                            if (deltaH >= 0)
-                            {
-
-                                cnx = nx >> deltaH;
-                                cny = ny >> deltaH;
-                                cnz = nz >> deltaH;
-                            }
-                            else
-                            {
-
-                                cnx = nx << (-deltaH);
-                                cny = ny << (-deltaH);
-                                cnz = nz << (-deltaH);
-                            }
-
-                            var nIdx = new OctreeIndex(cnx, cny, cnz, nh);
-
-                            if (nIdx.x < 0 || nIdx.y < 0 || nIdx.z < 0)
-                                continue;
-                            if ((nIdx.x + 1) * nIdx.Size > sizeX ||
-                                (nIdx.y + 1) * nIdx.Size > sizeY ||
-                                (nIdx.z + 1) * nIdx.Size > sizeZ)
-                                continue;
-                            if (closed.Contains(nIdx.MortonCode))
-                                continue;
-                            if (!obstacleMap.IsSubvolumeTraversable(nIdx))
-                                continue;
-
-
-                            bool alreadyAdded = false;
-                            for (int j = 0; j < neighbors.Length; j++)
-                            {
-                                if (neighbors[j].MortonCode == nIdx.MortonCode)
-                                {
-                                    alreadyAdded = true;
-                                    break;
-                                }
-                            }
-
-                            if (!alreadyAdded)
-                                neighbors.Add(nIdx);
-                        }
+                        cnx = nx >> deltaH;
+                        cny = ny >> deltaH;
+                        cnz = nz >> deltaH;
                     }
+                    else
+                    {
+                        cnx = nx << -deltaH;
+                        cny = ny << -deltaH;
+                        cnz = nz << -deltaH;
+                    }
+
+                    var nIdx = new OctreeIndex(cnx, cny, cnz, nh);
+
+                    if (nIdx.x < 0 || nIdx.y < 0 || nIdx.z < 0)
+                        continue;
+                    if ((nIdx.x + 1) * nIdx.Size > sizeX ||
+                        (nIdx.y + 1) * nIdx.Size > sizeY ||
+                        (nIdx.z + 1) * nIdx.Size > sizeZ)
+                        continue;
+                    if (closed.Contains(nIdx.MortonCode))
+                        continue;
+                    if (!obstacleMap.IsSubvolumeTraversable(nIdx))
+                        continue;
+
+
+                    var alreadyAdded = false;
+                    for (var j = 0; j < neighbors.Length; j++)
+                        if (neighbors[j].MortonCode == nIdx.MortonCode)
+                        {
+                            alreadyAdded = true;
+                            break;
+                        }
+
+                    if (!alreadyAdded)
+                        neighbors.Add(nIdx);
                 }
             }
 
@@ -235,23 +221,20 @@ namespace BovineLabs.Grid.Wavestar
             OctreeIndex neighborIdx,
             OctreeIndex goalSV)
         {
-            float3 currentCenter = currentIdx.Center;
-            float3 neighborCenter = neighborIdx.Center;
+            var currentCenter = currentIdx.Center;
+            var neighborCenter = neighborIdx.Center;
 
 
-            float existingG = float.PositiveInfinity;
-            if (costField.TryGetValue(neighborIdx.MortonCode, out var existingData))
-            {
-                existingG = existingData.gCost;
-            }
+            var existingG = float.PositiveInfinity;
+            if (costField.TryGetValue(neighborIdx.MortonCode, out var existingData)) existingG = existingData.gCost;
 
 
-            float directG = currentData.gCost + math.distance(currentCenter, neighborCenter);
+            var directG = currentData.gCost + math.distance(currentCenter, neighborCenter);
 
 
-            float losG = float.PositiveInfinity;
-            int3 losPred = currentData.Predecessor;
-            float3 predCenter = currentData.PredecessorCenter;
+            var losG = float.PositiveInfinity;
+            var losPred = currentData.Predecessor;
+            var predCenter = currentData.PredecessorCenter;
 
             if (HasLineOfSight(predCenter, neighborCenter))
             {
@@ -265,16 +248,12 @@ namespace BovineLabs.Grid.Wavestar
             }
 
 
-            float candidateG = math.min(directG, losG);
+            var candidateG = math.min(directG, losG);
             int3 candidatePred;
             if (candidateG == losG && losG < directG)
-            {
                 candidatePred = losPred;
-            }
             else
-            {
                 candidatePred = new int3((int)currentCenter.x, (int)currentCenter.y, (int)currentCenter.z);
-            }
 
 
             var cmp = CompareCosts(existingG, candidateG);
@@ -287,8 +266,8 @@ namespace BovineLabs.Grid.Wavestar
                     costField[neighborIdx.MortonCode] = newData;
 
 
-                    float h = math.distance(neighborCenter, (float3)goalPos);
-                    float f = candidateG + h;
+                    var h = math.distance(neighborCenter, goalPos);
+                    var f = candidateG + h;
 
                     fScores[neighborIdx.MortonCode] = f;
                     open.Push(new OpenSetElement(neighborIdx, f));
@@ -297,17 +276,12 @@ namespace BovineLabs.Grid.Wavestar
                 case ComparisonResult.Ambiguous:
 
                     if (neighborIdx.height > minHeight)
-                {
-                    SubdivideAndRepropagate(
-                        ref open, ref fScores, ref closed,
-                        currentIdx, currentData, neighborIdx, goalSV);
-                }
-                else
-                {
-
-                    goto case ComparisonResult.StrictlyBetter;
-                }
-                break;
+                        SubdivideAndRepropagate(
+                            ref open, ref fScores, ref closed,
+                            currentIdx, currentData, neighborIdx, goalSV);
+                    else
+                        goto case ComparisonResult.StrictlyBetter;
+                    break;
 
                 case ComparisonResult.NotBetter:
                 default:
@@ -322,17 +296,16 @@ namespace BovineLabs.Grid.Wavestar
             if (float.IsInfinity(existing))
                 return ComparisonResult.StrictlyBetter;
 
-            float threshold = epsilon * math.max(math.abs(existing), math.abs(candidate));
+            var threshold = epsilon * math.max(math.abs(existing), math.abs(candidate));
             threshold = math.max(threshold, 1e-6f);
 
-            float diff = existing - candidate;
+            var diff = existing - candidate;
 
             if (diff > threshold)
                 return ComparisonResult.StrictlyBetter;
-            else if (diff > -threshold)
+            if (diff > -threshold)
                 return ComparisonResult.Ambiguous;
-            else
-                return ComparisonResult.NotBetter;
+            return ComparisonResult.NotBetter;
         }
 
 
@@ -345,8 +318,8 @@ namespace BovineLabs.Grid.Wavestar
             OctreeIndex neighborIdx,
             OctreeIndex goalSV)
         {
-            int childCount = (sizeY > 1) ? 8 : 4;
-            for (int c = 0; c < childCount; c++)
+            var childCount = sizeY > 1 ? 8 : 4;
+            for (var c = 0; c < childCount; c++)
             {
                 var child = neighborIdx.Child(c);
 
@@ -371,33 +344,42 @@ namespace BovineLabs.Grid.Wavestar
 
         private bool HasLineOfSight(float3 from, float3 to)
         {
+            var x0 = (int)math.floor(from.x);
+            var y0 = (int)math.floor(from.y);
+            var z0 = (int)math.floor(from.z);
+            var x1 = (int)math.floor(to.x);
+            var y1 = (int)math.floor(to.y);
+            var z1 = (int)math.floor(to.z);
 
-            int x0 = (int)math.floor(from.x);
-            int y0 = (int)math.floor(from.y);
-            int z0 = (int)math.floor(from.z);
-            int x1 = (int)math.floor(to.x);
-            int y1 = (int)math.floor(to.y);
-            int z1 = (int)math.floor(to.z);
+            var dx = math.abs(x1 - x0);
+            var dy = math.abs(y1 - y0);
+            var dz = math.abs(z1 - z0);
 
-            int dx = math.abs(x1 - x0);
-            int dy = math.abs(y1 - y0);
-            int dz = math.abs(z1 - z0);
-
-            int sx = x0 < x1 ? 1 : -1;
-            int sy = y0 < y1 ? 1 : -1;
-            int sz = z0 < z1 ? 1 : -1;
+            var sx = x0 < x1 ? 1 : -1;
+            var sy = y0 < y1 ? 1 : -1;
+            var sz = z0 < z1 ? 1 : -1;
 
 
             if (dx >= dy && dx >= dz)
             {
-                int errY = 2 * dy - dx;
-                int errZ = 2 * dz - dx;
-                for (int i = 0; i <= dx; i++)
+                var errY = 2 * dy - dx;
+                var errZ = 2 * dz - dx;
+                for (var i = 0; i <= dx; i++)
                 {
                     if (!obstacleMap.IsTraversable(x0, y0, z0))
                         return false;
-                    if (errY > 0) { y0 += sy; errY -= 2 * dx; }
-                    if (errZ > 0) { z0 += sz; errZ -= 2 * dx; }
+                    if (errY > 0)
+                    {
+                        y0 += sy;
+                        errY -= 2 * dx;
+                    }
+
+                    if (errZ > 0)
+                    {
+                        z0 += sz;
+                        errZ -= 2 * dx;
+                    }
+
                     errY += 2 * dy;
                     errZ += 2 * dz;
                     x0 += sx;
@@ -405,14 +387,24 @@ namespace BovineLabs.Grid.Wavestar
             }
             else if (dy >= dx && dy >= dz)
             {
-                int errX = 2 * dx - dy;
-                int errZ = 2 * dz - dy;
-                for (int i = 0; i <= dy; i++)
+                var errX = 2 * dx - dy;
+                var errZ = 2 * dz - dy;
+                for (var i = 0; i <= dy; i++)
                 {
                     if (!obstacleMap.IsTraversable(x0, y0, z0))
                         return false;
-                    if (errX > 0) { x0 += sx; errX -= 2 * dy; }
-                    if (errZ > 0) { z0 += sz; errZ -= 2 * dy; }
+                    if (errX > 0)
+                    {
+                        x0 += sx;
+                        errX -= 2 * dy;
+                    }
+
+                    if (errZ > 0)
+                    {
+                        z0 += sz;
+                        errZ -= 2 * dy;
+                    }
+
                     errX += 2 * dx;
                     errZ += 2 * dz;
                     y0 += sy;
@@ -420,14 +412,24 @@ namespace BovineLabs.Grid.Wavestar
             }
             else
             {
-                int errX = 2 * dx - dz;
-                int errY = 2 * dy - dz;
-                for (int i = 0; i <= dz; i++)
+                var errX = 2 * dx - dz;
+                var errY = 2 * dy - dz;
+                for (var i = 0; i <= dz; i++)
                 {
                     if (!obstacleMap.IsTraversable(x0, y0, z0))
                         return false;
-                    if (errX > 0) { x0 += sx; errX -= 2 * dz; }
-                    if (errY > 0) { y0 += sy; errY -= 2 * dz; }
+                    if (errX > 0)
+                    {
+                        x0 += sx;
+                        errX -= 2 * dz;
+                    }
+
+                    if (errY > 0)
+                    {
+                        y0 += sy;
+                        errY -= 2 * dz;
+                    }
+
                     errX += 2 * dx;
                     errY += 2 * dy;
                     z0 += sz;

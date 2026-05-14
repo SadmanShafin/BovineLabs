@@ -1,11 +1,9 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Unity.Burst;
-using Unity.Burst.CompilerServices;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
-using BovineLabs.Grid;
 
 namespace BovineLabs.Grid.DStarLite
 {
@@ -24,7 +22,7 @@ namespace BovineLabs.Grid.DStarLite
     }
 
     [BurstCompile]
-    public unsafe static class DStarLiteApi
+    public static unsafe class DStarLiteApi
     {
         public static bool TryCreate(int width, int height, Allocator allocator, out DStarLiteState result)
         {
@@ -41,7 +39,7 @@ namespace BovineLabs.Grid.DStarLite
                 RHS = new NativeArray<float>(g.Length, allocator),
                 Open = heap,
                 InOpen = new NativeArray<byte>(g.Length, allocator),
-                Parent = new NativeArray<int>(g.Length, allocator),
+                Parent = new NativeArray<int>(g.Length, allocator)
             };
             return true;
         }
@@ -56,14 +54,20 @@ namespace BovineLabs.Grid.DStarLite
             s.Km = 0f;
             s.Open.Clear();
 
-            float* gPtr = (float*)s.G.GetUnsafePtr();
-            float* rhsPtr = (float*)s.RHS.GetUnsafePtr();
-            byte* inOpen = (byte*)s.InOpen.GetUnsafePtr();
-            int* parent = (int*)s.Parent.GetUnsafePtr();
-            int len = s.Grid.Length;
-            for (int i = 0; i < len; i++) { gPtr[i] = float.PositiveInfinity; rhsPtr[i] = float.PositiveInfinity; inOpen[i] = 0; parent[i] = -1; }
+            var gPtr = (float*)s.G.GetUnsafePtr();
+            var rhsPtr = (float*)s.RHS.GetUnsafePtr();
+            var inOpen = (byte*)s.InOpen.GetUnsafePtr();
+            var parent = (int*)s.Parent.GetUnsafePtr();
+            var len = s.Grid.Length;
+            for (var i = 0; i < len; i++)
+            {
+                gPtr[i] = float.PositiveInfinity;
+                rhsPtr[i] = float.PositiveInfinity;
+                inOpen[i] = 0;
+                parent[i] = -1;
+            }
 
-            byte* blk = (byte*)blocked.GetUnsafeReadOnlyPtr();
+            var blk = (byte*)blocked.GetUnsafeReadOnlyPtr();
             if (blk[goal] != 0) return false;
 
             rhsPtr[goal] = 0f;
@@ -81,30 +85,33 @@ namespace BovineLabs.Grid.DStarLite
         }
 
         [BurstCompile]
-        public static bool TryUpdateCell(ref DStarLiteState s, in NativeArray<byte> blocked, in NativeArray<float> cost, int cell)
+        public static bool TryUpdateCell(ref DStarLiteState s, in NativeArray<byte> blocked, in NativeArray<float> cost,
+            int cell)
         {
             if (!s.Grid.InBounds(cell)) return false;
-            float* gPtr = (float*)s.G.GetUnsafePtr();
-            float* rhsPtr = (float*)s.RHS.GetUnsafePtr();
-            byte* inOpen = (byte*)s.InOpen.GetUnsafePtr();
-            int* parentPtr = (int*)s.Parent.GetUnsafePtr();
-            byte* blk = (byte*)blocked.GetUnsafeReadOnlyPtr();
-            float* costPtr = cost.IsCreated ? (float*)cost.GetUnsafeReadOnlyPtr() : null;
-            return TryUpdateVertex(gPtr, rhsPtr, inOpen, parentPtr, blk, costPtr, ref s.Open, s.Grid, s.Goal, s.Start, s.Km, cell);
+            var gPtr = (float*)s.G.GetUnsafePtr();
+            var rhsPtr = (float*)s.RHS.GetUnsafePtr();
+            var inOpen = (byte*)s.InOpen.GetUnsafePtr();
+            var parentPtr = (int*)s.Parent.GetUnsafePtr();
+            var blk = (byte*)blocked.GetUnsafeReadOnlyPtr();
+            var costPtr = cost.IsCreated ? (float*)cost.GetUnsafeReadOnlyPtr() : null;
+            return TryUpdateVertex(gPtr, rhsPtr, inOpen, parentPtr, blk, costPtr, ref s.Open, s.Grid, s.Goal, s.Start,
+                s.Km, cell);
         }
 
         [BurstCompile]
-        public static bool TryRepair(ref DStarLiteState s, in NativeArray<byte> blocked, in NativeArray<float> cost, int maxPops)
+        public static bool TryRepair(ref DStarLiteState s, in NativeArray<byte> blocked, in NativeArray<float> cost,
+            int maxPops)
         {
-            float* gPtr = (float*)s.G.GetUnsafePtr();
-            float* rhsPtr = (float*)s.RHS.GetUnsafePtr();
-            byte* inOpen = (byte*)s.InOpen.GetUnsafePtr();
-            int* parentPtr = (int*)s.Parent.GetUnsafePtr();
-            byte* blk = (byte*)blocked.GetUnsafeReadOnlyPtr();
-            float* costPtr = cost.IsCreated ? (float*)cost.GetUnsafeReadOnlyPtr() : null;
-            int w = s.Grid.Width;
+            var gPtr = (float*)s.G.GetUnsafePtr();
+            var rhsPtr = (float*)s.RHS.GetUnsafePtr();
+            var inOpen = (byte*)s.InOpen.GetUnsafePtr();
+            var parentPtr = (int*)s.Parent.GetUnsafePtr();
+            var blk = (byte*)blocked.GetUnsafeReadOnlyPtr();
+            var costPtr = cost.IsCreated ? (float*)cost.GetUnsafeReadOnlyPtr() : null;
+            var w = s.Grid.Width;
 
-            int pops = 0;
+            var pops = 0;
             while (pops < maxPops)
             {
                 while (!s.Open.IsEmpty)
@@ -128,7 +135,7 @@ namespace BovineLabs.Grid.DStarLite
                 inOpen[u.Id] = 0;
                 pops++;
 
-                int uid = u.Id;
+                var uid = u.Id;
                 var uKey = new float2(u.Key0, u.Key1);
                 var trueKey = CalculateKey(gPtr, rhsPtr, s.Start, s.Goal, s.Grid, s.Km, uid);
 
@@ -140,13 +147,16 @@ namespace BovineLabs.Grid.DStarLite
                 else if (gPtr[uid] > rhsPtr[uid])
                 {
                     gPtr[uid] = rhsPtr[uid];
-                    if (!TryUpdateSuccessors(gPtr, rhsPtr, inOpen, parentPtr, blk, costPtr, ref s.Open, s.Grid, s.Goal, s.Start, s.Km, w, uid)) return false;
+                    if (!TryUpdateSuccessors(gPtr, rhsPtr, inOpen, parentPtr, blk, costPtr, ref s.Open, s.Grid, s.Goal,
+                            s.Start, s.Km, w, uid)) return false;
                 }
                 else
                 {
                     gPtr[uid] = float.PositiveInfinity;
-                    if (!TryUpdateVertex(gPtr, rhsPtr, inOpen, parentPtr, blk, costPtr, ref s.Open, s.Grid, s.Goal, s.Start, s.Km, uid)) return false;
-                    if (!TryUpdateSuccessors(gPtr, rhsPtr, inOpen, parentPtr, blk, costPtr, ref s.Open, s.Grid, s.Goal, s.Start, s.Km, w, uid)) return false;
+                    if (!TryUpdateVertex(gPtr, rhsPtr, inOpen, parentPtr, blk, costPtr, ref s.Open, s.Grid, s.Goal,
+                            s.Start, s.Km, uid)) return false;
+                    if (!TryUpdateSuccessors(gPtr, rhsPtr, inOpen, parentPtr, blk, costPtr, ref s.Open, s.Grid, s.Goal,
+                            s.Start, s.Km, w, uid)) return false;
                 }
             }
 
@@ -154,38 +164,39 @@ namespace BovineLabs.Grid.DStarLite
         }
 
         [BurstCompile]
-        public static bool TryExtractPath(ref DStarLiteState s, in NativeArray<byte> blocked, in NativeArray<float> cost, ref NativeList<int> path)
+        public static bool TryExtractPath(ref DStarLiteState s, in NativeArray<byte> blocked,
+            in NativeArray<float> cost, ref NativeList<int> path)
         {
             path.Clear();
-            float* gPtr = (float*)s.G.GetUnsafePtr();
-            byte* blk = (byte*)blocked.GetUnsafeReadOnlyPtr();
-            float* costPtr = cost.IsCreated ? (float*)cost.GetUnsafeReadOnlyPtr() : null;
-            int w = s.Grid.Width;
+            var gPtr = (float*)s.G.GetUnsafePtr();
+            var blk = (byte*)blocked.GetUnsafeReadOnlyPtr();
+            var costPtr = cost.IsCreated ? (float*)cost.GetUnsafeReadOnlyPtr() : null;
+            var w = s.Grid.Width;
 
-            float rhsStart = ((float*)s.RHS.GetUnsafePtr())[s.Start];
+            var rhsStart = ((float*)s.RHS.GetUnsafePtr())[s.Start];
             if (rhsStart >= float.PositiveInfinity) return false;
             if (blk[s.Start] != 0) return false;
 
-            int current = s.Start;
+            var current = s.Start;
             path.Add(current);
-            int maxSteps = s.Grid.Length * 2;
+            var maxSteps = s.Grid.Length * 2;
 
             while (current != s.Goal && maxSteps-- > 0)
             {
-                int best = -1;
-                float bestCost = float.PositiveInfinity;
-                float bestG = float.PositiveInfinity;
+                var best = -1;
+                var bestCost = float.PositiveInfinity;
+                var bestG = float.PositiveInfinity;
 
-                int2 cp = s.Grid.ToCoord(current);
-                for (int d = 0; d < 8; d++)
+                var cp = s.Grid.ToCoord(current);
+                for (var d = 0; d < 8; d++)
                 {
-                    int2 np = cp + Grid2D.Dir8(d);
+                    var np = cp + Grid2D.Dir8(d);
                     if (!s.Grid.InBounds(np)) continue;
-                    int ni = s.Grid.ToIndex(np);
+                    var ni = s.Grid.ToIndex(np);
                     if (blk[ni] != 0) continue;
 
-                    float edgeCost = GetEdgeCost(w, costPtr, current, ni, blk);
-                    float total = edgeCost + gPtr[ni];
+                    var edgeCost = GetEdgeCost(w, costPtr, current, ni, blk);
+                    var total = edgeCost + gPtr[ni];
                     if (total < bestCost || (total == bestCost && gPtr[ni] < bestG))
                     {
                         bestCost = total;
@@ -198,6 +209,7 @@ namespace BovineLabs.Grid.DStarLite
                 current = best;
                 path.Add(current);
             }
+
             return path.Length > 0 && path[path.Length - 1] == s.Goal;
         }
 
@@ -211,10 +223,11 @@ namespace BovineLabs.Grid.DStarLite
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static float2 CalculateKey(float* gPtr, float* rhsPtr, int start, int goal, Grid2D grid, float km, int cell)
+        private static float2 CalculateKey(float* gPtr, float* rhsPtr, int start, int goal, Grid2D grid, float km,
+            int cell)
         {
-            float minGRhs = math.min(gPtr[cell], rhsPtr[cell]);
-            float h = Grid2D.HeuristicOctile(grid.ToCoord(start), grid.ToCoord(cell));
+            var minGRhs = math.min(gPtr[cell], rhsPtr[cell]);
+            var h = Grid2D.HeuristicOctile(grid.ToCoord(start), grid.ToCoord(cell));
             return new float2(minGRhs + h + km, minGRhs);
         }
 
@@ -225,23 +238,24 @@ namespace BovineLabs.Grid.DStarLite
         {
             if (cell != goal)
             {
-                float minRhs = float.PositiveInfinity;
-                int2 cp = grid.ToCoord(cell);
-                for (int d = 0; d < 8; d++)
+                var minRhs = float.PositiveInfinity;
+                var cp = grid.ToCoord(cell);
+                for (var d = 0; d < 8; d++)
                 {
-                    int2 np = cp + Grid2D.Dir8(d);
+                    var np = cp + Grid2D.Dir8(d);
                     if (!grid.InBounds(np)) continue;
-                    int ni = grid.ToIndex(np);
+                    var ni = grid.ToIndex(np);
                     if (blk[ni] != 0) continue;
 
-                    float edgeCost = GetEdgeCost(grid.Width, costPtr, cell, ni, blk);
-                    float candidate = edgeCost + gPtr[ni];
+                    var edgeCost = GetEdgeCost(grid.Width, costPtr, cell, ni, blk);
+                    var candidate = edgeCost + gPtr[ni];
                     if (candidate < minRhs)
                     {
                         minRhs = candidate;
                         parentPtr[cell] = ni;
                     }
                 }
+
                 rhsPtr[cell] = minRhs;
             }
 
@@ -256,6 +270,7 @@ namespace BovineLabs.Grid.DStarLite
                 open.TryRemove(cell);
                 inOpen[cell] = 0;
             }
+
             return true;
         }
 
@@ -264,15 +279,17 @@ namespace BovineLabs.Grid.DStarLite
             byte* blk, float* costPtr,
             ref MinHeap open, Grid2D grid, int goal, int start, float km, int w, int cell)
         {
-            int2 cp = grid.ToCoord(cell);
-            for (int d = 0; d < 8; d++)
+            var cp = grid.ToCoord(cell);
+            for (var d = 0; d < 8; d++)
             {
-                int2 np = cp + Grid2D.Dir8(d);
+                var np = cp + Grid2D.Dir8(d);
                 if (!grid.InBounds(np)) continue;
-                int ni = grid.ToIndex(np);
+                var ni = grid.ToIndex(np);
                 if (blk[ni] != 0) continue;
-                if (!TryUpdateVertex(gPtr, rhsPtr, inOpen, parentPtr, blk, costPtr, ref open, grid, goal, start, km, ni)) return false;
+                if (!TryUpdateVertex(gPtr, rhsPtr, inOpen, parentPtr, blk, costPtr, ref open, grid, goal, start, km,
+                        ni)) return false;
             }
+
             return true;
         }
 
@@ -283,7 +300,7 @@ namespace BovineLabs.Grid.DStarLite
             if (costPtr != null)
                 return (costPtr[from] + costPtr[to]) * 0.5f;
 
-            int diff = math.abs(from - to);
+            var diff = math.abs(from - to);
             return math.select(1.414f, 1f, diff == 1 || diff == gridWidth);
         }
 

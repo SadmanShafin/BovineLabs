@@ -1,11 +1,11 @@
+using BovineLabs.Grid.Hashlife;
 using NUnit.Framework;
 using Unity.Collections;
-using BovineLabs.Grid;
-using BovineLabs.Grid.Hashlife;
 
 public class HashlifeTests
 {
-    [Test] public void Create_Leaves()
+    [Test]
+    public void Create_Leaves()
     {
         Assert.IsTrue(HashlifeApi.TryCreate(100, Allocator.Temp, out var s));
         Assert.AreEqual(0, s.Nodes[0].Level);
@@ -13,11 +13,12 @@ public class HashlifeTests
         HashlifeApi.Dispose(ref s);
     }
 
-    [Test] public void MakeNode_Interns()
+    [Test]
+    public void MakeNode_Interns()
     {
         Assert.IsTrue(HashlifeApi.TryCreate(100, Allocator.Temp, out var s));
-        Assert.IsTrue(HashlifeApi.TryMakeNode(ref s, 0, 0, 0, 0, out int id1));
-        Assert.IsTrue(HashlifeApi.TryMakeNode(ref s, 0, 0, 0, 0, out int id2));
+        Assert.IsTrue(HashlifeApi.TryMakeNode(ref s, 0, 0, 0, 0, out var id1));
+        Assert.IsTrue(HashlifeApi.TryMakeNode(ref s, 0, 0, 0, 0, out var id2));
         Assert.AreEqual(id1, id2);
         HashlifeApi.Dispose(ref s);
     }

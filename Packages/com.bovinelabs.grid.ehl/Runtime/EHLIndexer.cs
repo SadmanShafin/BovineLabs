@@ -7,6 +7,96 @@ using Unity.Mathematics;
 
 namespace BovineLabs.Grid.EHL
 {
+    public static class EHLIndexer
+    {
+        public static bool TryBuild(
+            NativeArray<ConvexVertex> convexVertices,
+            NativeArray<ObstacleEdge> obstacleEdges,
+            NativeArray<int> hubOffsets,
+            NativeArray<int> hubCounts,
+            NativeArray<VisibilityLabel> hubLabels,
+            NativeArray<int> adjOffsets,
+            NativeArray<int> adjCounts,
+            NativeArray<AdjEdge> adjEdges,
+            float2 mapMin,
+            float2 mapMax,
+            int2 gridDims,
+            long memoryBudgetBytes,
+            out NativeList<GridCell> cellsOut,
+            out NativeList<ViaLabel> viaLabelsOut,
+            out JobHandle jobHandle)
+        {
+            cellsOut = new NativeList<GridCell>(Allocator.Persistent);
+            viaLabelsOut = new NativeList<ViaLabel>(Allocator.Persistent);
+
+            var job = new EHLIndexerJob
+            {
+                ConvexVertices = convexVertices,
+                ObstacleEdges = obstacleEdges,
+                HubOffsets = hubOffsets,
+                HubCounts = hubCounts,
+                HubLabels = hubLabels,
+                AdjOffsets = adjOffsets,
+                AdjCounts = adjCounts,
+                AdjEdges = adjEdges,
+                MapMin = mapMin,
+                MapMax = mapMax,
+                GridDims = gridDims,
+                CellSize = (mapMax - mapMin) / new float2(gridDims.x, gridDims.y),
+                MemoryBudgetBytes = memoryBudgetBytes,
+                CellsOut = cellsOut,
+                ViaLabelsOut = viaLabelsOut
+            };
+
+            jobHandle = job.Schedule();
+            return true;
+        }
+
+        public static bool TryAssembleIndex(
+            float2 mapMin,
+            float2 mapMax,
+            int2 gridDims,
+            NativeList<GridCell> cells,
+            NativeList<ViaLabel> viaLabels,
+            NativeArray<ConvexVertex> convexVertices,
+            NativeArray<ObstacleEdge> obstacleEdges,
+            NativeArray<int> adjOffsets,
+            NativeArray<int> adjCounts,
+            NativeArray<AdjEdge> adjEdges,
+            NativeArray<int> hubOffsets,
+            NativeArray<int> hubCounts,
+            NativeArray<VisibilityLabel> hubLabels,
+            NativeList<long> succKeys,
+            NativeList<int> succValues,
+            out EHLIndex index)
+        {
+            var successorMap = new NativeHashMap<long, int>(succKeys.Length, Allocator.Persistent);
+            for (var i = 0; i < succKeys.Length; i++)
+                successorMap.TryAdd(succKeys[i], succValues[i]);
+
+            index = new EHLIndex
+            {
+                MapMin = mapMin,
+                MapMax = mapMax,
+                GridDims = gridDims,
+                CellSize = (mapMax - mapMin) / new float2(gridDims.x, gridDims.y),
+                Cells = new NativeArray<GridCell>(cells.AsArray(), Allocator.Persistent),
+                ViaLabels = new NativeArray<ViaLabel>(viaLabels.AsArray(), Allocator.Persistent),
+                ConvexVertices = convexVertices,
+                ObstacleEdges = obstacleEdges,
+                AdjOffsets = adjOffsets,
+                AdjCounts = adjCounts,
+                AdjEdges = adjEdges,
+                HubOffsets = hubOffsets,
+                HubCounts = hubCounts,
+                HubLabels = hubLabels,
+                SuccessorMap = successorMap
+            };
+
+            return true;
+        }
+    }
+
     [BurstCompile]
     public struct EHLIndexerJob : IJob
     {
@@ -33,99 +123,97 @@ namespace BovineLabs.Grid.EHL
 
         public unsafe void Execute()
         {
-            int numCells = GridDims.x * GridDims.y;
-            int numVertices = ConvexVertices.Length;
+            var numCells = GridDims.x * GridDims.y;
+            var numVertices = ConvexVertices.Length;
 
             // Maintain an array of pointers to ViaLabels UnsafeLists for merging
-            var cellLabels = (UnsafeList<ViaLabel>**)UnsafeUtility.Malloc(sizeof(IntPtr) * numCells, UnsafeUtility.AlignOf<IntPtr>(), Allocator.Temp);
-            
+            var cellLabels = (UnsafeList<ViaLabel>**)UnsafeUtility.Malloc(sizeof(IntPtr) * numCells,
+                UnsafeUtility.AlignOf<IntPtr>(), Allocator.Temp);
+
             var labelSet = new NativeHashMap<int, ViaLabel>(256, Allocator.Temp);
             var samplePoints = new NativeList<float2>(5, Allocator.Temp);
             var visibleVertices = new NativeList<int>(128, Allocator.Temp);
 
-            for (int cy = 0; cy < GridDims.y; cy++)
+            for (var cy = 0; cy < GridDims.y; cy++)
+            for (var cx = 0; cx < GridDims.x; cx++)
             {
-                for (int cx = 0; cx < GridDims.x; cx++)
+                var cellIdx = cy * GridDims.x + cx;
+                var localLabels = new UnsafeList<ViaLabel>(64, Allocator.Temp);
+
+                labelSet.Clear();
+                samplePoints.Clear();
+                visibleVertices.Clear();
+
+                var cellMin = MapMin + new float2(cx * CellSize.x, cy * CellSize.y);
+                var cellMax = cellMin + CellSize;
+                var cellCenter = (cellMin + cellMax) * 0.5f;
+
+                samplePoints.Add(cellCenter);
+                samplePoints.Add(cellMin + CellSize * new float2(0.25f, 0.25f));
+                samplePoints.Add(cellMin + CellSize * new float2(0.75f, 0.25f));
+                samplePoints.Add(cellMin + CellSize * new float2(0.25f, 0.75f));
+                samplePoints.Add(cellMin + CellSize * new float2(0.75f, 0.75f));
+
+                for (var v = 0; v < numVertices; v++)
                 {
-                    int cellIdx = cy * GridDims.x + cx;
-                    var localLabels = new UnsafeList<ViaLabel>(64, Allocator.Temp);
+                    var vPos = ConvexVertices[v].Position;
+                    var canSee = false;
 
-                    labelSet.Clear();
-                    samplePoints.Clear();
-                    visibleVertices.Clear();
-
-                    float2 cellMin = MapMin + new float2(cx * CellSize.x, cy * CellSize.y);
-                    float2 cellMax = cellMin + CellSize;
-                    float2 cellCenter = (cellMin + cellMax) * 0.5f;
-
-                    samplePoints.Add(cellCenter);
-                    samplePoints.Add(cellMin + CellSize * new float2(0.25f, 0.25f));
-                    samplePoints.Add(cellMin + CellSize * new float2(0.75f, 0.25f));
-                    samplePoints.Add(cellMin + CellSize * new float2(0.25f, 0.75f));
-                    samplePoints.Add(cellMin + CellSize * new float2(0.75f, 0.75f));
-
-                    for (int v = 0; v < numVertices; v++)
-                    {
-                        float2 vPos = ConvexVertices[v].Position;
-                        bool canSee = false;
-
-                        for (int s = 0; s < samplePoints.Length; s++)
+                    for (var s = 0; s < samplePoints.Length; s++)
+                        if (IsVisible(vPos, samplePoints[s], ObstacleEdges))
                         {
-                            if (IsVisible(vPos, samplePoints[s], ObstacleEdges))
-                            {
-                                canSee = true;
-                                break;
-                            }
+                            canSee = true;
+                            break;
                         }
 
-                        if (canSee) visibleVertices.Add(v);
-                    }
-
-                    for (int vi = 0; vi < visibleVertices.Length; vi++)
-                    {
-                        int v = visibleVertices[vi];
-                        float2 vPos = ConvexVertices[v].Position;
-                        float distToCell = math.distance(cellCenter, vPos);
-
-                        int hubStart = HubOffsets[v];
-                        int hubCount = HubCounts[v];
-
-                        for (int h = 0; h < hubCount; h++)
-                        {
-                            var label = HubLabels[hubStart + h];
-                            float totalDist = distToCell + label.Distance;
-
-                            var viaLabel = new ViaLabel(
-                                label.HubVertexId,
-                                totalDist,
-                                label.ViaVertexId,
-                                v
-                            );
-
-                            if (labelSet.TryGetValue(label.HubVertexId, out var existing))
-                            {
-                                if (totalDist < existing.HubDistance)
-                                    labelSet[label.HubVertexId] = viaLabel;
-                            }
-                            else
-                            {
-                                labelSet.TryAdd(label.HubVertexId, viaLabel);
-                            }
-                        }
-                    }
-
-                    var values = labelSet.GetValueArray(Allocator.Temp);
-                    values.Sort();
-
-                    for (int i = 0; i < values.Length; i++)
-                        localLabels.Add(values[i]);
-
-                    var persistentList = (UnsafeList<ViaLabel>*)UnsafeUtility.Malloc(sizeof(UnsafeList<ViaLabel>), UnsafeUtility.AlignOf<UnsafeList<ViaLabel>>(), Allocator.Temp);
-                    *persistentList = localLabels;
-                    cellLabels[cellIdx] = persistentList;
-                    
-                    values.Dispose();
+                    if (canSee) visibleVertices.Add(v);
                 }
+
+                for (var vi = 0; vi < visibleVertices.Length; vi++)
+                {
+                    var v = visibleVertices[vi];
+                    var vPos = ConvexVertices[v].Position;
+                    var distToCell = math.distance(cellCenter, vPos);
+
+                    var hubStart = HubOffsets[v];
+                    var hubCount = HubCounts[v];
+
+                    for (var h = 0; h < hubCount; h++)
+                    {
+                        var label = HubLabels[hubStart + h];
+                        var totalDist = distToCell + label.Distance;
+
+                        var viaLabel = new ViaLabel(
+                            label.HubVertexId,
+                            totalDist,
+                            label.ViaVertexId,
+                            v
+                        );
+
+                        if (labelSet.TryGetValue(label.HubVertexId, out var existing))
+                        {
+                            if (totalDist < existing.HubDistance)
+                                labelSet[label.HubVertexId] = viaLabel;
+                        }
+                        else
+                        {
+                            labelSet.TryAdd(label.HubVertexId, viaLabel);
+                        }
+                    }
+                }
+
+                var values = labelSet.GetValueArray(Allocator.Temp);
+                values.Sort();
+
+                for (var i = 0; i < values.Length; i++)
+                    localLabels.Add(values[i]);
+
+                var persistentList = (UnsafeList<ViaLabel>*)UnsafeUtility.Malloc(sizeof(UnsafeList<ViaLabel>),
+                    UnsafeUtility.AlignOf<UnsafeList<ViaLabel>>(), Allocator.Temp);
+                *persistentList = localLabels;
+                cellLabels[cellIdx] = persistentList;
+
+                values.Dispose();
             }
 
             labelSet.Dispose();
@@ -133,12 +221,12 @@ namespace BovineLabs.Grid.EHL
             visibleVertices.Dispose();
 
             long currentMemory = 0;
-            for (int i = 0; i < numCells; i++)
+            for (var i = 0; i < numCells; i++)
                 currentMemory += cellLabels[i]->Length * UnsafeUtility.SizeOf<ViaLabel>();
 
             var activeCells = new NativeArray<bool>(numCells, Allocator.Temp);
             var cellMergedInto = new NativeArray<int>(numCells, Allocator.Temp);
-            for (int i = 0; i < numCells; i++)
+            for (var i = 0; i < numCells; i++)
             {
                 activeCells[i] = true;
                 cellMergedInto[i] = i;
@@ -146,48 +234,46 @@ namespace BovineLabs.Grid.EHL
 
             if (currentMemory > MemoryBudgetBytes)
             {
-                int maxIterations = numCells;
-                int iter = 0;
+                var maxIterations = numCells;
+                var iter = 0;
 
                 while (currentMemory > MemoryBudgetBytes && iter < maxIterations)
                 {
                     int bestA = -1, bestB = -1;
-                    float bestOverlap = -1f;
+                    var bestOverlap = -1f;
 
-                    for (int cy = 0; cy < GridDims.y; cy++)
+                    for (var cy = 0; cy < GridDims.y; cy++)
+                    for (var cx = 0; cx < GridDims.x; cx++)
                     {
-                        for (int cx = 0; cx < GridDims.x; cx++)
-                        {
-                            int idx = cy * GridDims.x + cx;
-                            if (!activeCells[idx]) continue;
+                        var idx = cy * GridDims.x + cx;
+                        if (!activeCells[idx]) continue;
 
-                            if (cx + 1 < GridDims.x)
+                        if (cx + 1 < GridDims.x)
+                        {
+                            var right = cy * GridDims.x + cx + 1;
+                            if (activeCells[right])
                             {
-                                int right = cy * GridDims.x + (cx + 1);
-                                if (activeCells[right])
+                                var overlap = ComputeOverlap(cellLabels[idx], cellLabels[right]);
+                                if (overlap > bestOverlap)
                                 {
-                                    float overlap = ComputeOverlap(cellLabels[idx], cellLabels[right]);
-                                    if (overlap > bestOverlap)
-                                    {
-                                        bestOverlap = overlap;
-                                        bestA = idx;
-                                        bestB = right;
-                                    }
+                                    bestOverlap = overlap;
+                                    bestA = idx;
+                                    bestB = right;
                                 }
                             }
+                        }
 
-                            if (cy + 1 < GridDims.y)
+                        if (cy + 1 < GridDims.y)
+                        {
+                            var top = (cy + 1) * GridDims.x + cx;
+                            if (activeCells[top])
                             {
-                                int top = (cy + 1) * GridDims.x + cx;
-                                if (activeCells[top])
+                                var overlap = ComputeOverlap(cellLabels[idx], cellLabels[top]);
+                                if (overlap > bestOverlap)
                                 {
-                                    float overlap = ComputeOverlap(cellLabels[idx], cellLabels[top]);
-                                    if (overlap > bestOverlap)
-                                    {
-                                        bestOverlap = overlap;
-                                        bestA = idx;
-                                        bestB = top;
-                                    }
+                                    bestOverlap = overlap;
+                                    bestA = idx;
+                                    bestB = top;
                                 }
                             }
                         }
@@ -202,7 +288,7 @@ namespace BovineLabs.Grid.EHL
 
                     cellLabels[bestA]->Dispose();
                     cellLabels[bestB]->Dispose();
-                    
+
                     *cellLabels[bestA] = merged;
                     currentMemory += merged.Length * UnsafeUtility.SizeOf<ViaLabel>();
 
@@ -213,32 +299,30 @@ namespace BovineLabs.Grid.EHL
                 }
             }
 
-            int labelOffset = 0;
-            for (int cy = 0; cy < GridDims.y; cy++)
+            var labelOffset = 0;
+            for (var cy = 0; cy < GridDims.y; cy++)
+            for (var cx = 0; cx < GridDims.x; cx++)
             {
-                for (int cx = 0; cx < GridDims.x; cx++)
-                {
-                    int cellIdx = cy * GridDims.x + cx;
+                var cellIdx = cy * GridDims.x + cx;
 
-                    int actualCell = cellIdx;
-                    while (!activeCells[actualCell])
-                        actualCell = cellMergedInto[actualCell];
+                var actualCell = cellIdx;
+                while (!activeCells[actualCell])
+                    actualCell = cellMergedInto[actualCell];
 
-                    float2 cellMin = MapMin + new float2(cx * CellSize.x, cy * CellSize.y);
-                    float2 cellMax = cellMin + CellSize;
+                var cellMin = MapMin + new float2(cx * CellSize.x, cy * CellSize.y);
+                var cellMax = cellMin + CellSize;
 
-                    var labels = cellLabels[actualCell];
-                    int count = labels->Length;
+                var labels = cellLabels[actualCell];
+                var count = labels->Length;
 
-                    CellsOut.Add(new GridCell(cellMin, cellMax, labelOffset, count));
-                    labelOffset += count;
+                CellsOut.Add(new GridCell(cellMin, cellMax, labelOffset, count));
+                labelOffset += count;
 
-                    for (int i = 0; i < count; i++)
-                        ViaLabelsOut.Add(labels->Ptr[i]);
-                }
+                for (var i = 0; i < count; i++)
+                    ViaLabelsOut.Add(labels->Ptr[i]);
             }
 
-            for (int i = 0; i < numCells; i++)
+            for (var i = 0; i < numCells; i++)
             {
                 if (activeCells[i])
                     cellLabels[i]->Dispose();
@@ -252,30 +336,31 @@ namespace BovineLabs.Grid.EHL
 
         private bool IsVisible(float2 a, float2 b, NativeArray<ObstacleEdge> edges)
         {
-            float2 ab = b - a;
-            float lenSq = math.lengthsq(ab);
+            var ab = b - a;
+            var lenSq = math.lengthsq(ab);
             if (lenSq < 1e-10f) return true;
 
-            for (int e = 0; e < edges.Length; e++)
+            for (var e = 0; e < edges.Length; e++)
             {
-                float2 c = edges[e].A;
-                float2 d = edges[e].B;
+                var c = edges[e].A;
+                var d = edges[e].B;
 
-                float2 d1 = ab;
-                float2 d2 = d - c;
-                float cross = d1.x * d2.y - d1.y * d2.x;
+                var d1 = ab;
+                var d2 = d - c;
+                var cross = d1.x * d2.y - d1.y * d2.x;
 
                 const float eps = 1e-10f;
                 if (math.abs(cross) < eps) continue;
 
-                float2 d3 = c - a;
-                float t = (d3.x * d2.y - d3.y * d2.x) / cross;
-                float u = (d3.x * d1.y - d3.y * d1.x) / cross;
+                var d3 = c - a;
+                var t = (d3.x * d2.y - d3.y * d2.x) / cross;
+                var u = (d3.x * d1.y - d3.y * d1.x) / cross;
 
                 const float margin = 1e-5f;
                 if (t > margin && t < 1.0f - margin && u > margin && u < 1.0f - margin)
                     return false;
             }
+
             return true;
         }
 
@@ -283,45 +368,47 @@ namespace BovineLabs.Grid.EHL
         {
             if (a->Length == 0 || b->Length == 0) return 0f;
 
-            int maxHubId = math.max(a->Ptr[a->Length - 1].HubVertexId, b->Ptr[b->Length - 1].HubVertexId);
+            var maxHubId = math.max(a->Ptr[a->Length - 1].HubVertexId, b->Ptr[b->Length - 1].HubVertexId);
             if (maxHubId < 64)
             {
                 ulong maskA = 0;
-                for (int i = 0; i < a->Length; i++) maskA |= 1UL << a->Ptr[i].HubVertexId;
+                for (var i = 0; i < a->Length; i++) maskA |= 1UL << a->Ptr[i].HubVertexId;
 
                 ulong maskB = 0;
-                for (int j = 0; j < b->Length; j++) maskB |= 1UL << b->Ptr[j].HubVertexId;
+                for (var j = 0; j < b->Length; j++) maskB |= 1UL << b->Ptr[j].HubVertexId;
 
-                ulong intersection = maskA & maskB;
-                ulong union = maskA | maskB;
+                var intersection = maskA & maskB;
+                var union = maskA | maskB;
 
-                int sharedBits = math.countbits(intersection);
-                int unionBits = math.countbits(union);
+                var sharedBits = math.countbits(intersection);
+                var unionBits = math.countbits(union);
 
                 return unionBits > 0 ? (float)sharedBits / unionBits : 0f;
             }
 
-            int numWords = (maxHubId >> 6) + 1;
-            ulong* maskA2 = (ulong*)UnsafeUtility.Malloc(UnsafeUtility.SizeOf<ulong>() * numWords, UnsafeUtility.AlignOf<ulong>(), Allocator.Temp);
-            ulong* maskB2 = (ulong*)UnsafeUtility.Malloc(UnsafeUtility.SizeOf<ulong>() * numWords, UnsafeUtility.AlignOf<ulong>(), Allocator.Temp);
+            var numWords = (maxHubId >> 6) + 1;
+            var maskA2 = (ulong*)UnsafeUtility.Malloc(UnsafeUtility.SizeOf<ulong>() * numWords,
+                UnsafeUtility.AlignOf<ulong>(), Allocator.Temp);
+            var maskB2 = (ulong*)UnsafeUtility.Malloc(UnsafeUtility.SizeOf<ulong>() * numWords,
+                UnsafeUtility.AlignOf<ulong>(), Allocator.Temp);
             UnsafeUtility.MemSet(maskA2, 0, (long)numWords * UnsafeUtility.SizeOf<ulong>());
             UnsafeUtility.MemSet(maskB2, 0, (long)numWords * UnsafeUtility.SizeOf<ulong>());
 
-            for (int i = 0; i < a->Length; i++)
+            for (var i = 0; i < a->Length; i++)
             {
-                int id = a->Ptr[i].HubVertexId;
+                var id = a->Ptr[i].HubVertexId;
                 maskA2[id >> 6] |= 1UL << (id & 63);
             }
 
-            for (int j = 0; j < b->Length; j++)
+            for (var j = 0; j < b->Length; j++)
             {
-                int id = b->Ptr[j].HubVertexId;
+                var id = b->Ptr[j].HubVertexId;
                 maskB2[id >> 6] |= 1UL << (id & 63);
             }
 
-            int shared = 0;
-            int totalUnion = 0;
-            for (int w = 0; w < numWords; w++)
+            var shared = 0;
+            var totalUnion = 0;
+            for (var w = 0; w < numWords; w++)
             {
                 shared += math.countbits(maskA2[w] & maskB2[w]);
                 totalUnion += math.countbits(maskA2[w] | maskB2[w]);
@@ -339,11 +426,11 @@ namespace BovineLabs.Grid.EHL
 
             int i = 0, j = 0;
             while (i < a->Length && j < b->Length)
-            {
                 if (a->Ptr[i].HubVertexId == b->Ptr[j].HubVertexId)
                 {
                     result.Add(a->Ptr[i].HubDistance <= b->Ptr[j].HubDistance ? a->Ptr[i] : b->Ptr[j]);
-                    i++; j++;
+                    i++;
+                    j++;
                 }
                 else if (a->Ptr[i].HubVertexId < b->Ptr[j].HubVertexId)
                 {
@@ -355,10 +442,18 @@ namespace BovineLabs.Grid.EHL
                     result.Add(b->Ptr[j]);
                     j++;
                 }
+
+            while (i < a->Length)
+            {
+                result.Add(a->Ptr[i]);
+                i++;
             }
 
-            while (i < a->Length) { result.Add(a->Ptr[i]); i++; }
-            while (j < b->Length) { result.Add(b->Ptr[j]); j++; }
+            while (j < b->Length)
+            {
+                result.Add(b->Ptr[j]);
+                j++;
+            }
 
             return result;
         }

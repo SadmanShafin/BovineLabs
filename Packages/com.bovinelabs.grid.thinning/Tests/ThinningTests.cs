@@ -1,29 +1,32 @@
-using NUnit.Framework;
-using Unity.Collections;
-using Unity.Mathematics;
 using BovineLabs.Grid;
 using BovineLabs.Grid.Thinning;
+using NUnit.Framework;
+using Unity.Collections;
 
 public class ThinningTests
 {
-    [Test] public void Create_Dimensions()
+    [Test]
+    public void Create_Dimensions()
     {
         Assert.IsTrue(ThinningApi.TryCreate(5, 5, Allocator.Temp, out var s));
         Assert.AreEqual(25, s.Grid.Length);
         ThinningApi.Dispose(ref s);
     }
 
-    [Test] public void Iterate_RemovesBorder()
+    [Test]
+    public void Iterate_RemovesBorder()
     {
         Assert.IsTrue(ThinningApi.TryCreate(5, 5, Allocator.Temp, out var s));
         var solid = new NativeArray<byte>(25, Allocator.Temp);
         solid.Fill((byte)1);
         Assert.IsTrue(ThinningApi.TryIterate(ref s, ref solid, out var removed));
         Assert.Greater(removed, 0);
-        ThinningApi.Dispose(ref s); solid.Dispose();
+        ThinningApi.Dispose(ref s);
+        solid.Dispose();
     }
 
-    [Test] public void Dispose_Double()
+    [Test]
+    public void Dispose_Double()
     {
         Assert.IsTrue(ThinningApi.TryCreate(3, 3, Allocator.Temp, out var s));
         ThinningApi.Dispose(ref s);

@@ -6,12 +6,10 @@ using Unity.Mathematics;
 
 namespace BovineLabs.Grid
 {
-
-
     public enum CellState : byte
     {
         Free = 0,
-        Blocked = 1,
+        Blocked = 1
     }
 
 
@@ -37,19 +35,28 @@ namespace BovineLabs.Grid
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public readonly int Index(int x, int y) => y * Width + x;
+        public readonly int Index(int x, int y)
+        {
+            return y * Width + x;
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public readonly bool InBounds(int2 pos) =>
-            pos.x >= 0 && pos.x < Width && pos.y >= 0 && pos.y < Height;
+        public readonly bool InBounds(int2 pos)
+        {
+            return pos.x >= 0 && pos.x < Width && pos.y >= 0 && pos.y < Height;
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public readonly bool IsFree(int2 pos) =>
-            InBounds(pos) && Cells[Index(pos.x, pos.y)] == CellState.Free;
+        public readonly bool IsFree(int2 pos)
+        {
+            return InBounds(pos) && Cells[Index(pos.x, pos.y)] == CellState.Free;
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Set(int x, int y, CellState state) =>
+        public void Set(int x, int y, CellState state)
+        {
             Cells[Index(x, y)] = state;
+        }
 
         public void Dispose()
         {
@@ -65,9 +72,20 @@ namespace BovineLabs.Grid
         public float FCost;
         public int ParentIndex;
 
-        public int CompareTo(PathNode other) => FCost.CompareTo(other.FCost);
-        public bool Equals(PathNode other) => Position.Equals(other.Position);
-        public override int GetHashCode() => Position.GetHashCode();
+        public int CompareTo(PathNode other)
+        {
+            return FCost.CompareTo(other.FCost);
+        }
+
+        public bool Equals(PathNode other)
+        {
+            return Position.Equals(other.Position);
+        }
+
+        public override int GetHashCode()
+        {
+            return Position.GetHashCode();
+        }
     }
 
 
@@ -95,35 +113,37 @@ namespace BovineLabs.Grid
 
     public static class GridNeighbors
     {
-        public static readonly int2[] Cardinal = {
-            new int2(0, -1),
-            new int2(1, 0),
-            new int2(0, 1),
-            new int2(-1, 0),
-        };
-
-        public static readonly int2[] Diagonal = {
-            new int2(1, -1),
-            new int2(1, 1),
-            new int2(-1, 1),
-            new int2(-1, -1),
-        };
-
         public const float CardinalCost = 1f;
         public const float DiagonalCost = 1.4142135f;
+
+        public static readonly int2[] Cardinal =
+        {
+            new(0, -1),
+            new(1, 0),
+            new(0, 1),
+            new(-1, 0)
+        };
+
+        public static readonly int2[] Diagonal =
+        {
+            new(1, -1),
+            new(1, 1),
+            new(-1, 1),
+            new(-1, -1)
+        };
 
 
         public static int GetNeighbors4(in Grid2D grid, int cell, NativeArray<int> neighbors, NativeArray<byte> blocked)
         {
-            int count = 0;
-            int2 p = grid.ToCoord(cell);
+            var count = 0;
+            var p = grid.ToCoord(cell);
 
-            for (int d = 0; d < 4; d++)
+            for (var d = 0; d < 4; d++)
             {
-                int2 n = p + Grid2D.Dir4(d);
+                var n = p + Grid2D.Dir4(d);
                 if (grid.InBounds(n))
                 {
-                    int ni = grid.ToIndex(n);
+                    var ni = grid.ToIndex(n);
                     if (blocked[ni] == 0)
                         neighbors[count++] = ni;
                 }
@@ -135,15 +155,15 @@ namespace BovineLabs.Grid
 
         public static int GetNeighbors8(in Grid2D grid, int cell, NativeArray<int> neighbors, NativeArray<byte> blocked)
         {
-            int count = 0;
-            int2 p = grid.ToCoord(cell);
+            var count = 0;
+            var p = grid.ToCoord(cell);
 
-            for (int d = 0; d < 8; d++)
+            for (var d = 0; d < 8; d++)
             {
-                int2 n = p + Grid2D.Dir8(d);
+                var n = p + Grid2D.Dir8(d);
                 if (grid.InBounds(n))
                 {
-                    int ni = grid.ToIndex(n);
+                    var ni = grid.ToIndex(n);
                     if (blocked[ni] == 0)
                         neighbors[count++] = ni;
                 }
@@ -155,8 +175,8 @@ namespace BovineLabs.Grid
 
         public static bool IsDiagonalPassable(in Grid2D grid, int2 from, int2 dir, NativeArray<byte> blocked)
         {
-            int2 adjA = new int2(from.x + dir.x, from.y);
-            int2 adjB = new int2(from.x, from.y + dir.y);
+            var adjA = new int2(from.x + dir.x, from.y);
+            var adjB = new int2(from.x, from.y + dir.y);
 
             if (!grid.InBounds(adjA) || !grid.InBounds(adjB)) return false;
             return blocked[grid.ToIndex(adjA)] == 0 && blocked[grid.ToIndex(adjB)] == 0;

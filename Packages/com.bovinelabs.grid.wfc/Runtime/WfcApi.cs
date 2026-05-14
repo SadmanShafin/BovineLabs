@@ -1,9 +1,8 @@
+using Unity.Burst;
+using Unity.Burst.CompilerServices;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
-using Unity.Burst;
-using Unity.Burst.CompilerServices;
-using BovineLabs.Grid;
 
 namespace BovineLabs.Grid.Wfc
 {
@@ -22,7 +21,7 @@ namespace BovineLabs.Grid.Wfc
     }
 
     [BurstCompile]
-    public unsafe static class WfcApi
+    public static unsafe class WfcApi
     {
         public static bool TryCreate(int width, int height, int patternCount, Allocator a, out WfcState s)
         {
@@ -40,7 +39,7 @@ namespace BovineLabs.Grid.Wfc
                 Queue = new UnsafeQueue<int>(a),
                 Dirty = new NativeArray<byte>(g.Length, a),
                 ObserveHeap = heap,
-                WfcComplete = 0,
+                WfcComplete = 0
             };
             return true;
         }
@@ -48,51 +47,52 @@ namespace BovineLabs.Grid.Wfc
         [BurstCompile]
         public static bool TryInitializeAllPossible(ref WfcState s)
         {
-            ulong all = 0UL;
+            var all = 0UL;
             if (s.PatternCount == 64) all = ulong.MaxValue;
             else all = (1UL << s.PatternCount) - 1;
 
-            int len = s.Grid.Length;
-            ulong* possiblePtr = (ulong*)s.PossibleBits.GetUnsafePtr();
-            int* entropyPtr = (int*)s.Entropy.GetUnsafePtr();
+            var len = s.Grid.Length;
+            var possiblePtr = (ulong*)s.PossibleBits.GetUnsafePtr();
+            var entropyPtr = (int*)s.Entropy.GetUnsafePtr();
 
-            for (int i = 0; i < len; i++)
+            for (var i = 0; i < len; i++)
             {
                 possiblePtr[i] = all;
                 entropyPtr[i] = s.PatternCount;
             }
+
             s.Queue.Clear();
             s.Dirty.Fill((byte)0);
             return true;
         }
 
         [BurstCompile]
-        public static bool TryLearnAdjacency(ref WfcState s, in NativeArray<int> sample, int sampleWidth, int sampleHeight)
+        public static bool TryLearnAdjacency(ref WfcState s, in NativeArray<int> sample, int sampleWidth,
+            int sampleHeight)
         {
             s.Compatibility.Fill(0UL);
-            int* samplePtr = (int*)sample.GetUnsafeReadOnlyPtr();
-            ulong* compatibilityPtr = (ulong*)s.Compatibility.GetUnsafePtr();
+            var samplePtr = (int*)sample.GetUnsafeReadOnlyPtr();
+            var compatibilityPtr = (ulong*)s.Compatibility.GetUnsafePtr();
 
-            for (int y = 0; y < sampleHeight; y++)
+            for (var y = 0; y < sampleHeight; y++)
+            for (var x = 0; x < sampleWidth; x++)
             {
-                for (int x = 0; x < sampleWidth; x++)
-                {
-                    int pattern = samplePtr[y * sampleWidth + x];
-                    if (Hint.Unlikely(pattern < 0 || pattern >= s.PatternCount)) continue;
+                var pattern = samplePtr[y * sampleWidth + x];
+                if (Hint.Unlikely(pattern < 0 || pattern >= s.PatternCount)) continue;
 
-                    for (int d = 0; d < 4; d++)
-                    {
-                        int2 offset = Grid2D.Dir4(d);
-                        int nx = x + offset.x;
-                        int ny = y + offset.y;
-                        if (Hint.Unlikely(nx < 0 || ny < 0 || nx >= sampleWidth || ny >= sampleHeight)) continue;
-                        
-                        int neighbor = samplePtr[ny * sampleWidth + nx];
-                        if (Hint.Unlikely(neighbor < 0 || neighbor >= s.PatternCount)) continue;
-                        compatibilityPtr[pattern * 4 + d] |= 1UL << neighbor;
-                    }
+                for (var d = 0; d < 4; d++)
+                {
+                    var offset = Grid2D.Dir4(d);
+                    var nx = x + offset.x;
+                    var ny = y + offset.y;
+                    if (Hint.Unlikely(nx < 0 || ny < 0 || nx >= sampleWidth || ny >= sampleHeight)) continue;
+
+                    var neighbor = samplePtr[ny * sampleWidth + nx];
+                    if (Hint.Unlikely(neighbor < 0 || neighbor >= s.PatternCount)) continue;
+                    compatibilityPtr[pattern * 4 + d] |= 1UL << neighbor;
                 }
             }
+
             return true;
         }
 
@@ -100,7 +100,7 @@ namespace BovineLabs.Grid.Wfc
         public static bool TryObserve(ref WfcState s, int cell, int chosenPattern)
         {
             if (Hint.Unlikely(!s.Grid.InBounds(cell) || (uint)chosenPattern >= (uint)s.PatternCount)) return false;
-            ulong mask = 1UL << chosenPattern;
+            var mask = 1UL << chosenPattern;
             s.PossibleBits[cell] = mask;
             s.Entropy[cell] = 1;
             s.Queue.Enqueue(cell);
@@ -110,39 +110,39 @@ namespace BovineLabs.Grid.Wfc
         [BurstCompile]
         public static bool TryPropagate(ref WfcState s)
         {
-            int width = s.Grid.Width;
-            int height = s.Grid.Height;
-            ulong* possiblePtr = (ulong*)s.PossibleBits.GetUnsafePtr();
-            int* entropyPtr = (int*)s.Entropy.GetUnsafePtr();
-            ulong* compatibilityPtr = (ulong*)s.Compatibility.GetUnsafeReadOnlyPtr();
-            byte* dirtyPtr = (byte*)s.Dirty.GetUnsafePtr();
+            var width = s.Grid.Width;
+            var height = s.Grid.Height;
+            var possiblePtr = (ulong*)s.PossibleBits.GetUnsafePtr();
+            var entropyPtr = (int*)s.Entropy.GetUnsafePtr();
+            var compatibilityPtr = (ulong*)s.Compatibility.GetUnsafeReadOnlyPtr();
+            var dirtyPtr = (byte*)s.Dirty.GetUnsafePtr();
 
-            while (s.Queue.TryDequeue(out int cell))
+            while (s.Queue.TryDequeue(out var cell))
             {
-                int y = cell / width;
-                int x = cell % width;
-                ulong cellPossible = possiblePtr[cell];
+                var y = cell / width;
+                var x = cell % width;
+                var cellPossible = possiblePtr[cell];
 
-                for (int d = 0; d < 4; d++)
+                for (var d = 0; d < 4; d++)
                 {
-                    int2 offset = Grid2D.Dir4(d);
-                    int nx = x + offset.x;
-                    int ny = y + offset.y;
+                    var offset = Grid2D.Dir4(d);
+                    var nx = x + offset.x;
+                    var ny = y + offset.y;
                     if (Hint.Unlikely(nx < 0 || ny < 0 || nx >= width || ny >= height)) continue;
-                    
-                    int ni = ny * width + nx;
-                    ulong niPossible = possiblePtr[ni];
 
-                    ulong unionPossible = 0UL;
-                    ulong temp = cellPossible;
+                    var ni = ny * width + nx;
+                    var niPossible = possiblePtr[ni];
+
+                    var unionPossible = 0UL;
+                    var temp = cellPossible;
                     while (temp != 0)
                     {
-                        int cp = math.tzcnt(temp);
+                        var cp = math.tzcnt(temp);
                         unionPossible |= compatibilityPtr[cp * 4 + d];
                         temp &= ~(1UL << cp);
                     }
 
-                    ulong restricted = niPossible & unionPossible;
+                    var restricted = niPossible & unionPossible;
                     if (Hint.Unlikely(restricted == 0UL)) return false;
 
                     if (restricted != niPossible)
@@ -154,11 +154,12 @@ namespace BovineLabs.Grid.Wfc
                     }
                 }
             }
+
             return true;
         }
 
         [BurstCompile]
-        public static bool TryRun(ref WfcState s, ref NativeArray<int> output, ref Unity.Mathematics.Random rng)
+        public static bool TryRun(ref WfcState s, ref NativeArray<int> output, ref Random rng)
         {
             if (!TryInitWfc(ref s)) return false;
 
@@ -167,14 +168,15 @@ namespace BovineLabs.Grid.Wfc
 
             if (s.WfcComplete == 2) return false;
 
-            int len = s.Grid.Length;
-            int* outputPtr = (int*)output.GetUnsafePtr();
-            ulong* possiblePtr = (ulong*)s.PossibleBits.GetUnsafePtr();
-            for (int i = 0; i < len; i++)
+            var len = s.Grid.Length;
+            var outputPtr = (int*)output.GetUnsafePtr();
+            var possiblePtr = (ulong*)s.PossibleBits.GetUnsafePtr();
+            for (var i = 0; i < len; i++)
             {
-                ulong bits = possiblePtr[i];
+                var bits = possiblePtr[i];
                 outputPtr[i] = bits == 0 ? -1 : math.tzcnt(bits);
             }
+
             return true;
         }
 
@@ -186,57 +188,70 @@ namespace BovineLabs.Grid.Wfc
             s.ObserveHeap.Clear();
             s.WfcComplete = 0;
 
-            int len = s.Grid.Length;
-            int* entropyPtr = (int*)s.Entropy.GetUnsafePtr();
+            var len = s.Grid.Length;
+            var entropyPtr = (int*)s.Entropy.GetUnsafePtr();
 
-            for (int i = 0; i < len; i++)
+            for (var i = 0; i < len; i++)
                 if (entropyPtr[i] > 1)
-                    if (!s.ObserveHeap.TryInsertOrDecrease(new HeapNode(i, entropyPtr[i]))) return false;
+                    if (!s.ObserveHeap.TryInsertOrDecrease(new HeapNode(i, entropyPtr[i])))
+                        return false;
 
             return true;
         }
 
         [BurstCompile]
-        public static bool TryObserveStep(ref WfcState s, ref Unity.Mathematics.Random rng)
+        public static bool TryObserveStep(ref WfcState s, ref Random rng)
         {
             if (s.WfcComplete != 0) return false;
 
-            int len = s.Grid.Length;
-            int* entropyPtr = (int*)s.Entropy.GetUnsafePtr();
-            ulong* possiblePtr = (ulong*)s.PossibleBits.GetUnsafePtr();
+            var len = s.Grid.Length;
+            var entropyPtr = (int*)s.Entropy.GetUnsafePtr();
+            var possiblePtr = (ulong*)s.PossibleBits.GetUnsafePtr();
 
             while (!s.ObserveHeap.IsEmpty)
             {
-                if (!s.ObserveHeap.TryPop(out var top)) { s.WfcComplete = 1; return false; }
-                int bestCell = top.Id;
-                int e = entropyPtr[bestCell];
-                if (e <= 1) continue;
-                if (possiblePtr[bestCell] == 0UL) { s.WfcComplete = 2; return false; }
+                if (!s.ObserveHeap.TryPop(out var top))
+                {
+                    s.WfcComplete = 1;
+                    return false;
+                }
 
-                ulong possible = possiblePtr[bestCell];
-                int count = e;
-                int chosen = rng.NextInt(0, count);
-                int pattern = -1;
-                ulong temp = possible;
-                for (int i = 0; i <= chosen; i++)
+                var bestCell = top.Id;
+                var e = entropyPtr[bestCell];
+                if (e <= 1) continue;
+                if (possiblePtr[bestCell] == 0UL)
+                {
+                    s.WfcComplete = 2;
+                    return false;
+                }
+
+                var possible = possiblePtr[bestCell];
+                var count = e;
+                var chosen = rng.NextInt(0, count);
+                var pattern = -1;
+                var temp = possible;
+                for (var i = 0; i <= chosen; i++)
                 {
                     pattern = math.tzcnt(temp);
                     temp &= ~(1UL << pattern);
                 }
 
                 TryObserve(ref s, bestCell, pattern);
-                if (!TryPropagate(ref s)) { s.WfcComplete = 2; return false; }
-
-                byte* dirtyPtr = (byte*)s.Dirty.GetUnsafePtr();
-                for (int i = 0; i < len; i++)
+                if (!TryPropagate(ref s))
                 {
+                    s.WfcComplete = 2;
+                    return false;
+                }
+
+                var dirtyPtr = (byte*)s.Dirty.GetUnsafePtr();
+                for (var i = 0; i < len; i++)
                     if (dirtyPtr[i] != 0)
                     {
                         dirtyPtr[i] = 0;
                         if (entropyPtr[i] > 1)
-                            if (!s.ObserveHeap.TryInsertOrDecrease(new HeapNode(i, entropyPtr[i]))) return false;
+                            if (!s.ObserveHeap.TryInsertOrDecrease(new HeapNode(i, entropyPtr[i])))
+                                return false;
                     }
-                }
 
                 return true;
             }
@@ -250,14 +265,15 @@ namespace BovineLabs.Grid.Wfc
         {
             if (s.WfcComplete != 1) return false;
 
-            int len = s.Grid.Length;
-            ulong* possiblePtr = (ulong*)s.PossibleBits.GetUnsafePtr();
-            int* outputPtr = (int*)output.GetUnsafePtr();
-            for (int i = 0; i < len; i++)
+            var len = s.Grid.Length;
+            var possiblePtr = (ulong*)s.PossibleBits.GetUnsafePtr();
+            var outputPtr = (int*)output.GetUnsafePtr();
+            for (var i = 0; i < len; i++)
             {
-                ulong bits = possiblePtr[i];
+                var bits = possiblePtr[i];
                 outputPtr[i] = bits == 0 ? -1 : math.tzcnt(bits);
             }
+
             return true;
         }
 

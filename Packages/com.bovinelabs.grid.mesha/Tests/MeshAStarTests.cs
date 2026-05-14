@@ -1,5 +1,3 @@
-using BovineLabs.Grid;
-using BovineLabs.Grid.MeshA;
 using NUnit.Framework;
 using Unity.Collections;
 using Unity.Mathematics;
@@ -8,8 +6,8 @@ namespace BovineLabs.Grid.MeshA.Tests
 {
     public class MeshAStarTests
     {
-        private PrimitiveSet prims;
         private MeshGraphData mesh;
+        private PrimitiveSet prims;
 
         [SetUp]
         public void Setup()
@@ -32,7 +30,7 @@ namespace BovineLabs.Grid.MeshA.Tests
         {
             using var grid = new NativeGrid2D(10, 10, Allocator.Temp);
             Assert.IsTrue(MeshAStar.TryFindPath(grid, prims, mesh,
-                new int2(0, 0), new int2(5, 5), out var result, 0, 1.0f, Allocator.Temp));
+                new int2(0, 0), new int2(5, 5), out var result));
 
             Assert.IsTrue(result.Found);
             Assert.Greater(result.Path.Length, 0);
@@ -46,7 +44,7 @@ namespace BovineLabs.Grid.MeshA.Tests
         {
             using var grid = new NativeGrid2D(5, 5, Allocator.Temp);
             Assert.IsTrue(MeshAStar.TryFindPath(grid, prims, mesh,
-                new int2(2, 2), new int2(2, 2), out var result, 0, 1.0f, Allocator.Temp));
+                new int2(2, 2), new int2(2, 2), out var result));
 
 
             Assert.IsTrue(result.Found);
@@ -61,20 +59,18 @@ namespace BovineLabs.Grid.MeshA.Tests
         {
             using var grid = new NativeGrid2D(10, 10, Allocator.Temp);
 
-            for (int x = 0; x < 9; x++) grid.Set(x, 5, CellState.Blocked);
+            for (var x = 0; x < 9; x++) grid.Set(x, 5, CellState.Blocked);
 
             Assert.IsTrue(MeshAStar.TryFindPath(grid, prims, mesh,
-                new int2(4, 3), new int2(4, 7), out var result, 0, 1.0f, Allocator.Temp));
+                new int2(4, 3), new int2(4, 7), out var result));
 
             Assert.IsTrue(result.Found);
             Assert.Greater(result.Path.Length, 0);
 
 
-            for (int i = 0; i < result.Path.Length; i++)
-            {
+            for (var i = 0; i < result.Path.Length; i++)
                 Assert.IsTrue(grid.IsFree(result.Path[i]),
                     $"Path node {i} at {result.Path[i]} is in a blocked cell");
-            }
             result.Dispose();
         }
 
@@ -83,10 +79,10 @@ namespace BovineLabs.Grid.MeshA.Tests
         {
             using var grid = new NativeGrid2D(10, 10, Allocator.Temp);
 
-            for (int x = 0; x < 10; x++) grid.Set(x, 5, CellState.Blocked);
+            for (var x = 0; x < 10; x++) grid.Set(x, 5, CellState.Blocked);
 
             Assert.IsFalse(MeshAStar.TryFindPath(grid, prims, mesh,
-                new int2(4, 2), new int2(4, 8), out var result, 0, 1.0f, Allocator.Temp));
+                new int2(4, 2), new int2(4, 8), out var result));
 
             Assert.IsFalse(result.Found);
             result.Dispose();
@@ -98,7 +94,7 @@ namespace BovineLabs.Grid.MeshA.Tests
         {
             using var grid = new NativeGrid2D(10, 10, Allocator.Temp);
             Assert.IsTrue(MeshAStar.TryFindPath(grid, prims, mesh,
-                new int2(0, 0), new int2(3, 4), out var result, 0, 1.0f, Allocator.Temp));
+                new int2(0, 0), new int2(3, 4), out var result));
 
             Assert.IsTrue(result.Found);
             Assert.Greater(result.PathCost, 0f);
@@ -110,7 +106,7 @@ namespace BovineLabs.Grid.MeshA.Tests
         {
             using var grid = new NativeGrid2D(10, 10, Allocator.Temp);
             Assert.IsTrue(MeshAStar.TryFindPath(grid, prims, mesh,
-                new int2(0, 0), new int2(5, 5), out var result, 0, 1.0f, Allocator.Temp));
+                new int2(0, 0), new int2(5, 5), out var result));
 
             Assert.IsTrue(result.Found);
             Assert.Greater(result.NodesExplored, 0);
@@ -134,7 +130,7 @@ namespace BovineLabs.Grid.MeshA.Tests
         [Test]
         public void MeshGraph_InitialConfigMapping_Correct()
         {
-            for (int theta = 0; theta < 8; theta++)
+            for (var theta = 0; theta < 8; theta++)
             {
                 Assert.AreEqual(theta, mesh.InitialConfigByTheta[theta]);
                 Assert.AreEqual(theta, mesh.ThetaByInitialConfig[theta]);
@@ -147,10 +143,10 @@ namespace BovineLabs.Grid.MeshA.Tests
             using var grid = new NativeGrid2D(20, 20, Allocator.Temp);
 
             Assert.IsTrue(MeshAStar.TryFindPath(grid, prims, mesh,
-                new int2(0, 0), new int2(15, 15), out var optimal, 0, 1.0f, Allocator.Temp));
+                new int2(0, 0), new int2(15, 15), out var optimal));
 
             Assert.IsTrue(MeshAStar.TryFindPath(grid, prims, mesh,
-                new int2(0, 0), new int2(15, 15), out var weighted, 0, 2.0f, Allocator.Temp));
+                new int2(0, 0), new int2(15, 15), out var weighted, 0, 2.0f));
 
             Assert.IsTrue(optimal.Found);
             Assert.IsTrue(weighted.Found);

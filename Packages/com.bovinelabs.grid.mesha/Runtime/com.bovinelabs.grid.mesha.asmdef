@@ -4,7 +4,9 @@
   "references": [
     "Unity.Burst",
     "Unity.Collections",
-    "Unity.Mathematics","com.bovinelabs.grid"],
+    "Unity.Mathematics",
+    "com.bovinelabs.grid"
+  ],
   "includePlatforms": [],
   "excludePlatforms": [],
   "allowUnsafeCode": true,

@@ -1,4 +1,3 @@
-using System;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
@@ -27,31 +26,21 @@ namespace BovineLabs.Grid.Wavestar
 
         private void ComputeDistanceField()
         {
-            int totalCells = sizeX * sizeY * sizeZ;
-            for (int i = 0; i < totalCells; i++)
-            {
-                distanceToObstacle[i] = obstacleGrid[i] != 0 ? 0 : totalCells;
-            }
+            var totalCells = sizeX * sizeY * sizeZ;
+            for (var i = 0; i < totalCells; i++) distanceToObstacle[i] = obstacleGrid[i] != 0 ? 0 : totalCells;
             var queue = new NativeList<int3>(Allocator.Temp);
-            for (int z = 0; z < sizeZ; z++)
-            {
-                for (int y = 0; y < sizeY; y++)
-                {
-                    for (int x = 0; x < sizeX; x++)
-                    {
-                        if (obstacleGrid[x + y * sizeX + z * sizeX * sizeY] != 0)
-                        {
-                            queue.Add(new int3(x, y, z));
-                        }
-                    }
-                }
-            }
-            int head = 0;
+            for (var z = 0; z < sizeZ; z++)
+            for (var y = 0; y < sizeY; y++)
+            for (var x = 0; x < sizeX; x++)
+                if (obstacleGrid[x + y * sizeX + z * sizeX * sizeY] != 0)
+                    queue.Add(new int3(x, y, z));
+
+            var head = 0;
             while (head < queue.Length)
             {
-                int3 pos = queue[head];
+                var pos = queue[head];
                 head++;
-                int currentDist = distanceToObstacle[pos.x + pos.y * sizeX + pos.z * sizeX * sizeY];
+                var currentDist = distanceToObstacle[pos.x + pos.y * sizeX + pos.z * sizeX * sizeY];
                 TryPropagate(queue, pos.x + 1, pos.y, pos.z, currentDist);
                 TryPropagate(queue, pos.x - 1, pos.y, pos.z, currentDist);
                 if (sizeY > 1)
@@ -59,12 +48,14 @@ namespace BovineLabs.Grid.Wavestar
                     TryPropagate(queue, pos.x, pos.y + 1, pos.z, currentDist);
                     TryPropagate(queue, pos.x, pos.y - 1, pos.z, currentDist);
                 }
+
                 if (sizeZ > 1)
                 {
                     TryPropagate(queue, pos.x, pos.y, pos.z + 1, currentDist);
                     TryPropagate(queue, pos.x, pos.y, pos.z - 1, currentDist);
                 }
             }
+
             queue.Dispose();
         }
 
@@ -72,7 +63,7 @@ namespace BovineLabs.Grid.Wavestar
         {
             if (x < 0 || x >= sizeX || y < 0 || y >= sizeY || z < 0 || z >= sizeZ)
                 return;
-            int idx = x + y * sizeX + z * sizeX * sizeY;
+            var idx = x + y * sizeX + z * sizeX * sizeY;
             if (distanceToObstacle[idx] > parentDist + 1)
             {
                 distanceToObstacle[idx] = parentDist + 1;
@@ -82,98 +73,84 @@ namespace BovineLabs.Grid.Wavestar
 
         private void BuildMultiResDecomposition(NativeObstacleMap obstacleMap)
         {
-            int rootSize = 1 << maxHeight;
-            int rootsX = (sizeX + rootSize - 1) / rootSize;
-            int rootsY = (sizeY + rootSize - 1) / rootSize;
-            int rootsZ = (sizeZ + rootSize - 1) / rootSize;
-            for (int rz = 0; rz < rootsZ; rz++)
+            var rootSize = 1 << maxHeight;
+            var rootsX = (sizeX + rootSize - 1) / rootSize;
+            var rootsY = (sizeY + rootSize - 1) / rootSize;
+            var rootsZ = (sizeZ + rootSize - 1) / rootSize;
+            for (var rz = 0; rz < rootsZ; rz++)
+            for (var ry = 0; ry < rootsY; ry++)
+            for (var rx = 0; rx < rootsX; rx++)
             {
-                for (int ry = 0; ry < rootsY; ry++)
-                {
-                    for (int rx = 0; rx < rootsX; rx++)
-                    {
-                        var rootIdx = new OctreeIndex(rx, ry, rz, maxHeight);
-                        DecomposeRecursive(rootIdx, obstacleMap);
-                    }
-                }
+                var rootIdx = new OctreeIndex(rx, ry, rz, maxHeight);
+                DecomposeRecursive(rootIdx, obstacleMap);
             }
         }
 
         private void DecomposeRecursive(OctreeIndex idx, NativeObstacleMap obstacleMap)
         {
-            bool allBlocked = true;
-            bool allFree = true;
-            int s = idx.Size;
-            int minX = idx.x * s;
-            int minY = idx.y * s;
-            int minZ = idx.z * s;
-            int maxX = math.min(minX + s, sizeX);
-            int maxY = math.min(minY + s, sizeY);
-            int maxZ = math.min(minZ + s, sizeZ);
-            int step = math.max(1, s / 4);
-            for (int zz = minZ; zz < maxZ; zz += step)
+            var allBlocked = true;
+            var allFree = true;
+            var s = idx.Size;
+            var minX = idx.x * s;
+            var minY = idx.y * s;
+            var minZ = idx.z * s;
+            var maxX = math.min(minX + s, sizeX);
+            var maxY = math.min(minY + s, sizeY);
+            var maxZ = math.min(minZ + s, sizeZ);
+            var step = math.max(1, s / 4);
+            for (var zz = minZ; zz < maxZ; zz += step)
+            for (var yy = minY; yy < maxY; yy += step)
+            for (var xx = minX; xx < maxX; xx += step)
             {
-                for (int yy = minY; yy < maxY; yy += step)
-                {
-                    for (int xx = minX; xx < maxX; xx += step)
-                    {
-                        int cellIdx = xx + yy * sizeX + zz * sizeX * sizeY;
-                        bool blocked = obstacleGrid[cellIdx] != 0;
-                        if (blocked) allFree = false;
-                        else allBlocked = false;
-                    }
-                }
+                var cellIdx = xx + yy * sizeX + zz * sizeX * sizeY;
+                var blocked = obstacleGrid[cellIdx] != 0;
+                if (blocked) allFree = false;
+                else allBlocked = false;
             }
+
             if (allFree || allBlocked)
-            {
                 if (s <= 4)
                 {
                     allBlocked = true;
                     allFree = true;
-                    for (int zz = minZ; zz < maxZ; zz++)
+                    for (var zz = minZ; zz < maxZ; zz++)
+                    for (var yy = minY; yy < maxY; yy++)
+                    for (var xx = minX; xx < maxX; xx++)
                     {
-                        for (int yy = minY; yy < maxY; yy++)
-                        {
-                            for (int xx = minX; xx < maxX; xx++)
-                            {
-                                int cellIdx = xx + yy * sizeX + zz * sizeX * sizeY;
-                                bool blocked = obstacleGrid[cellIdx] != 0;
-                                if (blocked) allFree = false;
-                                else allBlocked = false;
-                            }
-                        }
+                        var cellIdx = xx + yy * sizeX + zz * sizeX * sizeY;
+                        var blocked = obstacleGrid[cellIdx] != 0;
+                        if (blocked) allFree = false;
+                        else allBlocked = false;
                     }
                 }
-            }
+
             if (allBlocked)
                 return;
             if (allFree)
             {
-                int minDist = int.MaxValue;
-                for (int zz = minZ; zz < maxZ && minDist > refinementRadius; zz++)
+                var minDist = int.MaxValue;
+                for (var zz = minZ; zz < maxZ && minDist > refinementRadius; zz++)
+                for (var yy = minY; yy < maxY && minDist > refinementRadius; yy++)
+                for (var xx = minX; xx < maxX && minDist > refinementRadius; xx++)
                 {
-                    for (int yy = minY; yy < maxY && minDist > refinementRadius; yy++)
-                    {
-                        for (int xx = minX; xx < maxX && minDist > refinementRadius; xx++)
-                        {
-                            int d = distanceToObstacle[xx + yy * sizeX + zz * sizeX * sizeY];
-                            minDist = math.min(minDist, d);
-                        }
-                    }
+                    var d = distanceToObstacle[xx + yy * sizeX + zz * sizeX * sizeY];
+                    minDist = math.min(minDist, d);
                 }
+
                 if (minDist > refinementRadius)
                 {
                     traversableSubvolumes.Add(idx.MortonCode);
                     return;
                 }
             }
+
             if (idx.height > 0)
             {
-                int childCount = (sizeY > 1) ? 8 : 4;
-                for (int c = 0; c < childCount; c++)
+                var childCount = sizeY > 1 ? 8 : 4;
+                for (var c = 0; c < childCount; c++)
                 {
                     var child = idx.Child(c);
-                    int cs = child.Size;
+                    var cs = child.Size;
                     if (child.x * cs >= sizeX || child.y * cs >= sizeY || child.z * cs >= sizeZ)
                         continue;
                     DecomposeRecursive(child, obstacleMap);
@@ -181,19 +158,15 @@ namespace BovineLabs.Grid.Wavestar
             }
             else
             {
-                for (int zz = minZ; zz < maxZ; zz++)
+                for (var zz = minZ; zz < maxZ; zz++)
+                for (var yy = minY; yy < maxY; yy++)
+                for (var xx = minX; xx < maxX; xx++)
                 {
-                    for (int yy = minY; yy < maxY; yy++)
+                    var cellIdx = xx + yy * sizeX + zz * sizeX * sizeY;
+                    if (obstacleGrid[cellIdx] == 0)
                     {
-                        for (int xx = minX; xx < maxX; xx++)
-                        {
-                            int cellIdx = xx + yy * sizeX + zz * sizeX * sizeY;
-                            if (obstacleGrid[cellIdx] == 0)
-                            {
-                                var leaf = new OctreeIndex(xx, yy, zz, 0);
-                                traversableSubvolumes.Add(leaf.MortonCode);
-                            }
-                        }
+                        var leaf = new OctreeIndex(xx, yy, zz, 0);
+                        traversableSubvolumes.Add(leaf.MortonCode);
                     }
                 }
             }
@@ -204,9 +177,9 @@ namespace BovineLabs.Grid.Wavestar
     {
         public static int ComputeMaxHeight(int sizeX, int sizeY, int sizeZ)
         {
-            int maxDim = math.max(math.max(sizeX, sizeY), sizeZ);
-            int h = 0;
-            while ((1 << h) < maxDim)
+            var maxDim = math.max(math.max(sizeX, sizeY), sizeZ);
+            var h = 0;
+            while (1 << h < maxDim)
                 h++;
             return h;
         }
@@ -218,8 +191,8 @@ namespace BovineLabs.Grid.Wavestar
             out NativeHashSet<int> traversable,
             out NativeArray<int> distanceToObstacle)
         {
-            int maxHeight = ComputeMaxHeight(sizeX, sizeY, sizeZ);
-            int totalCells = sizeX * sizeY * sizeZ;
+            var maxHeight = ComputeMaxHeight(sizeX, sizeY, sizeZ);
+            var totalCells = sizeX * sizeY * sizeZ;
             distanceToObstacle = new NativeArray<int>(totalCells, Allocator.Persistent);
             traversable = new NativeHashSet<int>(totalCells / 4, Allocator.Persistent);
             var job = new WavestarBuilderJob
@@ -231,7 +204,7 @@ namespace BovineLabs.Grid.Wavestar
                 maxHeight = maxHeight,
                 refinementRadius = refinementRadius,
                 traversableSubvolumes = traversable,
-                distanceToObstacle = distanceToObstacle,
+                distanceToObstacle = distanceToObstacle
             };
             var handle = job.Schedule();
             handle.Complete();

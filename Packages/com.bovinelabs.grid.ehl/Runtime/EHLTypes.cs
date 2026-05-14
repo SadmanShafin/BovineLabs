@@ -4,8 +4,6 @@ using Unity.Mathematics;
 
 namespace BovineLabs.Grid.EHL
 {
-
-
     public struct ConvexVertex
     {
         public float2 Position;
@@ -47,8 +45,7 @@ namespace BovineLabs.Grid.EHL
 
         public int CompareTo(VisibilityLabel other)
         {
-
-            int cmp = HubVertexId.CompareTo(other.HubVertexId);
+            var cmp = HubVertexId.CompareTo(other.HubVertexId);
             if (cmp != 0) return cmp;
             return Distance.CompareTo(other.Distance);
         }
@@ -58,8 +55,15 @@ namespace BovineLabs.Grid.EHL
             return HubVertexId == other.HubVertexId;
         }
 
-        public override bool Equals(object obj) => obj is VisibilityLabel other && Equals(other);
-        public override int GetHashCode() => HubVertexId;
+        public override bool Equals(object obj)
+        {
+            return obj is VisibilityLabel other && Equals(other);
+        }
+
+        public override int GetHashCode()
+        {
+            return HubVertexId;
+        }
     }
 
 
@@ -80,13 +84,23 @@ namespace BovineLabs.Grid.EHL
 
         public int CompareTo(ViaLabel other)
         {
-
             return HubVertexId.CompareTo(other.HubVertexId);
         }
 
-        public bool Equals(ViaLabel other) => HubVertexId == other.HubVertexId;
-        public override bool Equals(object obj) => obj is ViaLabel other && Equals(other);
-        public override int GetHashCode() => HubVertexId;
+        public bool Equals(ViaLabel other)
+        {
+            return HubVertexId == other.HubVertexId;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is ViaLabel other && Equals(other);
+        }
+
+        public override int GetHashCode()
+        {
+            return HubVertexId;
+        }
     }
 
 
@@ -118,7 +132,6 @@ namespace BovineLabs.Grid.EHL
 
     public struct EHLIndex : IDisposable
     {
-
         public float2 MapMin;
         public float2 MapMax;
 
@@ -173,8 +186,8 @@ namespace BovineLabs.Grid.EHL
 
         public int CellIndex(float2 p)
         {
-            int cx = (int)math.floor((p.x - MapMin.x) / CellSize.x);
-            int cy = (int)math.floor((p.y - MapMin.y) / CellSize.y);
+            var cx = (int)math.floor((p.x - MapMin.x) / CellSize.x);
+            var cy = (int)math.floor((p.y - MapMin.y) / CellSize.y);
             cx = math.clamp(cx, 0, GridDims.x - 1);
             cy = math.clamp(cy, 0, GridDims.y - 1);
             return cy * GridDims.x + cx;
@@ -200,13 +213,15 @@ namespace BovineLabs.Grid.EHL
             Distance = distance;
         }
 
-        public int CompareTo(AdjEdge other) => TargetVertexId.CompareTo(other.TargetVertexId);
+        public int CompareTo(AdjEdge other)
+        {
+            return TargetVertexId.CompareTo(other.TargetVertexId);
+        }
     }
 
 
     public struct EHLQueryResult
     {
-
         public float Distance;
 
         public NativeList<float2> Waypoints;

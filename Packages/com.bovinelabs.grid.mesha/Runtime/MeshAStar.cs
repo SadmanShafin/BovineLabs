@@ -1,8 +1,6 @@
-using System;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Mathematics;
-using BovineLabs.Grid;
 
 namespace BovineLabs.Grid.MeshA
 {
@@ -51,7 +49,7 @@ namespace BovineLabs.Grid.MeshA
                 Path = result.Path,
                 Found = found,
                 PathCost = pathCost,
-                NodesExplored = nodesExplored,
+                NodesExplored = nodesExplored
             };
 
             job.Execute();
@@ -60,7 +58,7 @@ namespace BovineLabs.Grid.MeshA
             result.PathCost = pathCost.Value;
             result.NodesExplored = nodesExplored.Value;
 
-            bool success = found.Value;
+            var success = found.Value;
 
             found.Dispose();
             pathCost.Dispose();

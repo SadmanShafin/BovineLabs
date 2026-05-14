@@ -1,11 +1,9 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Unity.Burst;
-using Unity.Burst.CompilerServices;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
-using BovineLabs.Grid;
 
 namespace BovineLabs.Grid.Jps
 {
@@ -20,7 +18,7 @@ namespace BovineLabs.Grid.Jps
     }
 
     [BurstCompile]
-    public unsafe static class JpsApi
+    public static unsafe class JpsApi
     {
         public static bool TryCreate(int width, int height, Allocator allocator, out JpsState result)
         {
@@ -42,28 +40,39 @@ namespace BovineLabs.Grid.Jps
                 G = new NativeArray<float>(g.Length, allocator),
                 Parent = new NativeArray<int>(g.Length, allocator),
                 Closed = new NativeArray<byte>(g.Length, allocator),
-                Open = open,
+                Open = open
             };
             return true;
         }
 
         [BurstCompile]
-        public static bool TrySearch(ref JpsState s, in NativeArray<byte> blocked, int start, int goal, ref NativeList<int> path)
+        public static bool TrySearch(ref JpsState s, in NativeArray<byte> blocked, int start, int goal,
+            ref NativeList<int> path)
         {
             path.Clear();
-            float* g = (float*)s.G.GetUnsafePtr();
-            int* parent = (int*)s.Parent.GetUnsafePtr();
-            byte* closed = (byte*)s.Closed.GetUnsafePtr();
-            byte* blk = (byte*)blocked.GetUnsafeReadOnlyPtr();
-            int w = s.Grid.Width;
-            int h = s.Grid.Height;
-            int len = s.Grid.Length;
+            var g = (float*)s.G.GetUnsafePtr();
+            var parent = (int*)s.Parent.GetUnsafePtr();
+            var closed = (byte*)s.Closed.GetUnsafePtr();
+            var blk = (byte*)blocked.GetUnsafeReadOnlyPtr();
+            var w = s.Grid.Width;
+            var h = s.Grid.Height;
+            var len = s.Grid.Length;
 
-            for (int i = 0; i < len; i++) { g[i] = float.PositiveInfinity; parent[i] = -1; closed[i] = 0; }
+            for (var i = 0; i < len; i++)
+            {
+                g[i] = float.PositiveInfinity;
+                parent[i] = -1;
+                closed[i] = 0;
+            }
+
             s.Open.Clear();
 
             if (blk[start] != 0 || blk[goal] != 0) return false;
-            if (start == goal) { path.Add(start); return true; }
+            if (start == goal)
+            {
+                path.Add(start);
+                return true;
+            }
 
             g[start] = 0f;
             s.Open.TryInsertOrDecrease(new HeapNode(start, Octile(0, 0, s.Grid.ToCoord(start), s.Grid.ToCoord(goal))));
@@ -71,7 +80,7 @@ namespace BovineLabs.Grid.Jps
             while (!s.Open.IsEmpty)
             {
                 if (!s.Open.TryPop(out var current)) return false;
-                int cid = current.Id;
+                var cid = current.Id;
                 closed[cid] = 1;
 
                 if (cid == goal)
@@ -80,21 +89,21 @@ namespace BovineLabs.Grid.Jps
                     return true;
                 }
 
-                int2 cp = s.Grid.ToCoord(cid);
+                var cp = s.Grid.ToCoord(cid);
 
-                for (int d = 0; d < 8; d++)
+                for (var d = 0; d < 8; d++)
                 {
-                    int2 dir = Grid2D.Dir8(d);
-                    if (TryJump(blk, w, h, cp, dir, goal, out int jumpIdx))
+                    var dir = Grid2D.Dir8(d);
+                    if (TryJump(blk, w, h, cp, dir, goal, out var jumpIdx))
                     {
                         if (closed[jumpIdx] != 0) continue;
-                        int2 jp = s.Grid.ToCoord(jumpIdx);
-                        float cost = g[cid] + Octile(0, 0, cp, jp);
+                        var jp = s.Grid.ToCoord(jumpIdx);
+                        var cost = g[cid] + Octile(0, 0, cp, jp);
                         if (cost < g[jumpIdx])
                         {
                             g[jumpIdx] = cost;
                             parent[jumpIdx] = cid;
-                            float f = cost + Octile(0, 0, jp, s.Grid.ToCoord(goal));
+                            var f = cost + Octile(0, 0, jp, s.Grid.ToCoord(goal));
                             s.Open.TryInsertOrDecrease(new HeapNode(jumpIdx, f));
                         }
                     }
@@ -104,29 +113,48 @@ namespace BovineLabs.Grid.Jps
             return false;
         }
 
-        public static bool TryJump(in JpsState s, in NativeArray<byte> blocked, int2 pos, int2 dir, int goal, out int jumpIdx)
+        public static bool TryJump(in JpsState s, in NativeArray<byte> blocked, int2 pos, int2 dir, int goal,
+            out int jumpIdx)
         {
-            byte* blk = (byte*)blocked.GetUnsafeReadOnlyPtr();
+            var blk = (byte*)blocked.GetUnsafeReadOnlyPtr();
             return TryJump(blk, s.Grid.Width, s.Grid.Height, pos, dir, goal, out jumpIdx);
         }
 
         private static bool TryJump(byte* blk, int w, int h, int2 pos, int2 dir, int goal, out int jumpIdx)
         {
             jumpIdx = -1;
-            int nx = pos.x + dir.x;
-            int ny = pos.y + dir.y;
+            var nx = pos.x + dir.x;
+            var ny = pos.y + dir.y;
 
             if ((uint)nx >= (uint)w || (uint)ny >= (uint)h) return false;
-            int nIdx = ny * w + nx;
+            var nIdx = ny * w + nx;
             if (blk[nIdx] != 0) return false;
 
-            if (nIdx == goal) { jumpIdx = nIdx; return true; }
-            if (HasForcedNeighbor(blk, w, h, nx, ny, dir)) { jumpIdx = nIdx; return true; }
+            if (nIdx == goal)
+            {
+                jumpIdx = nIdx;
+                return true;
+            }
+
+            if (HasForcedNeighbor(blk, w, h, nx, ny, dir))
+            {
+                jumpIdx = nIdx;
+                return true;
+            }
 
             if (dir.x != 0 && dir.y != 0)
             {
-                if (TryJump(blk, w, h, new int2(nx, ny), new int2(dir.x, 0), goal, out _)) { jumpIdx = nIdx; return true; }
-                if (TryJump(blk, w, h, new int2(nx, ny), new int2(0, dir.y), goal, out _)) { jumpIdx = nIdx; return true; }
+                if (TryJump(blk, w, h, new int2(nx, ny), new int2(dir.x, 0), goal, out _))
+                {
+                    jumpIdx = nIdx;
+                    return true;
+                }
+
+                if (TryJump(blk, w, h, new int2(nx, ny), new int2(0, dir.y), goal, out _))
+                {
+                    jumpIdx = nIdx;
+                    return true;
+                }
             }
 
             return TryJump(blk, w, h, new int2(nx, ny), dir, goal, out jumpIdx);
@@ -136,18 +164,27 @@ namespace BovineLabs.Grid.Jps
         public static bool TryExtractPath(in NativeArray<int> parent, int goal, int start, ref NativeList<int> path)
         {
             path.Clear();
-            int current = goal;
+            var current = goal;
             while (current != start)
             {
                 path.Add(current);
                 current = parent[current];
                 if (current < 0) return false;
             }
+
             path.Add(start);
 
-            int* p = (int*)path.GetUnsafePtr();
+            var p = path.GetUnsafePtr();
             int lo = 0, hi = path.Length - 1;
-            while (lo < hi) { int tmp = p[lo]; p[lo] = p[hi]; p[hi] = tmp; lo++; hi--; }
+            while (lo < hi)
+            {
+                var tmp = p[lo];
+                p[lo] = p[hi];
+                p[hi] = tmp;
+                lo++;
+                hi--;
+            }
+
             return true;
         }
 
@@ -162,7 +199,7 @@ namespace BovineLabs.Grid.Jps
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static float Octile(int _, int __, int2 a, int2 b)
         {
-            int2 d = math.abs(a - b);
+            var d = math.abs(a - b);
             return math.max(d.x, d.y) + 0.4142135f * math.min(d.x, d.y);
         }
 
@@ -176,6 +213,7 @@ namespace BovineLabs.Grid.Jps
                     int fx = nAx, fy = py + dir.y;
                     if ((uint)fx < (uint)w && (uint)fy < (uint)h && blk[fy * w + fx] == 0) return true;
                 }
+
                 int nBx = px, nBy = py - dir.y;
                 if ((uint)nBy < (uint)h && blk[nBy * w + nBx] != 0)
                 {
@@ -185,30 +223,31 @@ namespace BovineLabs.Grid.Jps
             }
             else if (dir.x != 0)
             {
-                for (int dy = -1; dy <= 1; dy += 2)
+                for (var dy = -1; dy <= 1; dy += 2)
                 {
-                    int wy = py + dy;
+                    var wy = py + dy;
                     if ((uint)wy >= (uint)h) continue;
                     if (blk[wy * w + px] != 0)
                     {
-                        int fx = px + dir.x;
+                        var fx = px + dir.x;
                         if ((uint)fx < (uint)w && blk[wy * w + fx] == 0) return true;
                     }
                 }
             }
             else
             {
-                for (int dx = -1; dx <= 1; dx += 2)
+                for (var dx = -1; dx <= 1; dx += 2)
                 {
-                    int wx = px + dx;
+                    var wx = px + dx;
                     if ((uint)wx >= (uint)w) continue;
                     if (blk[py * w + wx] != 0)
                     {
-                        int fy = py + dir.y;
+                        var fy = py + dir.y;
                         if ((uint)fy < (uint)h && blk[fy * w + wx] == 0) return true;
                     }
                 }
             }
+
             return false;
         }
     }

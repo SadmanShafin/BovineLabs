@@ -1,4 +1,3 @@
-using System;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
@@ -6,8 +5,6 @@ using Unity.Mathematics;
 
 namespace BovineLabs.Grid.EHL
 {
-
-
     [BurstCompile]
     public struct HubLabelingBuilderJob : IJob
     {
@@ -33,7 +30,7 @@ namespace BovineLabs.Grid.EHL
 
         public void Execute()
         {
-            int n = VertexCount;
+            var n = VertexCount;
             if (n == 0) return;
 
 
@@ -41,69 +38,59 @@ namespace BovineLabs.Grid.EHL
             var succ = new NativeArray<int>(n * n, Allocator.Temp);
 
 
-            for (int i = 0; i < n * n; i++)
+            for (var i = 0; i < n * n; i++)
             {
                 dist[i] = float.MaxValue;
                 succ[i] = -1;
             }
-            for (int i = 0; i < n; i++)
+
+            for (var i = 0; i < n; i++)
             {
                 dist[i * n + i] = 0f;
                 succ[i * n + i] = i;
             }
 
 
-            for (int src = 0; src < n; src++)
-            {
-                RunDijkstra(src, n, ref dist, ref succ);
-            }
+            for (var src = 0; src < n; src++) RunDijkstra(src, n, ref dist, ref succ);
 
 
             var covered = new NativeArray<bool>(n * n, Allocator.Temp);
-            for (int i = 0; i < n * n; i++)
+            for (var i = 0; i < n * n; i++)
                 covered[i] = false;
 
 
             var hubLabels = new NativeArray<NativeList<VisibilityLabel>>(n, Allocator.Temp);
-            for (int i = 0; i < n; i++)
+            for (var i = 0; i < n; i++)
                 hubLabels[i] = new NativeList<VisibilityLabel>(Allocator.Temp);
 
 
-            int totalPairs = 0;
-            for (int i = 0; i < n; i++)
-            {
-                for (int j = i + 1; j < n; j++)
-                {
-                    if (dist[i * n + j] < float.MaxValue)
-                        totalPairs++;
-                }
-            }
+            var totalPairs = 0;
+            for (var i = 0; i < n; i++)
+            for (var j = i + 1; j < n; j++)
+                if (dist[i * n + j] < float.MaxValue)
+                    totalPairs++;
 
-            int coveredCount = 0;
-            int iterations = 0;
+            var coveredCount = 0;
+            var iterations = 0;
 
             while (coveredCount < totalPairs && iterations < n)
             {
+                var bestHub = -1;
+                var bestCoverage = 0;
 
-                int bestHub = -1;
-                int bestCoverage = 0;
-
-                for (int h = 0; h < n; h++)
+                for (var h = 0; h < n; h++)
                 {
-                    int coverage = 0;
-                    for (int i = 0; i < n; i++)
+                    var coverage = 0;
+                    for (var i = 0; i < n; i++)
                     {
                         if (dist[i * n + h] >= float.MaxValue) continue;
-                        for (int j = i + 1; j < n; j++)
+                        for (var j = i + 1; j < n; j++)
                         {
                             if (covered[i * n + j]) continue;
                             if (dist[h * n + j] >= float.MaxValue) continue;
 
 
-                            if (math.abs(dist[i * n + h] + dist[h * n + j] - dist[i * n + j]) < 1e-4f)
-                            {
-                                coverage++;
-                            }
+                            if (math.abs(dist[i * n + h] + dist[h * n + j] - dist[i * n + j]) < 1e-4f) coverage++;
                         }
                     }
 
@@ -118,20 +105,16 @@ namespace BovineLabs.Grid.EHL
                     break;
 
 
-                for (int v = 0; v < n; v++)
-                {
+                for (var v = 0; v < n; v++)
                     if (dist[v * n + bestHub] < float.MaxValue)
                     {
-
-                        bool alreadyPresent = false;
-                        for (int k = 0; k < hubLabels[v].Length; k++)
-                        {
+                        var alreadyPresent = false;
+                        for (var k = 0; k < hubLabels[v].Length; k++)
                             if (hubLabels[v][k].HubVertexId == bestHub)
                             {
                                 alreadyPresent = true;
                                 break;
                             }
-                        }
 
                         if (!alreadyPresent)
                         {
@@ -146,13 +129,12 @@ namespace BovineLabs.Grid.EHL
                             SuccValuesOut.Add(succ[v * n + bestHub]);
                         }
                     }
-                }
 
 
-                for (int i = 0; i < n; i++)
+                for (var i = 0; i < n; i++)
                 {
                     if (dist[i * n + bestHub] >= float.MaxValue) continue;
-                    for (int j = i + 1; j < n; j++)
+                    for (var j = i + 1; j < n; j++)
                     {
                         if (covered[i * n + j]) continue;
                         if (dist[bestHub * n + j] >= float.MaxValue) continue;
@@ -170,18 +152,15 @@ namespace BovineLabs.Grid.EHL
             }
 
 
-            int offset = 0;
-            for (int v = 0; v < n; v++)
+            var offset = 0;
+            for (var v = 0; v < n; v++)
             {
                 hubLabels[v].Sort();
                 HubOffsetsOut.Add(offset);
                 HubCountsOut.Add(hubLabels[v].Length);
                 offset += hubLabels[v].Length;
 
-                for (int k = 0; k < hubLabels[v].Length; k++)
-                {
-                    HubLabelsOut.Add(hubLabels[v][k]);
-                }
+                for (var k = 0; k < hubLabels[v].Length; k++) HubLabelsOut.Add(hubLabels[v][k]);
 
                 hubLabels[v].Dispose();
             }
@@ -203,31 +182,28 @@ namespace BovineLabs.Grid.EHL
             dist[src * n + src] = 0f;
             succ[src * n + src] = src;
 
-            for (int iter = 0; iter < n; iter++)
+            for (var iter = 0; iter < n; iter++)
             {
-
-                float minDist = float.MaxValue;
-                int u = -1;
-                for (int i = 0; i < n; i++)
-                {
+                var minDist = float.MaxValue;
+                var u = -1;
+                for (var i = 0; i < n; i++)
                     if (!visited[i] && dist[src * n + i] < minDist)
                     {
                         minDist = dist[src * n + i];
                         u = i;
                     }
-                }
 
                 if (u < 0) break;
                 visited[u] = true;
 
 
-                int adjStart = AdjOffsets[u];
-                int adjCount = AdjCounts[u];
-                for (int e = 0; e < adjCount; e++)
+                var adjStart = AdjOffsets[u];
+                var adjCount = AdjCounts[u];
+                for (var e = 0; e < adjCount; e++)
                 {
                     var edge = AdjEdges[adjStart + e];
-                    int v = edge.TargetVertexId;
-                    float newDist = dist[src * n + u] + edge.Distance;
+                    var v = edge.TargetVertexId;
+                    var newDist = dist[src * n + u] + edge.Distance;
 
                     if (newDist < dist[src * n + v])
                     {
@@ -235,13 +211,9 @@ namespace BovineLabs.Grid.EHL
 
 
                         if (src == u)
-                        {
                             succ[src * n + v] = v;
-                        }
                         else
-                        {
                             succ[src * n + v] = succ[src * n + u];
-                        }
                     }
                 }
             }
@@ -283,7 +255,7 @@ namespace BovineLabs.Grid.EHL
                 HubOffsetsOut = hubOffsets,
                 HubCountsOut = hubCounts,
                 SuccKeysOut = succKeys,
-                SuccValuesOut = succValues,
+                SuccValuesOut = succValues
             };
 
             return job.Schedule(dependency);

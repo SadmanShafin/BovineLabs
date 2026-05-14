@@ -1,19 +1,20 @@
-using NUnit.Framework;
-using Unity.Collections;
-using Unity.Mathematics;
 using BovineLabs.Grid;
 using BovineLabs.Grid.Watershed;
+using NUnit.Framework;
+using Unity.Collections;
 
 public class WatershedTests
 {
-    [Test] public void Create_Dimensions()
+    [Test]
+    public void Create_Dimensions()
     {
         Assert.IsTrue(WatershedApi.TryCreate(5, 5, Allocator.Temp, out var s));
         Assert.AreEqual(25, s.Grid.Length);
         WatershedApi.Dispose(ref s);
     }
 
-    [Test] public void FindMinima_TwoMinima()
+    [Test]
+    public void FindMinima_TwoMinima()
     {
         Assert.IsTrue(WatershedApi.TryCreate(5, 5, Allocator.Temp, out var s));
         var height = new NativeArray<float>(25, Allocator.Temp);
@@ -21,13 +22,17 @@ public class WatershedTests
         height[s.Grid.ToIndex(1, 1)] = 0f;
         height[s.Grid.ToIndex(3, 3)] = 0f;
 
-        for (int i = 0; i < 25; i++) if (i != s.Grid.ToIndex(1,1) && i != s.Grid.ToIndex(3,3)) height[i] = 10f;
+        for (var i = 0; i < 25; i++)
+            if (i != s.Grid.ToIndex(1, 1) && i != s.Grid.ToIndex(3, 3))
+                height[i] = 10f;
         Assert.IsTrue(WatershedApi.TryFindMinima(ref s, in height, out var count));
         Assert.GreaterOrEqual(count, 1);
-        WatershedApi.Dispose(ref s); height.Dispose();
+        WatershedApi.Dispose(ref s);
+        height.Dispose();
     }
 
-    [Test] public void FindMinima_SingleMinimum()
+    [Test]
+    public void FindMinima_SingleMinimum()
     {
         Assert.IsTrue(WatershedApi.TryCreate(3, 3, Allocator.Temp, out var s));
         var height = new NativeArray<float>(9, Allocator.Temp);
@@ -36,10 +41,12 @@ public class WatershedTests
         Assert.IsTrue(WatershedApi.TryFindMinima(ref s, in height, out var count));
         Assert.AreEqual(1, count);
         Assert.AreEqual(0, s.Label[4]);
-        WatershedApi.Dispose(ref s); height.Dispose();
+        WatershedApi.Dispose(ref s);
+        height.Dispose();
     }
 
-    [Test] public void Flood_TwoBasins()
+    [Test]
+    public void Flood_TwoBasins()
     {
         Assert.IsTrue(WatershedApi.TryCreate(5, 5, Allocator.Temp, out var s));
         var height = new NativeArray<float>(25, Allocator.Temp);
@@ -51,10 +58,12 @@ public class WatershedTests
 
         Assert.GreaterOrEqual(s.Label[0], 0);
         Assert.GreaterOrEqual(s.Label[24], 0);
-        WatershedApi.Dispose(ref s); height.Dispose();
+        WatershedApi.Dispose(ref s);
+        height.Dispose();
     }
 
-    [Test] public void ExtractBoundaries()
+    [Test]
+    public void ExtractBoundaries()
     {
         Assert.IsTrue(WatershedApi.TryCreate(5, 5, Allocator.Temp, out var s));
         var height = new NativeArray<float>(25, Allocator.Temp);
@@ -66,13 +75,18 @@ public class WatershedTests
         Assert.IsTrue(WatershedApi.TryFlood(ref s, in height));
         Assert.IsTrue(WatershedApi.TryExtractBoundaries(ref s, ref boundary));
 
-        int labeled = 0;
-        for (int i = 0; i < 25; i++) if (s.Label[i] >= 0) labeled++;
+        var labeled = 0;
+        for (var i = 0; i < 25; i++)
+            if (s.Label[i] >= 0)
+                labeled++;
         Assert.Greater(labeled, 0);
-        WatershedApi.Dispose(ref s); height.Dispose(); boundary.Dispose();
+        WatershedApi.Dispose(ref s);
+        height.Dispose();
+        boundary.Dispose();
     }
 
-    [Test] public void Dispose_Double()
+    [Test]
+    public void Dispose_Double()
     {
         Assert.IsTrue(WatershedApi.TryCreate(3, 3, Allocator.Temp, out var s));
         WatershedApi.Dispose(ref s);

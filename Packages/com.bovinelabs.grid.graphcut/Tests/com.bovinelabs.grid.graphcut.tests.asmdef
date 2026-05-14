@@ -1,24 +1,26 @@
 {
-    "name": "com.bovinelabs.grid.graphcut.tests",
-    "rootNamespace": "",
-    "references": [
-        "com.bovinelabs.grid",
-        "com.bovinelabs.grid.graphcut",
-        "Unity.Burst",
-        "Unity.Collections",
-        "Unity.Mathematics"
-    ],
-    "includePlatforms": [
-        "Editor"
-    ],
-    "excludePlatforms": [],
-    "allowUnsafeCode": true,
-    "overrideReferences": true,
-    "precompiledReferences": ["nunit.framework.dll"],
-    "autoReferenced": false,
-    "defineConstraints": [
-        "UNITY_INCLUDE_TESTS"
-    ],
-    "versionDefines": [],
-    "noEngineReferences": false
+  "name": "com.bovinelabs.grid.graphcut.tests",
+  "rootNamespace": "",
+  "references": [
+    "com.bovinelabs.grid",
+    "com.bovinelabs.grid.graphcut",
+    "Unity.Burst",
+    "Unity.Collections",
+    "Unity.Mathematics"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": true,
+  "overrideReferences": true,
+  "precompiledReferences": [
+    "nunit.framework.dll"
+  ],
+  "autoReferenced": false,
+  "defineConstraints": [
+    "UNITY_INCLUDE_TESTS"
+  ],
+  "versionDefines": [],
+  "noEngineReferences": false
 }

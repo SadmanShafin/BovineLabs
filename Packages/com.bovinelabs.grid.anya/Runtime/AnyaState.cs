@@ -30,6 +30,7 @@ namespace BovineLabs.Grid.Anya
                 AllocatorManager.Free(Allocator, RootGCost);
                 RootGCost = null;
             }
+
             this = default;
         }
     }

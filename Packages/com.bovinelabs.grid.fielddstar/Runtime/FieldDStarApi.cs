@@ -1,9 +1,8 @@
+using Unity.Burst;
+using Unity.Burst.CompilerServices;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
-using Unity.Burst;
-using Unity.Burst.CompilerServices;
-using BovineLabs.Grid;
 
 namespace BovineLabs.Grid.FieldDStar
 {
@@ -18,7 +17,7 @@ namespace BovineLabs.Grid.FieldDStar
     }
 
     [BurstCompile]
-    public unsafe static class FieldDStarApi
+    public static unsafe class FieldDStarApi
     {
         public static bool TryCreate(int width, int height, Allocator a, out FieldDStarState result)
         {
@@ -40,7 +39,7 @@ namespace BovineLabs.Grid.FieldDStar
                 G = new NativeArray<float>(g.Length, a),
                 RHS = new NativeArray<float>(g.Length, a),
                 Flow = new NativeArray<float2>(g.Length, a),
-                Heap = heap,
+                Heap = heap
             };
             return true;
         }
@@ -74,9 +73,9 @@ namespace BovineLabs.Grid.FieldDStar
             if (s.Heap.IsEmpty) return false;
 
             if (!s.Heap.TryPop(out var node)) return false;
-            int u = node.Id;
-            float* gPtr = (float*)s.G.GetUnsafePtr();
-            float* rhsPtr = (float*)s.RHS.GetUnsafePtr();
+            var u = node.Id;
+            var gPtr = (float*)s.G.GetUnsafePtr();
+            var rhsPtr = (float*)s.RHS.GetUnsafePtr();
 
             if (gPtr[u] > rhsPtr[u])
             {
@@ -88,13 +87,13 @@ namespace BovineLabs.Grid.FieldDStar
                 UpdateRHS(ref s, in cost, u);
             }
 
-            int2 p = s.Grid.ToCoord(u);
-            int width = s.Grid.Width;
-            int height = s.Grid.Height;
+            var p = s.Grid.ToCoord(u);
+            var width = s.Grid.Width;
+            var height = s.Grid.Height;
 
-            for (int d = 0; d < 8; d++)
+            for (var d = 0; d < 8; d++)
             {
-                int2 np = p + Grid2D.Dir8(d);
+                var np = p + Grid2D.Dir8(d);
                 if (Hint.Likely(np.x >= 0 && np.y >= 0 && np.x < width && np.y < height))
                     UpdateRHS(ref s, in cost, np.y * width + np.x);
             }
@@ -107,27 +106,27 @@ namespace BovineLabs.Grid.FieldDStar
         {
             if (Hint.Unlikely(cell == s.Goal)) return;
 
-            float bestRHS = float.PositiveInfinity;
-            int2 p = s.Grid.ToCoord(cell);
-            int width = s.Grid.Width;
-            int height = s.Grid.Height;
-            float* gPtr = (float*)s.G.GetUnsafePtr();
-            float* rhsPtr = (float*)s.RHS.GetUnsafePtr();
-            float* costPtr = (float*)cost.GetUnsafeReadOnlyPtr();
+            var bestRHS = float.PositiveInfinity;
+            var p = s.Grid.ToCoord(cell);
+            var width = s.Grid.Width;
+            var height = s.Grid.Height;
+            var gPtr = (float*)s.G.GetUnsafePtr();
+            var rhsPtr = (float*)s.RHS.GetUnsafePtr();
+            var costPtr = (float*)cost.GetUnsafeReadOnlyPtr();
 
-            for (int i = 0; i < 8; i++)
+            for (var i = 0; i < 8; i++)
             {
-                int2 n1 = p + Grid2D.Dir8(i);
-                int2 n2 = p + Grid2D.Dir8((i + 1) % 8);
+                var n1 = p + Grid2D.Dir8(i);
+                var n2 = p + Grid2D.Dir8((i + 1) % 8);
 
                 if (Hint.Likely(n1.x >= 0 && n1.y >= 0 && n1.x < width && n1.y < height &&
                                 n2.x >= 0 && n2.y >= 0 && n2.x < width && n2.y < height))
                 {
-                    float c = costPtr[cell];
-                    float v1 = gPtr[n1.y * width + n1.x];
-                    float v2 = gPtr[n2.y * width + n2.x];
-                    
-                    float val = ComputeCost(v1, v2, c);
+                    var c = costPtr[cell];
+                    var v1 = gPtr[n1.y * width + n1.x];
+                    var v2 = gPtr[n2.y * width + n2.x];
+
+                    var val = ComputeCost(v1, v2, c);
                     if (val < bestRHS) bestRHS = val;
                 }
             }
@@ -136,7 +135,7 @@ namespace BovineLabs.Grid.FieldDStar
 
             if (gPtr[cell] != rhsPtr[cell])
             {
-                float key = math.min(gPtr[cell], rhsPtr[cell]);
+                var key = math.min(gPtr[cell], rhsPtr[cell]);
                 s.Heap.TryInsertOrDecrease(new HeapNode(cell, key));
             }
             else
@@ -148,70 +147,73 @@ namespace BovineLabs.Grid.FieldDStar
         private static float ComputeCost(float v1, float v2, float c)
         {
             if (float.IsPositiveInfinity(v1) && float.IsPositiveInfinity(v2)) return float.PositiveInfinity;
-            
+
             if (v1 <= v2)
             {
                 if (v2 - v1 <= c)
                 {
-                    float d = v2 - v1;
+                    var d = v2 - v1;
                     if (Hint.Likely(c > d + 1e-6f))
                     {
-                        float x = d / math.sqrt(c * c - d * d);
+                        var x = d / math.sqrt(c * c - d * d);
                         if (Hint.Likely(x < 1.0f)) return c * math.sqrt(x * x + 1.0f) + v1 * (1.0f - x) + v2 * x;
                     }
+
                     return c * 1.4142135f + v1;
                 }
+
                 return c + v1;
             }
-            else
+
+            if (v1 - v2 <= c)
             {
-                if (v1 - v2 <= c)
+                var d = v1 - v2;
+                if (Hint.Likely(c > d + 1e-6f))
                 {
-                    float d = v1 - v2;
-                    if (Hint.Likely(c > d + 1e-6f))
-                    {
-                        float x = d / math.sqrt(c * c - d * d);
-                        if (Hint.Likely(x < 1.0f)) return c * math.sqrt(x * x + 1.0f) + v2 * (1.0f - x) + v1 * x;
-                    }
-                    return c * 1.4142135f + v2;
+                    var x = d / math.sqrt(c * c - d * d);
+                    if (Hint.Likely(x < 1.0f)) return c * math.sqrt(x * x + 1.0f) + v2 * (1.0f - x) + v1 * x;
                 }
-                return c + v2;
+
+                return c * 1.4142135f + v2;
             }
+
+            return c + v2;
         }
 
         [BurstCompile]
         public static bool TryExtractFlow(ref FieldDStarState s, in NativeArray<float> cost)
         {
-            int cellCount = s.Grid.Length;
-            int width = s.Grid.Width;
-            int height = s.Grid.Height;
-            float* gPtr = (float*)s.G.GetUnsafeReadOnlyPtr();
-            float2* flowPtr = (float2*)s.Flow.GetUnsafePtr();
+            var cellCount = s.Grid.Length;
+            var width = s.Grid.Width;
+            var height = s.Grid.Height;
+            var gPtr = (float*)s.G.GetUnsafeReadOnlyPtr();
+            var flowPtr = (float2*)s.Flow.GetUnsafePtr();
 
-            for (int i = 0; i < cellCount; i++)
+            for (var i = 0; i < cellCount; i++)
             {
-                int y = i / width;
-                int x = i % width;
-                float2 grad = float2.zero;
+                var y = i / width;
+                var x = i % width;
+                var grad = float2.zero;
 
-                for (int d = 0; d < 8; d++)
+                for (var d = 0; d < 8; d++)
                 {
-                    int2 offset = Grid2D.Dir8(d);
-                    int nx = x + offset.x;
-                    int ny = y + offset.y;
+                    var offset = Grid2D.Dir8(d);
+                    var nx = x + offset.x;
+                    var ny = y + offset.y;
 
                     if (Hint.Likely(nx >= 0 && ny >= 0 && nx < width && ny < height))
                     {
-                        int ni = ny * width + nx;
-                        float2 dir = math.normalize(new float2(offset.x, offset.y));
-                        float diff = gPtr[i] - gPtr[ni];
+                        var ni = ny * width + nx;
+                        var dir = math.normalize(new float2(offset.x, offset.y));
+                        var diff = gPtr[i] - gPtr[ni];
                         grad += dir * diff;
                     }
                 }
 
-                float len = math.length(grad);
+                var len = math.length(grad);
                 flowPtr[i] = len > 0f ? grad / len : float2.zero;
             }
+
             return true;
         }
 

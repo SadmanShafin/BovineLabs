@@ -1,19 +1,20 @@
+using BovineLabs.Grid.Wilson;
 using NUnit.Framework;
 using Unity.Collections;
 using Unity.Mathematics;
-using BovineLabs.Grid;
-using BovineLabs.Grid.Wilson;
 
 public class WilsonTests
 {
-    [Test] public void Create_Dimensions()
+    [Test]
+    public void Create_Dimensions()
     {
         Assert.IsTrue(WilsonApi.TryCreate(5, 5, Allocator.Temp, out var s));
         Assert.AreEqual(25, s.Grid.Length);
         WilsonApi.Dispose(ref s);
     }
 
-    [Test] public void Initialize_Root()
+    [Test]
+    public void Initialize_Root()
     {
         Assert.IsTrue(WilsonApi.TryCreate(5, 5, Allocator.Temp, out var s));
         Assert.IsTrue(WilsonApi.TryInitialize(ref s, 0));
@@ -22,59 +23,67 @@ public class WilsonTests
         WilsonApi.Dispose(ref s);
     }
 
-    [Test] public void BuildTree_Small()
+    [Test]
+    public void BuildTree_Small()
     {
         Assert.IsTrue(WilsonApi.TryCreate(3, 3, Allocator.Temp, out var s));
-        var rng = new Unity.Mathematics.Random(42);
+        var rng = new Random(42);
         Assert.IsTrue(WilsonApi.TryInitialize(ref s, 0));
         Assert.IsTrue(WilsonApi.TryBuildTree(ref s, ref rng));
 
-        for (int i = 0; i < s.Grid.Length; i++)
+        for (var i = 0; i < s.Grid.Length; i++)
             Assert.AreEqual(1, s.InTree[i]);
 
         Assert.AreEqual(-1, s.Parent[0]);
 
-        for (int i = 1; i < s.Grid.Length; i++)
+        for (var i = 1; i < s.Grid.Length; i++)
             Assert.AreNotEqual(-1, s.Parent[i]);
         WilsonApi.Dispose(ref s);
     }
 
-    [Test] public void BuildTree_1x5()
+    [Test]
+    public void BuildTree_1x5()
     {
         Assert.IsTrue(WilsonApi.TryCreate(5, 1, Allocator.Temp, out var s));
-        var rng = new Unity.Mathematics.Random(123);
+        var rng = new Random(123);
         Assert.IsTrue(WilsonApi.TryInitialize(ref s, 0));
         Assert.IsTrue(WilsonApi.TryBuildTree(ref s, ref rng));
-        for (int i = 0; i < 5; i++) Assert.AreEqual(1, s.InTree[i]);
+        for (var i = 0; i < 5; i++) Assert.AreEqual(1, s.InTree[i]);
         WilsonApi.Dispose(ref s);
     }
 
-    [Test] public void BuildTree_Large()
+    [Test]
+    public void BuildTree_Large()
     {
         Assert.IsTrue(WilsonApi.TryCreate(10, 10, Allocator.Temp, out var s));
-        var rng = new Unity.Mathematics.Random(999);
+        var rng = new Random(999);
         Assert.IsTrue(WilsonApi.TryInitialize(ref s, 0));
         Assert.IsTrue(WilsonApi.TryBuildTree(ref s, ref rng));
-        for (int i = 0; i < 100; i++) Assert.AreEqual(1, s.InTree[i]);
+        for (var i = 0; i < 100; i++) Assert.AreEqual(1, s.InTree[i]);
         WilsonApi.Dispose(ref s);
     }
 
-    [Test] public void ExtractMazeWalls()
+    [Test]
+    public void ExtractMazeWalls()
     {
         Assert.IsTrue(WilsonApi.TryCreate(3, 3, Allocator.Temp, out var s));
-        var rng = new Unity.Mathematics.Random(42);
+        var rng = new Random(42);
         Assert.IsTrue(WilsonApi.TryInitialize(ref s, 0));
         Assert.IsTrue(WilsonApi.TryBuildTree(ref s, ref rng));
         var walls = new NativeArray<byte>(9, Allocator.Temp);
         Assert.IsTrue(WilsonApi.TryExtractMazeWalls(ref s, ref walls));
 
-        bool hasPassage = false;
-        for (int i = 0; i < walls.Length; i++) if (walls[i] == 0) hasPassage = true;
+        var hasPassage = false;
+        for (var i = 0; i < walls.Length; i++)
+            if (walls[i] == 0)
+                hasPassage = true;
         Assert.IsTrue(hasPassage);
-        WilsonApi.Dispose(ref s); walls.Dispose();
+        WilsonApi.Dispose(ref s);
+        walls.Dispose();
     }
 
-    [Test] public void Dispose_Double()
+    [Test]
+    public void Dispose_Double()
     {
         Assert.IsTrue(WilsonApi.TryCreate(3, 3, Allocator.Temp, out var s));
         WilsonApi.Dispose(ref s);

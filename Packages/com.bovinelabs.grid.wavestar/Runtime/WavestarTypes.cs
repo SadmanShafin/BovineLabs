@@ -5,8 +5,6 @@ using Unity.Mathematics;
 
 namespace BovineLabs.Grid.Wavestar
 {
-
-
     public struct OctreeIndex : IEquatable<OctreeIndex>
     {
         public int x;
@@ -26,16 +24,16 @@ namespace BovineLabs.Grid.Wavestar
         public int Size => 1 << height;
 
 
-        public float3 Center => new float3(
+        public float3 Center => new(
             x * Size + Size * 0.5f,
             y * Size + Size * 0.5f,
             z * Size + Size * 0.5f);
 
 
-        public int3 MinCorner => new int3(x * Size, y * Size, z * Size);
+        public int3 MinCorner => new(x * Size, y * Size, z * Size);
 
 
-        public int3 MaxCornerExclusive => new int3(
+        public int3 MaxCornerExclusive => new(
             (x + 1) * Size,
             (y + 1) * Size,
             (z + 1) * Size);
@@ -43,7 +41,7 @@ namespace BovineLabs.Grid.Wavestar
 
         public bool Contains(int3 point)
         {
-            int s = Size;
+            var s = Size;
             return point.x >= x * s && point.x < (x + 1) * s &&
                    point.y >= y * s && point.y < (y + 1) * s &&
                    point.z >= z * s && point.z < (z + 1) * s;
@@ -64,21 +62,20 @@ namespace BovineLabs.Grid.Wavestar
 
         public OctreeIndex Child(int childIndex)
         {
-            int cx = (childIndex & 1);
-            int cy = (childIndex >> 1) & 1;
-            int cz = (childIndex >> 2) & 1;
+            var cx = childIndex & 1;
+            var cy = (childIndex >> 1) & 1;
+            var cz = (childIndex >> 2) & 1;
             return new OctreeIndex(x * 2 + cx, y * 2 + cy, z * 2 + cz, height - 1);
         }
 
 
-        public OctreeIndex Parent => new OctreeIndex(x >> 1, y >> 1, z >> 1, height + 1);
+        public OctreeIndex Parent => new(x >> 1, y >> 1, z >> 1, height + 1);
 
 
         public int MortonCode
         {
             get
             {
-
                 uint spread(uint v)
                 {
                     v = (v | (v << 16)) & 0x030000FF;
@@ -88,10 +85,10 @@ namespace BovineLabs.Grid.Wavestar
                     return v;
                 }
 
-                uint mx = spread((uint)x);
-                uint my = spread((uint)y);
-                uint mz = spread((uint)z);
-                uint morton = mx | (my << 1) | (mz << 2);
+                var mx = spread((uint)x);
+                var my = spread((uint)y);
+                var mz = spread((uint)z);
+                var morton = mx | (my << 1) | (mz << 2);
 
                 return (int)(morton | ((uint)height << 24));
             }
@@ -102,14 +99,30 @@ namespace BovineLabs.Grid.Wavestar
             return x == other.x && y == other.y && z == other.z && height == other.height;
         }
 
-        public override bool Equals(object obj) => obj is OctreeIndex other && Equals(other);
+        public override bool Equals(object obj)
+        {
+            return obj is OctreeIndex other && Equals(other);
+        }
 
-        public override int GetHashCode() => MortonCode;
+        public override int GetHashCode()
+        {
+            return MortonCode;
+        }
 
-        public override string ToString() => $"OctreeIndex({x}, {y}, {z}, h={height})";
+        public override string ToString()
+        {
+            return $"OctreeIndex({x}, {y}, {z}, h={height})";
+        }
 
-        public static bool operator ==(OctreeIndex a, OctreeIndex b) => a.Equals(b);
-        public static bool operator !=(OctreeIndex a, OctreeIndex b) => !a.Equals(b);
+        public static bool operator ==(OctreeIndex a, OctreeIndex b)
+        {
+            return a.Equals(b);
+        }
+
+        public static bool operator !=(OctreeIndex a, OctreeIndex b)
+        {
+            return !a.Equals(b);
+        }
     }
 
 
@@ -122,19 +135,19 @@ namespace BovineLabs.Grid.Wavestar
 
         public SubvolumeData(int predX, int predY, int predZ, float gCost)
         {
-            this.predecessorX = predX;
-            this.predecessorY = predY;
-            this.predecessorZ = predZ;
+            predecessorX = predX;
+            predecessorY = predY;
+            predecessorZ = predZ;
             this.gCost = gCost;
         }
 
 
-        public int3 Predecessor => new int3(predecessorX, predecessorY, predecessorZ);
+        public int3 Predecessor => new(predecessorX, predecessorY, predecessorZ);
 
 
-        public float3 PredecessorCenter => new float3(predecessorX, predecessorY, predecessorZ);
+        public float3 PredecessorCenter => new(predecessorX, predecessorY, predecessorZ);
 
-        public static SubvolumeData Invalid => new SubvolumeData(0, 0, 0, float.PositiveInfinity);
+        public static SubvolumeData Invalid => new(0, 0, 0, float.PositiveInfinity);
     }
 
 
@@ -207,17 +220,15 @@ namespace BovineLabs.Grid.Wavestar
 
     public interface IObstacleMap
     {
+        int SizeX { get; }
+        int SizeY { get; }
+        int SizeZ { get; }
 
 
         bool IsTraversable(int x, int y, int z);
 
 
         bool IsSubvolumeTraversable(OctreeIndex idx);
-
-
-        int SizeX { get; }
-        int SizeY { get; }
-        int SizeZ { get; }
     }
 
 
@@ -225,9 +236,6 @@ namespace BovineLabs.Grid.Wavestar
     public struct NativeObstacleMap : IObstacleMap
     {
         private NativeArray<int> grid;
-        private int sizeX;
-        private int sizeY;
-        private int sizeZ;
 
 
         public const int BlockedCellState = 1;
@@ -235,44 +243,40 @@ namespace BovineLabs.Grid.Wavestar
         public NativeObstacleMap(NativeArray<int> grid, int sizeX, int sizeY, int sizeZ)
         {
             this.grid = grid;
-            this.sizeX = sizeX;
-            this.sizeY = sizeY;
-            this.sizeZ = sizeZ;
+            this.SizeX = sizeX;
+            this.SizeY = sizeY;
+            this.SizeZ = sizeZ;
         }
 
-        public int SizeX => sizeX;
-        public int SizeY => sizeY;
-        public int SizeZ => sizeZ;
+        public int SizeX { get; }
+
+        public int SizeY { get; }
+
+        public int SizeZ { get; }
 
         public bool IsTraversable(int x, int y, int z)
         {
-            if (x < 0 || x >= sizeX || y < 0 || y >= sizeY || z < 0 || z >= sizeZ)
+            if (x < 0 || x >= SizeX || y < 0 || y >= SizeY || z < 0 || z >= SizeZ)
                 return false;
-            int idx = x + y * sizeX + z * sizeX * sizeY;
+            var idx = x + y * SizeX + z * SizeX * SizeY;
             return grid[idx] != BlockedCellState;
         }
 
         public bool IsSubvolumeTraversable(OctreeIndex sv)
         {
-            int s = sv.Size;
-            int minX = sv.x * s;
-            int minY = sv.y * s;
-            int minZ = sv.z * s;
-            int maxX = math.min(minX + s, sizeX);
-            int maxY = math.min(minY + s, sizeY);
-            int maxZ = math.min(minZ + s, sizeZ);
+            var s = sv.Size;
+            var minX = sv.x * s;
+            var minY = sv.y * s;
+            var minZ = sv.z * s;
+            var maxX = math.min(minX + s, SizeX);
+            var maxY = math.min(minY + s, SizeY);
+            var maxZ = math.min(minZ + s, SizeZ);
 
-            for (int zz = minZ; zz < maxZ; zz++)
-            {
-                for (int yy = minY; yy < maxY; yy++)
-                {
-                    for (int xx = minX; xx < maxX; xx++)
-                    {
-                        if (!IsTraversable(xx, yy, zz))
-                            return false;
-                    }
-                }
-            }
+            for (var zz = minZ; zz < maxZ; zz++)
+            for (var yy = minY; yy < maxY; yy++)
+            for (var xx = minX; xx < maxX; xx++)
+                if (!IsTraversable(xx, yy, zz))
+                    return false;
 
             return true;
         }
@@ -310,7 +314,10 @@ namespace BovineLabs.Grid.Wavestar
 
         public bool IsCreated => heap.IsCreated;
 
-        public void Clear() => heap.Clear();
+        public void Clear()
+        {
+            heap.Clear();
+        }
 
         public void Push(OpenSetElement element)
         {
@@ -321,7 +328,7 @@ namespace BovineLabs.Grid.Wavestar
         public OpenSetElement Pop()
         {
             var root = heap[0];
-            int last = heap.Length - 1;
+            var last = heap.Length - 1;
             heap[0] = heap[last];
             heap.RemoveAt(last);
             if (heap.Length > 0)
@@ -339,7 +346,7 @@ namespace BovineLabs.Grid.Wavestar
         {
             while (idx > 0)
             {
-                int parent = (idx - 1) / 2;
+                var parent = (idx - 1) / 2;
                 if (heap[idx].fScore < heap[parent].fScore)
                 {
                     Swap(idx, parent);
@@ -354,12 +361,12 @@ namespace BovineLabs.Grid.Wavestar
 
         private void SinkDown(int idx)
         {
-            int count = heap.Length;
+            var count = heap.Length;
             while (true)
             {
-                int left = 2 * idx + 1;
-                int right = 2 * idx + 2;
-                int smallest = idx;
+                var left = 2 * idx + 1;
+                var right = 2 * idx + 2;
+                var smallest = idx;
 
                 if (left < count && heap[left].fScore < heap[smallest].fScore)
                     smallest = left;

@@ -1,16 +1,18 @@
+using BovineLabs.Grid.DynamicCut;
 using NUnit.Framework;
 using Unity.Collections;
-using BovineLabs.Grid.DynamicCut;
 
 public class DynamicCutTests
 {
-    [Test] public void Create_Dimensions()
+    [Test]
+    public void Create_Dimensions()
     {
         Assert.IsTrue(DynamicCutApi.TryCreate(5, 5, 100, Allocator.Temp, out var s));
         DynamicCutApi.Dispose(ref s);
     }
 
-    [Test] public void EditUnary()
+    [Test]
+    public void EditUnary()
     {
         Assert.IsTrue(DynamicCutApi.TryCreate(5, 5, 100, Allocator.Temp, out var s));
         DynamicCutApi.EditUnary(ref s, 12, 1, 0);
@@ -18,7 +20,8 @@ public class DynamicCutTests
         DynamicCutApi.Dispose(ref s);
     }
 
-    [Test] public void Dispose_Double()
+    [Test]
+    public void Dispose_Double()
     {
         Assert.IsTrue(DynamicCutApi.TryCreate(3, 3, 10, Allocator.Temp, out var s));
         DynamicCutApi.Dispose(ref s);

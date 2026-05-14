@@ -1,4 +1,3 @@
-using System;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
@@ -28,45 +27,39 @@ namespace BovineLabs.Grid.Wavestar
             var obstacleMap = new NativeObstacleMap(obstacleGrid, sizeX, sizeY, sizeZ);
 
             SubvolumeData goalData;
-            if (!FindGoalSubvolume(out goalData))
-            {
-                return;
-            }
+            if (!FindGoalSubvolume(out goalData)) return;
 
             var rawPath = new NativeList<float3>(Allocator.Temp);
             var visited = new NativeHashSet<int>(256, Allocator.Temp);
 
-            float3 currentPred = goalData.PredecessorCenter;
-            float3 goalCenter = (float3)goalPos + new float3(0.5f, 0.5f, 0.5f);
+            var currentPred = goalData.PredecessorCenter;
+            var goalCenter = goalPos + new float3(0.5f, 0.5f, 0.5f);
 
             rawPath.Add(goalCenter);
 
-            int safety = 0;
-            int maxSteps = costField.Count() + 10;
+            var safety = 0;
+            var maxSteps = costField.Count() + 10;
 
             while (safety < maxSteps)
             {
                 safety++;
 
-                float distToStart = math.distance(currentPred, (float3)startPos + new float3(0.5f, 0.5f, 0.5f));
-                if (distToStart < 0.5f)
-                {
-                    break;
-                }
+                var distToStart = math.distance(currentPred, startPos + new float3(0.5f, 0.5f, 0.5f));
+                if (distToStart < 0.5f) break;
 
-                int3 predGrid = new int3(
+                var predGrid = new int3(
                     (int)math.floor(currentPred.x),
                     (int)math.floor(currentPred.y),
                     (int)math.floor(currentPred.z));
 
-                bool found = false;
+                var found = false;
                 using (var keys = costField.GetKeyArray(Allocator.Temp))
                 using (var values = costField.GetValueArray(Allocator.Temp))
                 {
-                    for (int i = 0; i < keys.Length; i++)
+                    for (var i = 0; i < keys.Length; i++)
                     {
                         var sv = DecodeMortonCode(keys[i]);
-                        float3 center = sv.Center;
+                        var center = sv.Center;
 
                         if (math.distance(center, currentPred) < sv.Size * 0.75f)
                         {
@@ -83,31 +76,22 @@ namespace BovineLabs.Grid.Wavestar
                     break;
             }
 
-            rawPath.Add((float3)startPos + new float3(0.5f, 0.5f, 0.5f));
+            rawPath.Add(startPos + new float3(0.5f, 0.5f, 0.5f));
 
             var forwardPath = new NativeList<float3>(rawPath.Length, Allocator.Temp);
-            for (int i = rawPath.Length - 1; i >= 0; i--)
-            {
-                forwardPath.Add(rawPath[i]);
-            }
+            for (var i = rawPath.Length - 1; i >= 0; i--) forwardPath.Add(rawPath[i]);
             rawPath.Dispose();
 
             var smoothed = SmoothPath(forwardPath, obstacleMap);
             forwardPath.Dispose();
 
-            for (int i = 0; i < smoothed.Length; i++)
-            {
-                path.Add(smoothed[i]);
-            }
+            for (var i = 0; i < smoothed.Length; i++) path.Add(smoothed[i]);
 
             if (smoothed.Length >= 2)
             {
                 pathFound[0] = true;
-                float totalLen = 0f;
-                for (int i = 1; i < smoothed.Length; i++)
-                {
-                    totalLen += math.distance(smoothed[i - 1], smoothed[i]);
-                }
+                var totalLen = 0f;
+                for (var i = 1; i < smoothed.Length; i++) totalLen += math.distance(smoothed[i - 1], smoothed[i]);
                 pathLength[0] = totalLen;
             }
 
@@ -122,17 +106,15 @@ namespace BovineLabs.Grid.Wavestar
             using (var keys = costField.GetKeyArray(Allocator.Temp))
             using (var values = costField.GetValueArray(Allocator.Temp))
             {
-                for (int i = 0; i < keys.Length; i++)
+                for (var i = 0; i < keys.Length; i++)
                 {
                     var sv = DecodeMortonCode(keys[i]);
                     if (sv.Contains(goalPos))
-                    {
                         if (values[i].gCost < float.PositiveInfinity)
                         {
                             goalData = values[i];
                             return true;
                         }
-                    }
                 }
             }
 
@@ -141,8 +123,8 @@ namespace BovineLabs.Grid.Wavestar
 
         private OctreeIndex DecodeMortonCode(int mortonCode)
         {
-            uint m = (uint)mortonCode;
-            int height = (int)(m >> 24);
+            var m = (uint)mortonCode;
+            var height = (int)(m >> 24);
             m &= 0x00FFFFFF;
 
             uint compact(uint v)
@@ -155,9 +137,9 @@ namespace BovineLabs.Grid.Wavestar
                 return v;
             }
 
-            uint x = compact(m);
-            uint y = compact(m >> 1);
-            uint z = compact(m >> 2);
+            var x = compact(m);
+            var y = compact(m >> 1);
+            var z = compact(m >> 2);
 
             return new OctreeIndex((int)x, (int)y, (int)z, height);
         }
@@ -167,7 +149,7 @@ namespace BovineLabs.Grid.Wavestar
             if (inputPath.Length <= 2)
             {
                 var result = new NativeList<float3>(inputPath.Length, Allocator.Temp);
-                for (int i = 0; i < inputPath.Length; i++)
+                for (var i = 0; i < inputPath.Length; i++)
                     result.Add(inputPath[i]);
                 return result;
             }
@@ -175,19 +157,17 @@ namespace BovineLabs.Grid.Wavestar
             var smoothed = new NativeList<float3>(Allocator.Temp);
             smoothed.Add(inputPath[0]);
 
-            int current = 0;
+            var current = 0;
             while (current < inputPath.Length - 1)
             {
-                int furthest = current + 1;
+                var furthest = current + 1;
 
-                for (int candidate = inputPath.Length - 1; candidate > current + 1; candidate--)
-                {
+                for (var candidate = inputPath.Length - 1; candidate > current + 1; candidate--)
                     if (HasLineOfSight(obstacleMap, inputPath[current], inputPath[candidate]))
                     {
                         furthest = candidate;
                         break;
                     }
-                }
 
                 smoothed.Add(inputPath[furthest]);
                 current = furthest;
@@ -198,38 +178,38 @@ namespace BovineLabs.Grid.Wavestar
 
         private bool HasLineOfSight(NativeObstacleMap obstacleMap, float3 from, float3 to)
         {
-            int x0 = (int)math.floor(from.x);
-            int y0 = (int)math.floor(from.y);
-            int z0 = (int)math.floor(from.z);
-            int x1 = (int)math.floor(to.x);
-            int y1 = (int)math.floor(to.y);
-            int z1 = (int)math.floor(to.z);
+            var x0 = (int)math.floor(from.x);
+            var y0 = (int)math.floor(from.y);
+            var z0 = (int)math.floor(from.z);
+            var x1 = (int)math.floor(to.x);
+            var y1 = (int)math.floor(to.y);
+            var z1 = (int)math.floor(to.z);
 
-            int dx = math.abs(x1 - x0);
-            int dy = math.abs(y1 - y0);
-            int dz = math.abs(z1 - z0);
+            var dx = math.abs(x1 - x0);
+            var dy = math.abs(y1 - y0);
+            var dz = math.abs(z1 - z0);
 
-            int sx = x0 < x1 ? 1 : (x0 > x1 ? -1 : 0);
-            int sy = y0 < y1 ? 1 : (y0 > y1 ? -1 : 0);
-            int sz = z0 < z1 ? 1 : (z0 > z1 ? -1 : 0);
+            var sx = x0 < x1 ? 1 : x0 > x1 ? -1 : 0;
+            var sy = y0 < y1 ? 1 : y0 > y1 ? -1 : 0;
+            var sz = z0 < z1 ? 1 : z0 > z1 ? -1 : 0;
 
             float fx0 = from.x, fy0 = from.y, fz0 = from.z;
             float fx1 = to.x, fy1 = to.y, fz1 = to.z;
 
-            float dist = math.distance(from, to);
-            int steps = (int)math.ceil(dist * 2f);
+            var dist = math.distance(from, to);
+            var steps = (int)math.ceil(dist * 2f);
             steps = math.max(steps, 1);
 
-            for (int i = 0; i <= steps; i++)
+            for (var i = 0; i <= steps; i++)
             {
-                float t = (float)i / steps;
-                float px = math.lerp(fx0, fx1, t);
-                float py = math.lerp(fy0, fy1, t);
-                float pz = math.lerp(fz0, fz1, t);
+                var t = (float)i / steps;
+                var px = math.lerp(fx0, fx1, t);
+                var py = math.lerp(fy0, fy1, t);
+                var pz = math.lerp(fz0, fz1, t);
 
-                int cx = (int)math.floor(px);
-                int cy = (int)math.floor(py);
-                int cz = (int)math.floor(pz);
+                var cx = (int)math.floor(px);
+                var cy = (int)math.floor(py);
+                var cz = (int)math.floor(pz);
 
                 if (!obstacleMap.IsTraversable(cx, cy, cz))
                     return false;
@@ -263,13 +243,13 @@ namespace BovineLabs.Grid.Wavestar
                 sizeZ = sizeZ,
                 path = path,
                 pathFound = foundArr,
-                pathLength = lengthArr,
+                pathLength = lengthArr
             };
 
             var handle = job.Schedule();
             handle.Complete();
 
-            bool found = foundArr[0];
+            var found = foundArr[0];
             length = lengthArr[0];
 
             foundArr.Dispose();

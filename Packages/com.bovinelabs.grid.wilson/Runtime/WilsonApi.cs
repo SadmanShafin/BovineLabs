@@ -1,10 +1,8 @@
 using System.Runtime.InteropServices;
 using Unity.Burst;
-using Unity.Burst.CompilerServices;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
-using BovineLabs.Grid;
 
 namespace BovineLabs.Grid.Wilson
 {
@@ -19,7 +17,7 @@ namespace BovineLabs.Grid.Wilson
     }
 
     [BurstCompile]
-    public unsafe static class WilsonApi
+    public static unsafe class WilsonApi
     {
         public static bool TryCreate(int width, int height, Allocator a, out WilsonState s)
         {
@@ -31,7 +29,7 @@ namespace BovineLabs.Grid.Wilson
                 InTree = new NativeArray<byte>(g.Length, a),
                 Parent = new NativeArray<int>(g.Length, a),
                 WalkNext = new NativeArray<int>(g.Length, a),
-                Walk = new UnsafeList<int>(g.Length, a),
+                Walk = new UnsafeList<int>(g.Length, a)
             };
             return true;
         }
@@ -39,87 +37,92 @@ namespace BovineLabs.Grid.Wilson
         [BurstCompile]
         public static bool TryInitialize(ref WilsonState s, int root)
         {
-            byte* inTree = (byte*)s.InTree.GetUnsafePtr();
-            int* parent = (int*)s.Parent.GetUnsafePtr();
-            int* walkNext = (int*)s.WalkNext.GetUnsafePtr();
-            int len = s.Grid.Length;
+            var inTree = (byte*)s.InTree.GetUnsafePtr();
+            var parent = (int*)s.Parent.GetUnsafePtr();
+            var walkNext = (int*)s.WalkNext.GetUnsafePtr();
+            var len = s.Grid.Length;
             UnsafeUtility.MemSet(inTree, 0, len);
-            for (int i = 0; i < len; i++) { parent[i] = -1; walkNext[i] = -1; }
+            for (var i = 0; i < len; i++)
+            {
+                parent[i] = -1;
+                walkNext[i] = -1;
+            }
+
             s.Walk.Clear();
             inTree[root] = 1;
             return true;
         }
 
         [BurstCompile]
-        public static bool TryAddRandomWalk(ref WilsonState s, ref Unity.Mathematics.Random rng, int start)
+        public static bool TryAddRandomWalk(ref WilsonState s, ref Random rng, int start)
         {
             s.Walk.Clear();
-            int w = s.Grid.Width;
-            int h = s.Grid.Height;
-            byte* inTree = (byte*)s.InTree.GetUnsafePtr();
-            int* walkNext = (int*)s.WalkNext.GetUnsafePtr();
+            var w = s.Grid.Width;
+            var h = s.Grid.Height;
+            var inTree = (byte*)s.InTree.GetUnsafePtr();
+            var walkNext = (int*)s.WalkNext.GetUnsafePtr();
 
-            int current = start;
+            var current = start;
             while (inTree[current] == 0)
             {
-                int cx = current % w;
-                int cy = current / w;
-                int count = 0;
-                int* neighbors = stackalloc int[4];
+                var cx = current % w;
+                var cy = current / w;
+                var count = 0;
+                var neighbors = stackalloc int[4];
 
                 if (cx + 1 < w) neighbors[count++] = current + 1;
                 if (cy + 1 < h) neighbors[count++] = current + w;
                 if (cx > 0) neighbors[count++] = current - 1;
                 if (cy > 0) neighbors[count++] = current - w;
 
-                int pick = rng.NextInt(0, count);
-                int next = neighbors[pick];
+                var pick = rng.NextInt(0, count);
+                var next = neighbors[pick];
 
                 walkNext[current] = next;
                 current = next;
             }
 
-            int* parent = (int*)s.Parent.GetUnsafePtr();
+            var parent = (int*)s.Parent.GetUnsafePtr();
             current = start;
             while (inTree[current] == 0)
             {
-                int next = walkNext[current];
+                var next = walkNext[current];
                 parent[current] = next;
                 inTree[current] = 1;
                 s.Walk.Add(current);
                 current = next;
             }
 
-            for (int i = 0; i < s.Walk.Length; i++)
+            for (var i = 0; i < s.Walk.Length; i++)
                 walkNext[s.Walk[i]] = -1;
             return true;
         }
 
         [BurstCompile]
-        public static bool TryBuildTree(ref WilsonState s, ref Unity.Mathematics.Random rng)
+        public static bool TryBuildTree(ref WilsonState s, ref Random rng)
         {
-            byte* inTree = (byte*)s.InTree.GetUnsafePtr();
-            int len = s.Grid.Length;
-            for (int i = 0; i < len; i++)
-            {
+            var inTree = (byte*)s.InTree.GetUnsafePtr();
+            var len = s.Grid.Length;
+            for (var i = 0; i < len; i++)
                 if (inTree[i] == 0)
-                    if (!TryAddRandomWalk(ref s, ref rng, i)) return false;
-            }
+                    if (!TryAddRandomWalk(ref s, ref rng, i))
+                        return false;
             return true;
         }
 
         [BurstCompile]
         public static bool TryExtractMazeWalls(ref WilsonState s, ref NativeArray<byte> walls)
         {
-            byte* wPtr = (byte*)walls.GetUnsafePtr();
-            int* parent = (int*)s.Parent.GetUnsafePtr();
-            int len = s.Grid.Length;
+            var wPtr = (byte*)walls.GetUnsafePtr();
+            var parent = (int*)s.Parent.GetUnsafePtr();
+            var len = s.Grid.Length;
             UnsafeUtility.MemSet(wPtr, 1, len);
-            for (int i = 0; i < len; i++)
+            for (var i = 0; i < len; i++)
             {
                 if (parent[i] < 0) continue;
                 wPtr[i] = 0;
             }
+
             return true;
         }
 
