@@ -8,8 +8,6 @@ namespace BovineLabs.Grid.MeshA
 {
 
 
-
-
     public struct MotionPrimitive
     {
         public int Id;
@@ -18,9 +16,6 @@ namespace BovineLabs.Grid.MeshA
         public int GoalTheta;
         public float ArcLength;
         public float HeadingChange;
-
-
-
 
 
         public NativeArray<int> SweptCellsI;
@@ -42,9 +37,6 @@ namespace BovineLabs.Grid.MeshA
         }
 
 
-
-
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsCollisionFree(in NativeGrid2D grid, int baseX, int baseY, int startIdx)
         {
@@ -58,8 +50,6 @@ namespace BovineLabs.Grid.MeshA
             return true;
         }
     }
-
-
 
 
     public struct PrimitiveSet : IDisposable
@@ -96,10 +86,6 @@ namespace BovineLabs.Grid.MeshA
     }
 
 
-
-
-
-
     public struct SuccessorTransition
     {
         public int Di;
@@ -117,9 +103,6 @@ namespace BovineLabs.Grid.MeshA
     }
 
 
-
-
-
     public struct PrimEndpoint
     {
         public int FinalTheta;
@@ -128,9 +111,6 @@ namespace BovineLabs.Grid.MeshA
         public int KInTrace;
         public int PrimId;
     }
-
-
-
 
 
     public struct MeshGraphData : IDisposable
@@ -174,10 +154,6 @@ namespace BovineLabs.Grid.MeshA
     }
 
 
-
-
-
-
     public struct ExtendedCell : IEquatable<ExtendedCell>
     {
         public int X;
@@ -194,9 +170,6 @@ namespace BovineLabs.Grid.MeshA
         public bool Equals(ExtendedCell other) => X == other.X && Y == other.Y && ConfigId == other.ConfigId;
         public override int GetHashCode() => X * 73856093 ^ Y * 19349663 ^ ConfigId;
     }
-
-
-
 
 
     public struct MeshSearchNode

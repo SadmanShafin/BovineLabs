@@ -107,7 +107,6 @@ namespace BovineLabs.Grid.DStarLite
             int pops = 0;
             while (pops < maxPops)
             {
-                // Drain consistent nodes from top of heap
                 while (!s.Open.IsEmpty)
                 {
                     if (!s.Open.TryPeek(out var openTop)) return false;

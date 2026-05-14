@@ -65,10 +65,6 @@ namespace BovineLabs.Grid.Edt
                 length);
         }
 
-        /// <summary>
-        /// Felzenszwalb-Huttenlocher 1D squared distance transform.
-        /// Operates entirely on raw pointers — no safety handle overhead.
-        /// </summary>
         [BurstCompile]
         public static void Transform1D(
             float* f,
@@ -120,7 +116,6 @@ namespace BovineLabs.Grid.Edt
             int w = s.Grid.Width;
             int h = s.Grid.Height;
 
-            // Phase 1: Transform rows (separable — each row is independent)
             for (int y = 0; y < h; y++)
             {
                 int rowStart = y * w;
@@ -135,7 +130,6 @@ namespace BovineLabs.Grid.Edt
                     dst[x] = temp[x];
             }
 
-            // Phase 2: Transform columns (separable — each column is independent)
             for (int x = 0; x < w; x++)
             {
                 float* src = dist2Ptr + x;
@@ -151,11 +145,6 @@ namespace BovineLabs.Grid.Edt
             return true;
         }
 
-        /// <summary>
-        /// Parallel version of TryBuild using IJobFor.ScheduleParallel for row and column passes.
-        /// Returns a JobHandle for the combined row+column pipeline.
-        /// Caller is responsible for calling InitFromBlocked first and calling Complete() on the handle.
-        /// </summary>
         [BurstCompile]
         public static JobHandle TryBuildScheduled(
             ref EdtState s,
@@ -184,18 +173,13 @@ namespace BovineLabs.Grid.Edt
                 MaxDim = maxDim,
             };
 
-            // Phase 1: rows in parallel
             JobHandle rowHandle = rowJob.ScheduleParallel(h, 1, dependency);
 
-            // Phase 2: columns in parallel (depends on all rows being done)
             JobHandle colHandle = colJob.ScheduleParallel(w, 1, rowHandle);
 
             return colHandle;
         }
 
-        /// <summary>
-        /// Convenience wrapper that schedules and completes in one call.
-        /// </summary>
         [BurstCompile]
         public static bool TryBuildParallel(
             ref EdtState s,
@@ -232,10 +216,6 @@ namespace BovineLabs.Grid.Edt
         }
     }
 
-    /// <summary>
-    /// Parallelizable row pass for EDT. Each row is an independent 1D transform.
-    /// Operates in-place on the dist2 buffer.
-    /// </summary>
     [BurstCompile]
     public unsafe struct EdtRowJob : IJobFor
     {
@@ -259,10 +239,6 @@ namespace BovineLabs.Grid.Edt
         }
     }
 
-    /// <summary>
-    /// Parallelizable column pass for EDT. Each column is an independent 1D transform.
-    /// Uses thread-local contiguous buffer for column gather/scatter.
-    /// </summary>
     [BurstCompile]
     public unsafe struct EdtColJob : IJobFor
     {

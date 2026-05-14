@@ -16,10 +16,6 @@ public class PathfinderFuzzTests
         return seed;
     }
 
-    /// <summary>
-    /// Generates a random blocked array with given density.
-    /// Uses a simple xorshift PRNG seeded by the test case index.
-    /// </summary>
     private static NativeArray<byte> GenerateGrid(int w, int h, float density, uint seed, Allocator a)
     {
         var blocked = new NativeArray<byte>(w * h, a);
@@ -53,10 +49,6 @@ public class PathfinderFuzzTests
         return (start, goal);
     }
 
-    /// <summary>
-    /// Computes the path cost for a JPS integer path.
-    /// Uses octile distance between consecutive waypoints.
-    /// </summary>
     private static float ComputeJpsPathCost(Grid2D grid, NativeList<int> path)
     {
         if (path.Length == 0) return float.NaN;
@@ -70,9 +62,6 @@ public class PathfinderFuzzTests
         return cost;
     }
 
-    /// <summary>
-    /// Computes the Euclidean path cost for an Anya int2 path.
-    /// </summary>
     private static double ComputeAnyaPathCost(NativeList<int2> path)
     {
         if (path.Length == 0) return double.NaN;
@@ -86,7 +75,6 @@ public class PathfinderFuzzTests
         return cost;
     }
 
-    // ─── Test cases ───────────────────────────────────────────────────────
 
     [Test]
     public void Fuzz_OpenGrid_10x10()
@@ -151,7 +139,6 @@ public class PathfinderFuzzTests
             int2 startCoord = grid.ToCoord(startIdx);
             int2 goalCoord = grid.ToCoord(goalIdx);
 
-            // ── JPS ──
             float jpsCost = float.NaN;
             bool jpsFound = false;
             {
@@ -168,7 +155,6 @@ public class PathfinderFuzzTests
                 JpsApi.Dispose(ref jps);
             }
 
-            // ── Anya ──
             double anyaCost = double.NaN;
             bool anyaFound = false;
             {
@@ -186,27 +172,15 @@ public class PathfinderFuzzTests
                 AnyaApi.Dispose(ref anya);
             }
 
-            // Cross-validate: if Anya found a path, verify start/goal are correct (already checked above)
-            // Note: JPS and Anya have different completeness guarantees. JPS may miss paths
-            // in certain dense obstacle configurations. Anya may miss paths due to incomplete
-            // interval/corner generation. We only hard-assert on path validity, not cross-equivalence.
 
-            // Anya completeness: if JPS found a path, Anya should too (up to known limitations)
             if (jpsFound && !anyaFound) anyaReachabilityFailures++;
 
-            // Anya optimality: if both found paths, Anya cost should not greatly exceed JPS cost
             if (jpsFound && anyaFound)
             {
-                // Anya uses continuous space so should be <= JPS octile cost in most cases.
-                // Allow generous tolerance for known corner detection gaps.
                 if (anyaCost > jpsCost + COST_EPS) anyaOptimalityFailures++;
             }
         }
 
-        // Report but don't fail on known Anya limitations (this is a fuzz monitor, not a hard gate)
-        // Uncomment the Asserts below to make them hard failures once Anya is complete:
-        // Assert.AreEqual(0, anyaReachabilityFailures, $"Anya reachability failures: {anyaReachabilityFailures}/{trials}");
-        // Assert.AreEqual(0, anyaOptimalityFailures, $"Anya optimality failures: {anyaOptimalityFailures}/{trials}");
         if (anyaReachabilityFailures > 0 || anyaOptimalityFailures > 0)
         {
             Assert.Pass($"Completed with {anyaReachabilityFailures} reachability and {anyaOptimalityFailures} optimality gaps (known Anya WIP)");

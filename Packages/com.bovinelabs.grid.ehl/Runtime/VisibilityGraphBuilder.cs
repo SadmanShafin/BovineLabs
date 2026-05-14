@@ -8,9 +8,6 @@ namespace BovineLabs.Grid.EHL
 {
 
 
-
-
-
     [BurstCompile]
     public struct VisibilityGraphBuilderJob : IJob
     {
@@ -45,8 +42,6 @@ namespace BovineLabs.Grid.EHL
                 int count = PolyCounts[p];
 
 
-
-
                 float signedArea = 0f;
                 for (int i = 0; i < count; i++)
                 {
@@ -72,7 +67,6 @@ namespace BovineLabs.Grid.EHL
             }
 
             int n = convexVerts.Length;
-
 
 
             var adjLists = new NativeArray<NativeList<AdjEdge>>(n, Allocator.Temp);
@@ -128,10 +122,6 @@ namespace BovineLabs.Grid.EHL
         }
 
 
-
-
-
-
         private bool IsConvexVertex(float2 prev, float2 curr, float2 next, bool isCW)
         {
             float2 edge1 = curr - prev;
@@ -139,14 +129,9 @@ namespace BovineLabs.Grid.EHL
             float cross = edge1.x * edge2.y - edge1.y * edge2.x;
 
 
-
-
             const float eps = 1e-6f;
             return isCW ? (cross < -eps) : (cross > eps);
         }
-
-
-
 
 
         private bool AreCoVisible(
@@ -179,8 +164,6 @@ namespace BovineLabs.Grid.EHL
         }
 
 
-
-
         private bool SegmentsIntersect(float2 p1, float2 p2, float2 p3, float2 p4)
         {
             float2 d1 = p2 - p1;
@@ -210,19 +193,8 @@ namespace BovineLabs.Grid.EHL
     }
 
 
-
-
     public static class VisibilityGraphBuilder
     {
-
-
-
-
-
-
-
-
-
 
 
         public static JobHandle Build(

@@ -8,51 +8,24 @@ namespace BovineLabs.Grid.Wavestar
 {
 
 
-
-
-
-
-
-
-
-
-
-
-
-
     [BurstCompile]
     public struct MultiResThetaStarJob : IJob
     {
 
 
-
-
-
         public int3 startPos;
-
-
 
 
         public int3 goalPos;
 
 
-
-
-
         public float epsilon;
-
-
-
 
 
         public int maxHeight;
 
 
-
-
         public int minHeight;
-
-
 
 
         public int sizeX;
@@ -60,28 +33,16 @@ namespace BovineLabs.Grid.Wavestar
         public int sizeZ;
 
 
-
-
         public NativeArray<int> obstacleGrid;
-
-
-
-
-
 
 
         public NativeParallelHashMap<int, SubvolumeData> costField;
 
 
-
-
         public NativeArray<bool> pathFound;
 
 
-
-
         public NativeArray<float> goalGCost;
-
 
 
         private NativeObstacleMap obstacleMap;
@@ -169,9 +130,6 @@ namespace BovineLabs.Grid.Wavestar
         }
 
 
-
-
-
         private OctreeIndex FindFinestSubvolume(int3 pos, int startHeight)
         {
 
@@ -191,13 +149,9 @@ namespace BovineLabs.Grid.Wavestar
         }
 
 
-
-
-
         private NativeList<OctreeIndex> CollectNeighbors(OctreeIndex idx, NativeHashSet<int> closed)
         {
             var neighbors = new NativeList<OctreeIndex>(Allocator.Temp);
-
 
 
             int s = idx.Size;
@@ -272,16 +226,6 @@ namespace BovineLabs.Grid.Wavestar
         }
 
 
-
-
-
-
-
-
-
-
-
-
         private void UpdateSubvolume(
             ref NativeMinPQ open,
             ref NativeHashMap<int, float> fScores,
@@ -315,12 +259,6 @@ namespace BovineLabs.Grid.Wavestar
                        + math.distance(predCenter, neighborCenter);
 
 
-
-
-
-
-
-
                 losG = currentData.gCost
                        - math.distance(predCenter, currentCenter)
                        + math.distance(predCenter, neighborCenter);
@@ -347,7 +285,6 @@ namespace BovineLabs.Grid.Wavestar
 
                     var newData = new SubvolumeData(candidatePred.x, candidatePred.y, candidatePred.z, candidateG);
                     costField[neighborIdx.MortonCode] = newData;
-
 
 
                     float h = math.distance(neighborCenter, (float3)goalPos);
@@ -380,8 +317,6 @@ namespace BovineLabs.Grid.Wavestar
         }
 
 
-
-
         private ComparisonResult CompareCosts(float existing, float candidate)
         {
             if (float.IsInfinity(existing))
@@ -399,9 +334,6 @@ namespace BovineLabs.Grid.Wavestar
             else
                 return ComparisonResult.NotBetter;
         }
-
-
-
 
 
         private void SubdivideAndRepropagate(
@@ -435,9 +367,6 @@ namespace BovineLabs.Grid.Wavestar
                 UpdateSubvolume(ref open, ref fScores, ref closed, currentIdx, currentData, child, goalSV);
             }
         }
-
-
-
 
 
         private bool HasLineOfSight(float3 from, float3 to)

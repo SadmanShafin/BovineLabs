@@ -6,7 +6,6 @@ namespace BovineLabs.Grid.EHL
 {
 
 
-
     public struct ConvexVertex
     {
         public float2 Position;
@@ -20,8 +19,6 @@ namespace BovineLabs.Grid.EHL
     }
 
 
-
-
     public struct ObstacleEdge
     {
         public float2 A;
@@ -33,11 +30,6 @@ namespace BovineLabs.Grid.EHL
             B = b;
         }
     }
-
-
-
-
-
 
 
     public struct VisibilityLabel : IComparable<VisibilityLabel>, IEquatable<VisibilityLabel>
@@ -71,10 +63,6 @@ namespace BovineLabs.Grid.EHL
     }
 
 
-
-
-
-
     public struct ViaLabel : IComparable<ViaLabel>, IEquatable<ViaLabel>
     {
         public int HubVertexId;
@@ -100,9 +88,6 @@ namespace BovineLabs.Grid.EHL
         public override bool Equals(object obj) => obj is ViaLabel other && Equals(other);
         public override int GetHashCode() => HubVertexId;
     }
-
-
-
 
 
     public struct GridCell
@@ -131,9 +116,6 @@ namespace BovineLabs.Grid.EHL
     }
 
 
-
-
-
     public struct EHLIndex : IDisposable
     {
 
@@ -157,9 +139,6 @@ namespace BovineLabs.Grid.EHL
 
 
         public NativeArray<ObstacleEdge> ObstacleEdges;
-
-
-
 
 
         public NativeArray<int> AdjOffsets;
@@ -192,8 +171,6 @@ namespace BovineLabs.Grid.EHL
         }
 
 
-
-
         public int CellIndex(float2 p)
         {
             int cx = (int)math.floor((p.x - MapMin.x) / CellSize.x);
@@ -204,16 +181,12 @@ namespace BovineLabs.Grid.EHL
         }
 
 
-
-
         public NativeSlice<ViaLabel> GetCellLabels(int cellIndex)
         {
             var cell = Cells[cellIndex];
             return new NativeSlice<ViaLabel>(ViaLabels, cell.LabelStart, cell.LabelCount);
         }
     }
-
-
 
 
     public struct AdjEdge : IComparable<AdjEdge>
@@ -229,8 +202,6 @@ namespace BovineLabs.Grid.EHL
 
         public int CompareTo(AdjEdge other) => TargetVertexId.CompareTo(other.TargetVertexId);
     }
-
-
 
 
     public struct EHLQueryResult

@@ -8,15 +8,9 @@ namespace BovineLabs.Grid.MeshA
 {
 
 
-
-
-
     [BurstCompile]
     public static class PrimitiveSetFactory
     {
-
-
-
 
 
         public static bool TryCreateCardinal8(Allocator allocator, out PrimitiveSet result)

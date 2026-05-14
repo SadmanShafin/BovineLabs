@@ -8,15 +8,11 @@ namespace BovineLabs.Grid
 {
 
 
-
     public enum CellState : byte
     {
         Free = 0,
         Blocked = 1,
     }
-
-
-
 
 
     public struct NativeGrid2D : IDisposable
@@ -62,9 +58,6 @@ namespace BovineLabs.Grid
     }
 
 
-
-
-
     public struct PathNode : IEquatable<PathNode>, IComparable<PathNode>
     {
         public int2 Position;
@@ -76,8 +69,6 @@ namespace BovineLabs.Grid
         public bool Equals(PathNode other) => Position.Equals(other.Position);
         public override int GetHashCode() => Position.GetHashCode();
     }
-
-
 
 
     public struct PathResult : IDisposable
@@ -100,8 +91,6 @@ namespace BovineLabs.Grid
             if (Path.IsCreated) Path.Dispose();
         }
     }
-
-
 
 
     public static class GridNeighbors
@@ -173,8 +162,6 @@ namespace BovineLabs.Grid
             return blocked[grid.ToIndex(adjA)] == 0 && blocked[grid.ToIndex(adjB)] == 0;
         }
     }
-
-
 
 
     [BurstCompile]

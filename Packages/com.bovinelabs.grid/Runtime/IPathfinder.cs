@@ -7,15 +7,10 @@ namespace BovineLabs.Grid
 {
 
 
-
-
     public interface IPathfinder : IDisposable
     {
         PathResult FindPath(int2 start, int2 goal, Allocator allocator);
     }
-
-
-
 
 
     [Obsolete("Use MinHeap from BovineLabs.Grid instead — it uses raw pointers and is Burst-optimized.")]

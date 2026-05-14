@@ -8,15 +8,6 @@ namespace BovineLabs.Grid.EHL
 {
 
 
-
-
-
-
-
-
-
-
-
     [BurstCompile]
     public struct EHLStarQueryJob : IJob
     {
@@ -35,7 +26,6 @@ namespace BovineLabs.Grid.EHL
             int bestHubId = -1;
             int bestViaSource = -1;
             int bestViaTarget = -1;
-
 
 
             if (IsDirectlyVisible(Source, Target, Index.ObstacleEdges))
@@ -70,10 +60,6 @@ namespace BovineLabs.Grid.EHL
 
                         var labelS = labelsS[i];
                         var labelT = labelsT[j];
-
-
-
-
 
 
                         float2 visVertS = Index.ConvexVertices[labelS.VisibleVertexId].Position;
@@ -231,8 +217,6 @@ namespace BovineLabs.Grid.EHL
         }
 
 
-
-
         private bool IsDirectlyVisible(float2 a, float2 b, NativeArray<ObstacleEdge> edges)
         {
             float2 ab = b - a;
@@ -265,15 +249,8 @@ namespace BovineLabs.Grid.EHL
     }
 
 
-
-
     public static class EHLStarQuery
     {
-
-
-
-
-
 
 
         public static EHLQueryResult Query(ref EHLIndex index, float2 source, float2 target)
@@ -315,8 +292,6 @@ namespace BovineLabs.Grid.EHL
 
             return result;
         }
-
-
 
 
         public static JobHandle ScheduleQuery(

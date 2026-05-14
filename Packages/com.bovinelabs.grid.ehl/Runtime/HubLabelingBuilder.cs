@@ -8,18 +8,6 @@ namespace BovineLabs.Grid.EHL
 {
 
 
-
-
-
-
-
-
-
-
-
-
-
-
     [BurstCompile]
     public struct HubLabelingBuilderJob : IJob
     {
@@ -41,9 +29,6 @@ namespace BovineLabs.Grid.EHL
 
         public NativeList<long> SuccKeysOut;
         public NativeList<int> SuccValuesOut;
-
-
-
 
 
         public void Execute()
@@ -74,21 +59,14 @@ namespace BovineLabs.Grid.EHL
             }
 
 
-
             var covered = new NativeArray<bool>(n * n, Allocator.Temp);
             for (int i = 0; i < n * n; i++)
                 covered[i] = false;
 
 
-
-
-
-
             var hubLabels = new NativeArray<NativeList<VisibilityLabel>>(n, Allocator.Temp);
             for (int i = 0; i < n; i++)
                 hubLabels[i] = new NativeList<VisibilityLabel>(Allocator.Temp);
-
-
 
 
             int totalPairs = 0;
@@ -215,8 +193,6 @@ namespace BovineLabs.Grid.EHL
         }
 
 
-
-
         private void RunDijkstra(int src, int n, ref NativeArray<float> dist, ref NativeArray<int> succ)
         {
             var visited = new NativeArray<bool>(n, Allocator.Temp);
@@ -274,8 +250,6 @@ namespace BovineLabs.Grid.EHL
             queue.Dispose();
         }
     }
-
-
 
 
     public static class HubLabelingBuilder

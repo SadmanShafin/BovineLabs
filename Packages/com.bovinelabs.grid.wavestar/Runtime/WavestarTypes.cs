@@ -7,10 +7,6 @@ namespace BovineLabs.Grid.Wavestar
 {
 
 
-
-
-
-
     public struct OctreeIndex : IEquatable<OctreeIndex>
     {
         public int x;
@@ -27,11 +23,7 @@ namespace BovineLabs.Grid.Wavestar
         }
 
 
-
-
         public int Size => 1 << height;
-
-
 
 
         public float3 Center => new float3(
@@ -40,19 +32,13 @@ namespace BovineLabs.Grid.Wavestar
             z * Size + Size * 0.5f);
 
 
-
-
         public int3 MinCorner => new int3(x * Size, y * Size, z * Size);
-
-
 
 
         public int3 MaxCornerExclusive => new int3(
             (x + 1) * Size,
             (y + 1) * Size,
             (z + 1) * Size);
-
-
 
 
         public bool Contains(int3 point)
@@ -62,8 +48,6 @@ namespace BovineLabs.Grid.Wavestar
                    point.y >= y * s && point.y < (y + 1) * s &&
                    point.z >= z * s && point.z < (z + 1) * s;
         }
-
-
 
 
         public bool Contains(float3 point)
@@ -78,9 +62,6 @@ namespace BovineLabs.Grid.Wavestar
         }
 
 
-
-
-
         public OctreeIndex Child(int childIndex)
         {
             int cx = (childIndex & 1);
@@ -90,13 +71,7 @@ namespace BovineLabs.Grid.Wavestar
         }
 
 
-
-
         public OctreeIndex Parent => new OctreeIndex(x >> 1, y >> 1, z >> 1, height + 1);
-
-
-
-
 
 
         public int MortonCode
@@ -138,9 +113,6 @@ namespace BovineLabs.Grid.Wavestar
     }
 
 
-
-
-
     public struct SubvolumeData
     {
         public int predecessorX;
@@ -157,11 +129,7 @@ namespace BovineLabs.Grid.Wavestar
         }
 
 
-
-
         public int3 Predecessor => new int3(predecessorX, predecessorY, predecessorZ);
-
-
 
 
         public float3 PredecessorCenter => new float3(predecessorX, predecessorY, predecessorZ);
@@ -170,21 +138,12 @@ namespace BovineLabs.Grid.Wavestar
     }
 
 
-
-
-
-
-
     public enum ComparisonResult : byte
     {
         StrictlyBetter,
         Ambiguous,
         NotBetter
     }
-
-
-
-
 
 
     public struct MultiResCostField : IDisposable
@@ -219,8 +178,6 @@ namespace BovineLabs.Grid.Wavestar
         }
 
 
-
-
         public NativeHashMap<int, SubvolumeData> RawData => data;
 
         public NativeArray<int> GetKeyArray(Allocator allocator)
@@ -248,32 +205,20 @@ namespace BovineLabs.Grid.Wavestar
     }
 
 
-
-
-
     public interface IObstacleMap
     {
-
 
 
         bool IsTraversable(int x, int y, int z);
 
 
-
-
-
         bool IsSubvolumeTraversable(OctreeIndex idx);
-
-
 
 
         int SizeX { get; }
         int SizeY { get; }
         int SizeZ { get; }
     }
-
-
-
 
 
     [BurstCompile]
@@ -283,8 +228,6 @@ namespace BovineLabs.Grid.Wavestar
         private int sizeX;
         private int sizeY;
         private int sizeZ;
-
-
 
 
         public const int BlockedCellState = 1;
@@ -336,9 +279,6 @@ namespace BovineLabs.Grid.Wavestar
     }
 
 
-
-
-
     public struct OpenSetElement : IComparable<OpenSetElement>
     {
         public OctreeIndex index;
@@ -355,8 +295,6 @@ namespace BovineLabs.Grid.Wavestar
             return fScore.CompareTo(other.fScore);
         }
     }
-
-
 
 
     public struct NativeMinPQ : IDisposable

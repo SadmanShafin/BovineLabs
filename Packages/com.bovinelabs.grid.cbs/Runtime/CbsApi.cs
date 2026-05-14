@@ -9,10 +9,6 @@ namespace BovineLabs.Grid.Cbs
 {
     public struct AgentTask { public int Start; public int Goal; }
 
-    /// <summary>
-    /// Supports both vertex constraints (CellFrom == -1: agent cannot occupy Cell at Time)
-    /// and edge constraints (CellFrom >= 0: agent cannot traverse edge CellFrom→Cell at Time).
-    /// </summary>
     public struct CbsConstraint { public int Agent; public int Cell; public int CellFrom; public int Time; }
 
     public struct CbsNode
@@ -34,7 +30,6 @@ namespace BovineLabs.Grid.Cbs
         public UnsafeList<int> PathLengths;
         public MinHeap Heap;
 
-        // Steppable state
         public byte SolveComplete;
         public int AgentCount;
         public int SolutionNode;
@@ -63,10 +58,6 @@ namespace BovineLabs.Grid.Cbs
             return true;
         }
 
-        /// <summary>
-        /// Monolithic solve — calls InitSolve then steps until done.
-        /// Preserved for backward compatibility with existing tests.
-        /// </summary>
         [BurstCompile]
         public static bool TrySolve(
             ref CbsState s,
@@ -90,10 +81,6 @@ namespace BovineLabs.Grid.Cbs
             return TryExtractSolution(ref s, ref resultFlatPaths, ref resultPathLengths);
         }
 
-        /// <summary>
-        /// Initialize CBS solver: clear state, plan root node, push onto heap.
-        /// After calling this, use TryStepSolve for frame-by-frame execution.
-        /// </summary>
         [BurstCompile]
         public static bool TryInitSolve(
             ref CbsState s,
@@ -127,11 +114,6 @@ namespace BovineLabs.Grid.Cbs
             return true;
         }
 
-        /// <summary>
-        /// Perform one high-level CBS step: pop best node from heap, find first conflict,
-        /// branch into two child nodes with constraints. Returns true if a step was
-        /// performed, false if complete. Check s.SolveComplete: 0=running, 1=solved, 2=no solution.
-        /// </summary>
         [BurstCompile]
         public static bool TryStepSolve(ref CbsState s, byte* blocked, AgentTask* agents)
         {
@@ -164,9 +146,6 @@ namespace BovineLabs.Grid.Cbs
             return true;
         }
 
-        /// <summary>
-        /// After solve is complete (SolveComplete == 1), extract the solution paths.
-        /// </summary>
         [BurstCompile]
         public static bool TryExtractSolution(
             ref CbsState s,
@@ -226,9 +205,6 @@ namespace BovineLabs.Grid.Cbs
             return true;
         }
 
-        /// <summary>
-        /// Detects vertex and edge conflicts between all agent pairs.
-        /// </summary>
         [BurstCompile]
         private static bool FindConflict(in CbsState s, in CbsNode node, int agentCount,
             out int a1, out int a2, out int conflictType, out int cell, out int cellFrom, out int cellTo, out int t)

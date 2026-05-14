@@ -82,11 +82,9 @@ namespace BovineLabs.Grid.Continuum
             float* dens = (float*)s.Density.GetUnsafePtr();
             byte* blk = (byte*)blocked.GetUnsafeReadOnlyPtr();
 
-            // Init potential to infinity
             for (int i = 0; i < len; i++)
                 pot[i] = float.PositiveInfinity;
 
-            // Compute speed field (inverse density)
             for (int i = 0; i < len; i++)
             {
                 if (blk[i] == 1) { spd[i] = 0f; continue; }
@@ -95,10 +93,8 @@ namespace BovineLabs.Grid.Continuum
 
             pot[goal] = 0f;
 
-            // Gauss-Seidel sweeps — flattened to 1D pointer increments
             for (int iter = 0; iter < iterations; iter++)
             {
-                // Forward sweep
                 int idx = 0;
                 for (int y = 0; y < h; y++)
                 {
@@ -109,7 +105,6 @@ namespace BovineLabs.Grid.Continuum
                     }
                 }
 
-                // Backward sweep
                 idx = len - 1;
                 for (int y = h - 1; y >= 0; y--)
                 {
@@ -123,10 +118,6 @@ namespace BovineLabs.Grid.Continuum
             return true;
         }
 
-        /// <summary>
-        /// Relax a single cell using the Eikonal equation discretization.
-        /// Accepts precomputed 1D index to avoid redundant y*w+x computation.
-        /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void RelaxCell(float* pot, byte* blk, float* spd, int x, int y, int idx, int w, int h)
         {
@@ -136,7 +127,6 @@ namespace BovineLabs.Grid.Continuum
 
             float invSpeed = 1f / sp;
 
-            // Read neighbor potentials — inlined bounds checks, direct pointer access
             float tx = float.PositiveInfinity;
             float ty = float.PositiveInfinity;
 
@@ -169,7 +159,6 @@ namespace BovineLabs.Grid.Continuum
             float* pot = (float*)s.Potential.GetUnsafePtr();
             float2* flow = (float2*)s.Flow.GetUnsafePtr();
 
-            // Flatten to 1D — compute x from index, avoid division per cell
             int idx = 0;
             for (int y = 0; y < h; y++)
             {
@@ -177,7 +166,6 @@ namespace BovineLabs.Grid.Continuum
                 {
                     float2 grad = float2.zero;
 
-                    // Central differences with boundary fallback — all via pointer math
                     if (x > 0 && x < w - 1)
                         grad.x = (pot[idx + 1] - pot[idx - 1]) * 0.5f;
                     else if (x > 0)

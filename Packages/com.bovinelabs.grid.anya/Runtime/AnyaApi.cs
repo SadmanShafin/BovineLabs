@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
@@ -7,59 +8,31 @@ using BovineLabs.Grid;
 
 namespace BovineLabs.Grid.Anya
 {
-    public struct AnyaNode
-    {
-        public double L;
-        public double R;
-        public int y;
-        public int dy;
-        public double2 Root;
-        public double RootG;
-        public int Parent;
-    }
-
-    public struct AnyaState
-    {
-        public Grid2D Grid;
-        public DoubleMinHeap Heap;
-        public UnsafeList<AnyaNode> Pool;
-        public NativeArray<double> RootGCost;
-
-        // Steppable state
-        public int2 Start;
-        public int2 Goal;
-        public int BestNode;
-        public double BestCost;
-        public byte SearchComplete;
-    }
-
     [BurstCompile]
-    public unsafe static class AnyaApi
+    public static unsafe class AnyaApi
     {
         private const double EPS = 1e-7;
 
-        public static bool TryCreate(int width, int height, int maxNodes, Allocator a, out AnyaState result)
+        public static bool TryCreate(int width, int height, int maxNodes, AllocatorManager.AllocatorHandle a, out AnyaState result)
         {
-            if (!Grid2D.TryCreate(width, height, out var g) || !DoubleMinHeap.TryCreate(maxNodes, a, out var heap))
+            if (!Grid2D.TryCreate(width, height, out var g) || !DoubleMinHeap.TryCreate(maxNodes, a.ToAllocator, out var heap))
             {
                 result = default;
                 return false;
             }
 
+            int rootCount = (width + 1) * (height + 1);
             result = new AnyaState
             {
                 Grid = g,
                 Heap = heap,
-                Pool = new UnsafeList<AnyaNode>(maxNodes, a),
-                RootGCost = new NativeArray<double>((width + 1) * (height + 1), a),
+                Pool = new UnsafeList<AnyaNode>(maxNodes, a.ToAllocator),
+                Allocator = a,
+                RootGCost = (double*)AllocatorManager.Allocate(a, sizeof(double) * rootCount, UnsafeUtility.AlignOf<double>()),
             };
             return true;
         }
 
-        /// <summary>
-        /// Monolithic search — calls InitSearch then steps until done.
-        /// Preserved for backward compatibility with existing tests.
-        /// </summary>
         [BurstCompile]
         public static bool TrySearch(
             ref AnyaState s,
@@ -86,12 +59,6 @@ namespace BovineLabs.Grid.Anya
             return true;
         }
 
-        /// <summary>
-        /// Initialize search state. Sets start/goal, checks trivial cases (same cell,
-        /// direct line-of-sight), and pushes initial interval nodes onto the heap.
-        /// Returns false only for invalid inputs (out of bounds, blocked cells).
-        /// After calling this, use TryStepSearch for frame-by-frame expansion.
-        /// </summary>
         [BurstCompile]
         public static bool TryInitSearch(
             ref AnyaState s,
@@ -101,7 +68,10 @@ namespace BovineLabs.Grid.Anya
         {
             s.Heap.Clear();
             s.Pool.Clear();
-            s.RootGCost.Fill(double.PositiveInfinity);
+            
+            int rootCount = (s.Grid.Width + 1) * (s.Grid.Height + 1);
+            for (int i = 0; i < rootCount; i++) s.RootGCost[i] = double.PositiveInfinity;
+            
             s.Start = start;
             s.Goal = goal;
             s.BestNode = -1;
@@ -152,11 +122,6 @@ namespace BovineLabs.Grid.Anya
             return true;
         }
 
-        /// <summary>
-        /// Perform one expansion step (pop the best node from the heap, expand its successors).
-        /// Returns true when the search is complete (either found optimal path or exhausted heap).
-        /// Returns false if more steps are needed.
-        /// </summary>
         [BurstCompile]
         public static bool TryStepSearch(ref AnyaState s, in NativeArray<byte> blocked)
         {
@@ -188,6 +153,9 @@ namespace BovineLabs.Grid.Anya
                 double pR = u.R;
                 if (u.Root.y != u.y)
                 {
+                    int forwardDir = (u.y > u.Root.y) ? 1 : -1;
+                    if (dir != forwardDir) continue; // Only expand intervals away from root
+                    
                     double ratio = (double)(ny - u.Root.y) / (u.y - u.Root.y);
                     pL = u.Root.x + (u.L - u.Root.x) * ratio;
                     pR = u.Root.x + (u.R - u.Root.x) * ratio;
@@ -248,9 +216,6 @@ namespace BovineLabs.Grid.Anya
             return false;
         }
 
-        /// <summary>
-        /// After search is complete, extract the path from the best node found.
-        /// </summary>
         [BurstCompile]
         public static bool TryExtractPath(ref AnyaState s, ref NativeList<int2> path)
         {
@@ -267,6 +232,7 @@ namespace BovineLabs.Grid.Anya
             return path.Length > 0;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void ExpandCorners(
             ref AnyaState s,
             in AnyaNode u,
@@ -289,20 +255,21 @@ namespace BovineLabs.Grid.Anya
                 bool leftBlocked = blk[cellY * w + (ix - 1)] != 0;
                 bool rightBlocked = ix < w && blk[cellY * w + ix] != 0;
 
-                if (leftBlocked && blk[cellY * w + ix] == 0)
+                if (leftBlocked && !rightBlocked)
                 {
-                    if (u.Root.x > ix + EPS)
+                    if (u.Root.x <= ix + EPS)
                         TryAddCornerNode(ref s, u, uIdx, ix, w, h, blk, goal);
                 }
 
                 if (!leftBlocked && rightBlocked)
                 {
-                    if (u.Root.x < ix - EPS)
+                    if (u.Root.x >= ix - EPS)
                         TryAddCornerNode(ref s, u, uIdx, ix, w, h, blk, goal);
                 }
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void TryAddCornerNode(
             ref AnyaState s,
             in AnyaNode u,
@@ -316,9 +283,25 @@ namespace BovineLabs.Grid.Anya
             double2 newRoot = new double2(cornerX, u.y);
             double newG = u.RootG + math.distance(u.Root, newRoot);
             int rootIdx = u.y * (w + 1) + cornerX;
+            
             if (newG < s.RootGCost[rootIdx])
             {
                 s.RootGCost[rootIdx] = newG;
+
+                if (goal.y == u.y && LineOfSight(w, h, blk, new int2(cornerX, u.y), goal))
+                {
+                    double cost = newG + math.distance(newRoot, new double2(goal.x, goal.y));
+                    if (cost < s.BestCost)
+                    {
+                        s.BestCost = cost;
+                        s.BestNode = s.Pool.Length;
+                        s.Pool.Add(new AnyaNode
+                        {
+                            L = goal.x, R = goal.x, y = goal.y, dy = 0,
+                            Root = newRoot, RootG = newG, Parent = uIdx,
+                        });
+                    }
+                }
 
                 int fL = cornerX;
                 while (fL > 0 && IsEdgePassable(fL - 1, u.y, w, h, blk)) fL--;
@@ -326,14 +309,45 @@ namespace BovineLabs.Grid.Anya
                 int fR = cornerX;
                 while (fR < w && IsEdgePassable(fR, u.y, w, h, blk)) fR++;
 
-                if (u.y + 1 <= h)
-                    PushNode(ref s, fL, fR, u.y + 1, 1, newRoot, newG, uIdx, goal);
+                if (fR - fL > 0)
+                {
+                    if (u.y + 1 <= h)
+                        PushNode(ref s, fL, fR, u.y + 1, 1, newRoot, newG, uIdx, goal);
+                    if (u.y - 1 >= 0)
+                        PushNode(ref s, fL, fR, u.y - 1, -1, newRoot, newG, uIdx, goal);
+                }
 
-                if (u.y - 1 >= 0)
-                    PushNode(ref s, fL, fR, u.y - 1, -1, newRoot, newG, uIdx, goal);
+                if (cornerX < w && !IsEdgePassable(cornerX, u.y, w, h, blk))
+                {
+                    int fR2 = cornerX + 1;
+                    while (fR2 < w && IsEdgePassable(fR2, u.y, w, h, blk)) fR2++;
+
+                    if (fR2 > cornerX + 1)
+                    {
+                        if (u.y + 1 <= h)
+                            PushNode(ref s, cornerX + 1, fR2, u.y + 1, 1, newRoot, newG, uIdx, goal);
+                        if (u.y - 1 >= 0)
+                            PushNode(ref s, cornerX + 1, fR2, u.y - 1, -1, newRoot, newG, uIdx, goal);
+                    }
+                }
+
+                if (cornerX > 0 && !IsEdgePassable(cornerX - 1, u.y, w, h, blk))
+                {
+                    int fL2 = cornerX - 1;
+                    while (fL2 > 0 && IsEdgePassable(fL2 - 1, u.y, w, h, blk)) fL2--;
+
+                    if (cornerX - 1 > fL2)
+                    {
+                        if (u.y + 1 <= h)
+                            PushNode(ref s, fL2, cornerX - 1, u.y + 1, 1, newRoot, newG, uIdx, goal);
+                        if (u.y - 1 >= 0)
+                            PushNode(ref s, fL2, cornerX - 1, u.y - 1, -1, newRoot, newG, uIdx, goal);
+                    }
+                }
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool NodeEquals(in AnyaNode a, double L, double R, int y, double2 root)
         {
             return a.y == y
@@ -343,6 +357,7 @@ namespace BovineLabs.Grid.Anya
                 && math.abs(a.Root.y - root.y) < EPS;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void PushNode(ref AnyaState s, double L, double R, int y, int dy, double2 root, double rootG, int parent, int2 goal)
         {
             if (R - L <= EPS) return;
@@ -393,6 +408,7 @@ namespace BovineLabs.Grid.Anya
             s.Heap.TryInsertOrDecrease(new DoubleHeapNode(idx, f2));
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool IsEdgePassable(int x, int y, int w, int h, byte* blk)
         {
             bool below = x >= 0 && x < w && y >= 0 && y < h && blk[y * w + x] == 0;
@@ -400,9 +416,6 @@ namespace BovineLabs.Grid.Anya
             return below || above;
         }
 
-        /// <summary>
-        /// Amanatides &amp; Woo fast voxel traversal for line-of-sight.
-        /// </summary>
         [BurstCompile]
         public static bool LineOfSight(int w, int h, [NoAlias] byte* blk, int2 from, int2 to)
         {
@@ -474,17 +487,13 @@ namespace BovineLabs.Grid.Anya
 
             for (int i = 0, j = path.Length - 1; i < j; i++, j--)
             {
-                var tmp = path[i];
-                path[i] = path[j];
-                path[j] = tmp;
+                (path[i], path[j]) = (path[j], path[i]);
             }
         }
 
         public static void Dispose(ref AnyaState s)
         {
-            if (s.Heap.IsCreated) s.Heap.Dispose();
-            if (s.Pool.IsCreated) s.Pool.Dispose();
-            if (s.RootGCost.IsCreated) s.RootGCost.Dispose();
+            s.Dispose();
         }
     }
 }

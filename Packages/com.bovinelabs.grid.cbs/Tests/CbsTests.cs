@@ -110,14 +110,12 @@ public class CbsTests
         blocked.Fill((byte)0);
         var path = new NativeList<int>(Allocator.Temp);
         var constraints = new UnsafeList<CbsConstraint>(2, Allocator.Temp);
-        // Constrain agent 0 from traversing cell 1→cell 6 at time 2 (edge constraint)
         constraints.Add(new CbsConstraint { Agent = 0, Cell = 6, CellFrom = 1, Time = 2 });
         byte* blockedPtr = (byte*)blocked.GetUnsafePtr();
         Assert.IsTrue(CbsApi.TryAStar(ref s, blockedPtr, 0, 0, 24, in constraints, ref path));
         Assert.Greater(path.Length, 0);
         Assert.AreEqual(0, path[0]);
         Assert.AreEqual(24, path[path.Length - 1]);
-        // Verify the constrained edge is not used
         for (int i = 0; i < path.Length - 1; i++)
         {
             if (i + 1 == 2) // time=2 step
