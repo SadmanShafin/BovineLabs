@@ -5183,10 +5183,7 @@ MonoBehaviour:
   Owner: {fileID: 0}
   Source: {fileID: 0}
   Target: {fileID: 1319626923}
-  Custom:
-    Enable: 0
-    Target0: {fileID: 0}
-    Target1: {fileID: 0}
+  Custom: {fileID: 0}
   Initialize:
     Target: 1
 --- !u!114 &177049561
@@ -5753,10 +5750,7 @@ MonoBehaviour:
   Owner: {fileID: 0}
   Source: {fileID: 0}
   Target: {fileID: 1387560016}
-  Custom:
-    Enable: 0
-    Target0: {fileID: 0}
-    Target1: {fileID: 0}
+  Custom: {fileID: 0}
   Initialize:
     Target: 1
 --- !u!114 &440108317
@@ -6059,7 +6053,7 @@ Transform:
   m_GameObject: {fileID: 457577523}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.7, y: 5.34, z: 2.44}
+  m_LocalPosition: {x: 0, y: 10, z: -1.14}
   m_LocalScale: {x: 5, y: 5, z: 5}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -6578,10 +6572,7 @@ MonoBehaviour:
   Owner: {fileID: 0}
   Source: {fileID: 0}
   Target: {fileID: 1749563368}
-  Custom:
-    Enable: 0
-    Target0: {fileID: 0}
-    Target1: {fileID: 0}
+  Custom: {fileID: 0}
   Initialize:
     Target: 1
 --- !u!1 &536106232
@@ -6645,10 +6636,7 @@ MonoBehaviour:
   Owner: {fileID: 588256445}
   Source: {fileID: 588256445}
   Target: {fileID: 0}
-  Custom:
-    Enable: 0
-    Target0: {fileID: 0}
-    Target1: {fileID: 0}
+  Custom: {fileID: 0}
   Initialize:
     Target: 1
 --- !u!1 &537042899
@@ -6987,10 +6975,7 @@ MonoBehaviour:
   Owner: {fileID: 1387560016}
   Source: {fileID: 1387560016}
   Target: {fileID: 536106232}
-  Custom:
-    Enable: 0
-    Target0: {fileID: 536106232}
-    Target1: {fileID: 0}
+  Custom: {fileID: 0}
   Initialize:
     Target: 1
 --- !u!1 &913748214
@@ -8245,7 +8230,7 @@ GameObject:
   - component: {fileID: 1025364221}
   - component: {fileID: 1025364220}
   - component: {fileID: 1025364219}
-  - component: {fileID: 1025364218}
+  - component: {fileID: 1025364222}
   m_Layer: 0
   m_Name: Raction
   m_TagString: Untagged
@@ -8268,21 +8253,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 201455417}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1025364218
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1025364216}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c2495d8f9cf34ef69b2a30e8b536d98e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: BovineLabs.Reaction.Addon.Authoring::BovineLabs.Reaction.Addon.Authoring.ActionDestroyAuthoring
-  Destroys:
-  - Target: 2
-    Phase: 1
 --- !u!114 &1025364219
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8325,10 +8295,7 @@ MonoBehaviour:
   Owner: {fileID: 201455413}
   Source: {fileID: 0}
   Target: {fileID: 0}
-  Custom:
-    Enable: 0
-    Target0: {fileID: 0}
-    Target1: {fileID: 0}
+  Custom: {fileID: 0}
   Initialize:
     Target: 1
 --- !u!114 &1025364221
@@ -8343,6 +8310,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2d1839be73e81ae4c97132df4493e93f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: BovineLabs.Core.Extensions.Authoring::BovineLabs.Core.Authoring.LifeCycle.LifeCycleAuthoring
+--- !u!114 &1025364222
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1025364216}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ae4be56f1f506bc01bd1d6ac56dd054b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: BovineLabs.Reaction.Addon.Authoring::BovineLabs.Reaction.Addon.Authoring.ActionDestroyOnDeactivateAuthoring
+  Target: 2
 --- !u!1 &1036715270
 GameObject:
   m_ObjectHideFlags: 0
@@ -8441,10 +8421,7 @@ MonoBehaviour:
   Owner: {fileID: 1387560016}
   Source: {fileID: 0}
   Target: {fileID: 1387560016}
-  Custom:
-    Enable: 0
-    Target0: {fileID: 0}
-    Target1: {fileID: 0}
+  Custom: {fileID: 0}
   Initialize:
     Target: 2
 --- !u!114 &1036715274
@@ -8690,10 +8667,7 @@ MonoBehaviour:
   Owner: {fileID: 0}
   Source: {fileID: 0}
   Target: {fileID: 1749563368}
-  Custom:
-    Enable: 0
-    Target0: {fileID: 0}
-    Target1: {fileID: 0}
+  Custom: {fileID: 0}
   Initialize:
     Target: 1
 --- !u!114 &1241495314
@@ -10366,10 +10340,7 @@ MonoBehaviour:
   Owner: {fileID: 0}
   Source: {fileID: 0}
   Target: {fileID: 492110633}
-  Custom:
-    Enable: 0
-    Target0: {fileID: 0}
-    Target1: {fileID: 0}
+  Custom: {fileID: 0}
   Initialize:
     Target: 1
 --- !u!1 &1398704564
@@ -10837,10 +10808,7 @@ MonoBehaviour:
   Owner: {fileID: 0}
   Source: {fileID: 0}
   Target: {fileID: 1319626923}
-  Custom:
-    Enable: 0
-    Target0: {fileID: 0}
-    Target1: {fileID: 0}
+  Custom: {fileID: 0}
   Initialize:
     Target: 1
 --- !u!114 &1452734295
