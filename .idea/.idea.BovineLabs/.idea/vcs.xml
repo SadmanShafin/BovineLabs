@@ -16,6 +16,5 @@
     <mapping directory="$PROJECT_DIR$/Packages/BovineLabs.Timeline.UI" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/com.bovinelabs.timeline.parenting" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/Packages/com.bovinelabs.timeline.transform" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/Packages/com.rukhanka.animation" vcs="Git" />
   </component>
 </project>
