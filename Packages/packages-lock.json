@@ -246,9 +246,9 @@
       }
     },
     "com.bovinelabs.timeline.ui": {
-      "version": "file:BovineLabs.Timeline.UI",
+      "version": "https://github.com/IAFahim/BovineLabs.Timeline.UI.git",
       "depth": 0,
-      "source": "embedded",
+      "source": "git",
       "dependencies": {
         "com.unity.burst": "1.8.11",
         "com.unity.collections": "6.5.0",
@@ -262,7 +262,8 @@
         "com.bovinelabs.timeline.entitylinks": "1.0.0",
         "com.bovinelabs.timeline": "1.0.0",
         "com.bovinelabs.timeline.core": "1.0.0"
-      }
+      },
+      "hash": "8e5f28e3ddf30c5728928a3a31db5954edffced5"
     },
     "com.gitcopy.gc": {
       "version": "https://github.com/IAFahim/GC.git?path=/integration/unity/Packages/com.gitcopy.gc",
@@ -271,7 +272,7 @@
       "dependencies": {
         "com.unity.modules.subsystems": "1.0.0"
       },
-      "hash": "19e06634f4f0411898eacf0f1ad55a49fbcc6929"
+      "hash": "cdac6ff8cb1d25bc05121c01186ba6ce3512f0a2"
     },
     "com.rukhanka.animation": {
       "version": "https://github.com/iafahim/com.rukhanka.animation.git",
@@ -577,7 +578,7 @@
       "dependencies": {
         "com.unity.nuget.newtonsoft-json": "3.2.1"
       },
-      "hash": "886058c1bd3fd5f005cf31155fef6726260ce63c"
+      "hash": "a9d7a5897d63f440aabddae2001a5a26529d24a5"
     },
     "com.unity.modules.androidjni": {
       "version": "1.0.0",
