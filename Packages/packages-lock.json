@@ -283,6 +283,14 @@
       },
       "hash": "8e537fb56271d2d9331614b75f2d864d78950e35"
     },
+    "com.splinemesherpro.bovinelabstimelinedistance": {
+      "version": "file:BovineLabs.Timeline.Distance",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.unity.test-framework": "1.6.0"
+      }
+    },
     "com.unity.burst": {
       "version": "1.8.29",
       "depth": 1,
