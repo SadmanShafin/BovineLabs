@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "com.bovinelabs.reaction.addon":"https://github.com/IAFahim/com.bovinelabs.reaction.addon.git",
     "com.bovinelabs.anchor": "https://github.com/IAFahim/tertle-monorepo.git?path=com.bovinelabs.anchor",
     "com.bovinelabs.bridge": "https://github.com/IAFahim/tertle-monorepo.git?path=com.bovinelabs.bridge",
     "com.bovinelabs.core": "https://github.com/IAFahim/tertle-monorepo.git?path=com.bovinelabs.core",

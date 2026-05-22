@@ -548,11 +548,11 @@ MonoBehaviour:
   ReadRootFrom: 2
   ConsumerLink: {fileID: 11400000, guid: a31b484df79a0368a9134adf3d1c5af9, type: 2}
   Action: {fileID: -1680190386980627800, guid: 052faaac586de48259a63d0c4782560b, type: 3}
-  Range: 1
+  Range: 3
   Plane: {x: 0, y: 1, z: 0}
   Smoothing: 0
-  ClampRadius: 1
-  Mode: 10
+  ClampRadius: 0
+  Mode: 9
 --- !u!114 &-5304372104756700006
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -813,7 +813,7 @@ MonoBehaviour:
     m_Start: 0
     m_ClipIn: 0
     m_Asset: {fileID: -5410940431168369178}
-    m_Duration: 5
+    m_Duration: 11.133333333333333
     m_TimeScale: 1
     m_ParentTrack: {fileID: -4966873830450226548}
     m_EaseInDuration: 0
@@ -1927,18 +1927,18 @@ MonoBehaviour:
   uniformAxes: 1
   tuning:
     Proportional:
-      x: 60
-      y: 60
-      z: 60
+      x: 10
+      y: 10
+      z: 10
     Derivative:
-      x: 20
-      y: 20
-      z: 20
+      x: 3
+      y: 3
+      z: 3
     Integral:
-      x: 0
-      y: 0
-      z: 0
-    MaxOutput: 1000
+      x: 1
+      y: 1
+      z: 1
+    MaxOutput: 100
   trackingTarget: 1
   targetMode: 0
   targetOffset: {x: 0, y: 0, z: 0}
@@ -2157,18 +2157,18 @@ MonoBehaviour:
   uniformAxes: 1
   tuning:
     Proportional:
-      x: 10
-      y: 10
-      z: 10
+      x: 60
+      y: 60
+      z: 60
     Derivative:
-      x: 3
-      y: 3
-      z: 3
+      x: 20
+      y: 20
+      z: 20
     Integral:
-      x: 1
-      y: 1
-      z: 1
-    MaxOutput: 100
+      x: 0
+      y: 0
+      z: 0
+    MaxOutput: 1000
   trackingTarget: 1
   targetMode: 1
   targetRotationEuler: {x: 0, y: 0, z: 0}
