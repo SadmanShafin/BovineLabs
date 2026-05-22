@@ -552,7 +552,8 @@ MonoBehaviour:
   Plane: {x: 0, y: 1, z: 0}
   Smoothing: 0
   ClampRadius: 0
-  Mode: 25
+  Drag: 0
+  Mode: 56
   IgnoreParentRotation: 0
   ResetOnNoInput: 0
   EventRouteTo: 4
