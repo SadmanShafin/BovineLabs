@@ -60,6 +60,8 @@ MonoBehaviour:
   readStatLink: {fileID: 0}
   applyTo: 1
   applyToLink: {fileID: 0}
+  ignoreTarget: 2
+  requireLinks: []
 --- !u!114 &-8148941382746961763
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -548,10 +550,10 @@ MonoBehaviour:
   ReadRootFrom: 2
   ConsumerLink: {fileID: 11400000, guid: a31b484df79a0368a9134adf3d1c5af9, type: 2}
   Action: {fileID: -1680190386980627800, guid: 052faaac586de48259a63d0c4782560b, type: 3}
-  Range: 3
+  Range: 2
   Plane: {x: 0, y: 1, z: 0}
   Smoothing: 0
-  ClampRadius: 0
+  ClampRadius: 2
   Drag: 0
   Mode: 56
   IgnoreParentRotation: 0
@@ -2413,6 +2415,8 @@ MonoBehaviour:
   assignParent: 0
   assignParentLink: {fileID: 11400000, guid: a83fe61ae6391c5d19028cc5f30e8892, type: 2}
   targetLinkOverride: {fileID: 11400000, guid: 107f0f9aa8c3327da9d3b31dc6c772b8, type: 2}
+  ignoreTarget: 2
+  requireLinks: []
 --- !u!114 &3742618853116167990
 MonoBehaviour:
   m_ObjectHideFlags: 1
