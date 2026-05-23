@@ -77,4 +77,4 @@ crashlytics-build.properties
 .DS_Store
 graphify-out/
 
-/.pi
+**/.pi/
