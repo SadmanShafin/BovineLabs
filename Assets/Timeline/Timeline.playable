@@ -547,17 +547,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 60945455a8404617ac2c6ee13a5953ed, type: 3}
   m_Name: AxisTransformClip
   m_EditorClassIdentifier: BovineLabs.Timeline.PlayerInputs.Authoring::BovineLabs.Timeline.PlayerInputs.Authoring.AxisTransformClip
-  ReadRootFrom: 2
+  ReadRootFrom: 3
   ConsumerLink: {fileID: 11400000, guid: a31b484df79a0368a9134adf3d1c5af9, type: 2}
+  AnchorLink: {fileID: 11400000, guid: c868fab23b9ed69fcafbf52732dcf4cf, type: 2}
   Action: {fileID: -1680190386980627800, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   Range: 2
   Plane: {x: 0, y: 1, z: 0}
   Smoothing: 0
-  ClampRadius: 2
+  LeashRadius: 2
   Drag: 0
-  Mode: 56
-  IgnoreParentRotation: 0
-  ResetOnNoInput: 0
+  DecayRate: 0
+  Mode: 0
+  IgnoreParentRotation: 1
+  KeepLastPosition: 0
+  LocalSpace: 0
+  CameraRelative: 1
   EventRouteTo: 4
   EventRouteLink: {fileID: 0}
   OnInputStart: {fileID: 0}
@@ -822,7 +826,7 @@ MonoBehaviour:
     m_Start: 0
     m_ClipIn: 0
     m_Asset: {fileID: -5410940431168369178}
-    m_Duration: 11.133333333333333
+    m_Duration: 10.633333333333333
     m_TimeScale: 1
     m_ParentTrack: {fileID: -4966873830450226548}
     m_EaseInDuration: 0

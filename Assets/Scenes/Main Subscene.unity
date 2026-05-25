@@ -5004,7 +5004,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1749563369}
+  m_Father: {fileID: 588256446}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!23 &112069040
 MeshRenderer:
@@ -5263,7 +5263,7 @@ MonoBehaviour:
   m_InitialLinearVelocity:
     x: 0
     y: 0
-    z: 0
+    z: 10
   m_InitialAngularVelocity:
     x: 0
     y: 0
@@ -6040,6 +6040,7 @@ Transform:
   - {fileID: 356887546}
   - {fileID: 1319626932}
   - {fileID: 1387560017}
+  - {fileID: 112069038}
   m_Father: {fileID: 1749563369}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &588256447
@@ -9716,7 +9717,6 @@ Transform:
   - {fileID: 459224083}
   - {fileID: 160821345}
   - {fileID: 440108313}
-  - {fileID: 112069038}
   - {fileID: 588256446}
   - {fileID: 1504515830}
   m_Father: {fileID: 0}
