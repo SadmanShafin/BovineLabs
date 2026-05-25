@@ -1389,6 +1389,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 45e46922349eb5144bb396aa0f5d85f5, type: 3}
       insertIndex: -1
       addedObject: {fileID: -4451840238972997854}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 45e46922349eb5144bb396aa0f5d85f5, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1340474186226667699}
   m_SourcePrefab: {fileID: 100100000, guid: 45e46922349eb5144bb396aa0f5d85f5, type: 3}
 --- !u!1 &9128569630041000598 stripped
 GameObject:
@@ -1444,3 +1447,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: BovineLabs.Core.Extensions.Authoring::BovineLabs.Core.Authoring.ObjectManagement.ObjectDefinitionAuthoring
   Definition: {fileID: 11400000, guid: 98454e1957a48b913a2b3767612a630e, type: 2}
+--- !u!114 &1340474186226667699
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9128569630041000598}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2d1839be73e81ae4c97132df4493e93f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: BovineLabs.Core.Extensions.Authoring::BovineLabs.Core.Authoring.LifeCycle.LifeCycleAuthoring
