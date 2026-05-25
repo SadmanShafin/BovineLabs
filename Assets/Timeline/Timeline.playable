@@ -13,6 +13,99 @@ MonoBehaviour:
   m_Name: DirectorTimeScaleClip
   m_EditorClassIdentifier: BovineLabs.Timeline.Time.Authoring::BovineLabs.Timeline.Time.Authoring.DirectorTimeScaleClip
   TimeScale: 0.1
+--- !u!114 &-8647597700772610839
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 94e307101f80471192ee948ec1fa5bd6, type: 3}
+  m_Name: Physics Teleport Track
+  m_EditorClassIdentifier: BovineLabs.Timeline.Physics.Authoring::BovineLabs.Timeline.Physics.Authoring.PhysicsTeleportTrack
+  m_Version: 3
+  m_AnimClip: {fileID: 0}
+  m_Locked: 0
+  m_Muted: 0
+  m_CustomPlayableFullTypename: 
+  m_Curves: {fileID: 0}
+  m_Parent: {fileID: 11400000}
+  m_Children: []
+  m_Clips:
+  - m_Version: 1
+    m_Start: 2.5833333333333335
+    m_ClipIn: 0
+    m_Asset: {fileID: -1703632802686946173}
+    m_Duration: 1
+    m_TimeScale: 1
+    m_ParentTrack: {fileID: -8647597700772610839}
+    m_EaseInDuration: 0
+    m_EaseOutDuration: 0
+    m_BlendInDuration: 0
+    m_BlendOutDuration: 0
+    m_MixInCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    m_MixOutCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 1
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    m_BlendInCurveMode: 0
+    m_BlendOutCurveMode: 0
+    m_ExposedParameterNames: []
+    m_AnimationCurves: {fileID: 0}
+    m_Recordable: 0
+    m_PostExtrapolationMode: 0
+    m_PreExtrapolationMode: 0
+    m_PostExtrapolationTime: 0
+    m_PreExtrapolationTime: 0
+    m_DisplayName: PhysicsTeleportClip
+  m_Markers:
+    m_Objects: []
+  resetOnDeactivate: 1
 --- !u!114 &-8463901346039964451
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -291,6 +384,20 @@ MonoBehaviour:
   m_Name: ScaleClip
   m_EditorClassIdentifier: BovineLabs.Timeline.Transform.Authoring::BovineLabs.Timeline.Transform.Authoring.ScaleClip
   Scale: {x: 1, y: 2, z: 1}
+--- !u!114 &-6152670224312662199
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 63585fe47c354bf1b3f60501c3891e15, type: 3}
+  m_Name: AfterImageClip
+  m_EditorClassIdentifier: BovineLabs.Timeline.Animation.Authoring::BovineLabs.Timeline.Animation.Authoring.AfterImageClip
+  Prefab: {fileID: 11400000, guid: 98454e1957a48b913a2b3767612a630e, type: 2}
+  DestroyOnClipEnd: 1
 --- !u!114 &-5756201016497073933
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -816,7 +923,7 @@ MonoBehaviour:
   m_Version: 3
   m_AnimClip: {fileID: 0}
   m_Locked: 0
-  m_Muted: 0
+  m_Muted: 1
   m_CustomPlayableFullTypename: 
   m_Curves: {fileID: 0}
   m_Parent: {fileID: -8148941382746961763}
@@ -1712,6 +1819,73 @@ MonoBehaviour:
   m_Markers:
     m_Objects: []
   resetOnDeactivate: 1
+--- !u!114 &-1703632802686946173
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aaa7f61ef1964ffe8841d5c49948cea6, type: 3}
+  m_Name: PhysicsTeleportClip
+  m_EditorClassIdentifier: BovineLabs.Timeline.Physics.Authoring::BovineLabs.Timeline.Physics.Authoring.PhysicsTeleportClip
+  radius: 3
+  teleportRelativeTo: 1
+  teleportRelativeToLink: {fileID: 0}
+  azimuthCenter: 0
+  azimuthHalfRange: 180
+  elevationCenter: 0
+  elevationHalfRange: 30
+  referenceFrame: 0
+  facingMode: 0
+  clearanceRadius: 0.5
+  maxCandidates: 16
+  obstacleMask:
+    Category00: 0
+    Category01: 0
+    Category02: 0
+    Category03: 0
+    Category04: 0
+    Category05: 0
+    Category06: 0
+    Category07: 0
+    Category08: 0
+    Category09: 0
+    Category10: 0
+    Category11: 0
+    Category12: 0
+    Category13: 0
+    Category14: 0
+    Category15: 0
+    Category16: 0
+    Category17: 0
+    Category18: 0
+    Category19: 0
+    Category20: 0
+    Category21: 0
+    Category22: 0
+    Category23: 0
+    Category24: 0
+    Category25: 0
+    Category26: 0
+    Category27: 0
+    Category28: 0
+    Category29: 0
+    Category30: 0
+    Category31: 0
+  requireLineOfSight: 0
+  requireCandidateVisibility: 0
+  lineOfSightOffset: 1.5
+  resetVelocity: 1
+  strengthStat: {fileID: 0}
+  readStatFrom: 4
+  readStatLink: {fileID: 0}
+  failureCondition: {fileID: 0}
+  failureValue: 1
+  failureRouteTo: 4
+  failureRouteLink: {fileID: 0}
 --- !u!114 &-1649423987052053625
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -2011,6 +2185,7 @@ MonoBehaviour:
   - {fileID: -1971424872366394813}
   - {fileID: -2879647747670679448}
   - {fileID: 9180388455565498156}
+  - {fileID: -8647597700772610839}
   m_FixedDuration: 0
   m_EditorSettings:
     m_Framerate: 60
@@ -2590,7 +2765,7 @@ MonoBehaviour:
   m_Version: 3
   m_AnimClip: {fileID: 0}
   m_Locked: 0
-  m_Muted: 0
+  m_Muted: 1
   m_CustomPlayableFullTypename: 
   m_Curves: {fileID: 0}
   m_Parent: {fileID: 11400000}
@@ -2990,7 +3165,7 @@ MonoBehaviour:
   m_Version: 3
   m_AnimClip: {fileID: 0}
   m_Locked: 0
-  m_Muted: 0
+  m_Muted: 1
   m_CustomPlayableFullTypename: 
   m_Curves: {fileID: 0}
   m_Parent: {fileID: 11400000}
