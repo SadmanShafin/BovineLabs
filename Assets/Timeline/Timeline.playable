@@ -28,7 +28,7 @@ MonoBehaviour:
   m_Version: 3
   m_AnimClip: {fileID: 0}
   m_Locked: 0
-  m_Muted: 1
+  m_Muted: 0
   m_CustomPlayableFullTypename: 
   m_Curves: {fileID: 0}
   m_Parent: {fileID: 11400000}
@@ -157,10 +157,6 @@ MonoBehaviour:
   KeepLastPosition: 1
   LocalSpace: 0
   CameraRelative: 1
-  EventRouteTo: 4
-  EventRouteLink: {fileID: 0}
-  OnInputStart: {fileID: 0}
-  OnInputEnd: {fileID: 0}
 --- !u!114 &-8370034099660768068
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -794,10 +790,6 @@ MonoBehaviour:
   KeepLastPosition: 0
   LocalSpace: 0
   CameraRelative: 1
-  EventRouteTo: 4
-  EventRouteLink: {fileID: 0}
-  OnInputStart: {fileID: 0}
-  OnInputEnd: {fileID: 0}
 --- !u!114 &-5304372104756700006
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1932,6 +1924,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aaa7f61ef1964ffe8841d5c49948cea6, type: 3}
   m_Name: PhysicsTeleportClip
   m_EditorClassIdentifier: BovineLabs.Timeline.Physics.Authoring::BovineLabs.Timeline.Physics.Authoring.PhysicsTeleportClip
+  entityToTeleport: 4
+  entityToTeleportLink: {fileID: 0}
   radius: 3
   teleportRelativeTo: 1
   teleportRelativeToLink: {fileID: 0}

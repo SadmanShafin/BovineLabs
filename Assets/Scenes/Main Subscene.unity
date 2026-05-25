@@ -949,7 +949,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1064930412
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1229,7 +1229,7 @@ Transform:
   m_GameObject: {fileID: 1064930411}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 2.73, z: -1.14}
+  m_LocalPosition: {x: 0, y: 2.73, z: -6.72}
   m_LocalScale: {x: 5, y: 5, z: 5}
   m_ConstrainProportionsScale: 1
   m_Children:
@@ -1243,14 +1243,14 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1064930411}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0038df9991804dab9b4127193908728a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: BovineLabs.Reaction.Authoring::BovineLabs.Reaction.Authoring.Core.TargetsAuthoring
   Owner: {fileID: 1387560016}
   Source: {fileID: 1387560016}
-  Target: {fileID: 1387560016}
+  Target: {fileID: 1535064382}
   Custom: {fileID: 0}
   Initialize:
     Target: 1
@@ -1515,7 +1515,7 @@ PlayableDirector:
   - key: {fileID: 0}
     value: {fileID: 1319626935}
   - key: {fileID: -8647597700772610839, guid: 6859290a3f49de0e19ca9bee321e85e9, type: 2}
-    value: {fileID: 588256448}
+    value: {fileID: 1064930418}
   - key: {fileID: 4747093303008644252, guid: 6859290a3f49de0e19ca9bee321e85e9, type: 2}
     value: {fileID: 1319626935}
   - key: {fileID: -7655345696952888290, guid: 6859290a3f49de0e19ca9bee321e85e9, type: 2}
