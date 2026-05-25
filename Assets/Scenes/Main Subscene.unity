@@ -459,6 +459,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ceb1c7553028493c9c7547a63dfafe93, type: 3}
   m_Name: 
   m_EditorClassIdentifier: BovineLabs.Spatial.Authoring::BovineLabs.Spatial.Authoring.SpatialTargetAuthoring
+--- !u!1 &456499382 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1067107209536289264, guid: 2cf96c7253b99a4f0b8878443af0fb1e, type: 3}
+  m_PrefabInstance: {fileID: 8763122180439853083}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &456499386 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6658203493862875240, guid: 2cf96c7253b99a4f0b8878443af0fb1e, type: 3}
+  m_PrefabInstance: {fileID: 8763122180439853083}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 456499382}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0038df9991804dab9b4127193908728a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: BovineLabs.Reaction.Authoring::BovineLabs.Reaction.Authoring.Core.TargetsAuthoring
 --- !u!114 &459224084 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 8824415324974111259, guid: 2cf96c7253b99a4f0b8878443af0fb1e, type: 3}
@@ -1502,6 +1518,8 @@ PlayableDirector:
     value: {fileID: 588256448}
   - key: {fileID: 4747093303008644252, guid: 6859290a3f49de0e19ca9bee321e85e9, type: 2}
     value: {fileID: 1319626935}
+  - key: {fileID: -7655345696952888290, guid: 6859290a3f49de0e19ca9bee321e85e9, type: 2}
+    value: {fileID: 456499386}
   m_ExposedReferences:
     m_References: []
 --- !u!4 &1241495310
@@ -1815,8 +1833,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b56758b78461e68919d8fdaf17acea68, type: 3}
   m_Name: 
   m_EditorClassIdentifier: BovineLabs.Reaction.Addon.Authoring::BovineLabs.Reaction.Authoring.Actions.ActionAfterImageAuthoring
-  AfterImages:
-  - {Prefab: {fileID: 11400000, guid: 98454e1957a48b913a2b3767612a630e, type: 2}, SourceTarget: 2, DestroyOnDisabled: 0}
 --- !u!114 &1586938278
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2414,14 +2430,10 @@ PrefabInstance:
       propertyPath: m_PrefabInstanceID
       value: 2960574491
       objectReference: {fileID: 0}
-    - target: {fileID: 1364053009855571817, guid: 2cf96c7253b99a4f0b8878443af0fb1e, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 9.85
-      objectReference: {fileID: 0}
-    - target: {fileID: 1364053009855571817, guid: 2cf96c7253b99a4f0b8878443af0fb1e, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 2.78
-      objectReference: {fileID: 0}
+    - target: {fileID: 318942152117994479, guid: 2cf96c7253b99a4f0b8878443af0fb1e, type: 3}
+      propertyPath: Custom
+      value: 
+      objectReference: {fileID: 456499382}
     - target: {fileID: 2507177760741887977, guid: 2cf96c7253b99a4f0b8878443af0fb1e, type: 3}
       propertyPath: m_PrefabInstanceID
       value: 2960574491
@@ -2469,6 +2481,10 @@ PrefabInstance:
     - target: {fileID: 6451661644574034311, guid: 2cf96c7253b99a4f0b8878443af0fb1e, type: 3}
       propertyPath: m_Name
       value: Player
+      objectReference: {fileID: 0}
+    - target: {fileID: 8807183359092518101, guid: 2cf96c7253b99a4f0b8878443af0fb1e, type: 3}
+      propertyPath: m_PrefabInstanceID
+      value: 2960574491
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
