@@ -448,17 +448,6 @@ PlayableDirector:
     value: {fileID: 1064930412}
   m_ExposedReferences:
     m_References: []
---- !u!114 &356887550 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 3909136235796829177, guid: 2cf96c7253b99a4f0b8878443af0fb1e, type: 3}
-  m_PrefabInstance: {fileID: 8763122180439853083}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ceb1c7553028493c9c7547a63dfafe93, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: BovineLabs.Spatial.Authoring::BovineLabs.Spatial.Authoring.SpatialTargetAuthoring
 --- !u!1 &456499382 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1067107209536289264, guid: 2cf96c7253b99a4f0b8878443af0fb1e, type: 3}
@@ -522,7 +511,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: a8e24ca3c19be0ae383aed9ca347efbd, type: 2}
   - {fileID: 11400000, guid: 89916598b6c3ca6e5b1109a31001f189, type: 2}
   - {fileID: 11400000, guid: eaeddac758594e621ac1c1bde8130dce, type: 2}
-  - {fileID: 11400000, guid: 80f48e8b72e921ba4869cb20a288d411, type: 2}
+  - {fileID: 0}
 --- !u!4 &537042901
 Transform:
   m_ObjectHideFlags: 0
@@ -1487,9 +1476,9 @@ PlayableDirector:
   - key: {fileID: -764723377789886988, guid: 6859290a3f49de0e19ca9bee321e85e9, type: 2}
     value: {fileID: 459224084}
   - key: {fileID: 9163435243908383156, guid: 6859290a3f49de0e19ca9bee321e85e9, type: 2}
-    value: {fileID: 356887550}
+    value: {fileID: 0}
   - key: {fileID: -4106123855044702114, guid: 6859290a3f49de0e19ca9bee321e85e9, type: 2}
-    value: {fileID: 356887550}
+    value: {fileID: 0}
   - key: {fileID: 0}
     value: {fileID: 537042899}
   - key: {fileID: -5421011351473203731, guid: 6859290a3f49de0e19ca9bee321e85e9, type: 2}
@@ -1767,14 +1756,13 @@ GameObject:
   - component: {fileID: 1586938280}
   - component: {fileID: 1586938279}
   - component: {fileID: 1586938278}
-  - component: {fileID: 1586938277}
   m_Layer: 0
   m_Name: Inputs
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1586938274
 Transform:
   m_ObjectHideFlags: 0
@@ -1821,18 +1809,6 @@ PlayableDirector:
     value: {fileID: 459224084}
   m_ExposedReferences:
     m_References: []
---- !u!114 &1586938277
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1586938273}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b56758b78461e68919d8fdaf17acea68, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: BovineLabs.Reaction.Addon.Authoring::BovineLabs.Reaction.Authoring.Actions.ActionAfterImageAuthoring
 --- !u!114 &1586938278
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2486,7 +2462,9 @@ PrefabInstance:
       propertyPath: m_PrefabInstanceID
       value: 2960574491
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 3909136235796829177, guid: 2cf96c7253b99a4f0b8878443af0fb1e, type: 3}
+    - {fileID: 5723082701912539971, guid: 2cf96c7253b99a4f0b8878443af0fb1e, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []

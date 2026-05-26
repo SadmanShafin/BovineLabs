@@ -489,6 +489,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1
   m_Children:
+  - {fileID: 1364053009855571817}
   - {fileID: 8821198028533858119}
   - {fileID: 6416113213760499931}
   - {fileID: 5418466884551858294}
@@ -738,7 +739,7 @@ MonoBehaviour:
   Owner: {fileID: 2306455584813647898}
   Source: {fileID: 2306455584813647898}
   Target: {fileID: 5923866154917846625}
-  Custom: {fileID: 0}
+  Custom: {fileID: 1067107209536289264}
   Initialize:
     Target: 0
 --- !u!1 &2306455584813647898
@@ -912,8 +913,6 @@ GameObject:
   m_Component:
   - component: {fileID: 8821198028533858119}
   - component: {fileID: 6548104451193709854}
-  - component: {fileID: 3909136235796829177}
-  - component: {fileID: 5723082701912539971}
   m_Layer: 0
   m_Name: Combat and Loc
   m_TagString: Untagged
@@ -949,32 +948,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: BovineLabs.Core.Authoring::BovineLabs.Core.Authoring.TransformAuthoring
   TransformUsageFlags: 2
---- !u!114 &3909136235796829177
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3024012179147535025}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ceb1c7553028493c9c7547a63dfafe93, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: BovineLabs.Spatial.Authoring::BovineLabs.Spatial.Authoring.SpatialTargetAuthoring
---- !u!114 &5723082701912539971
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3024012179147535025}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2754a85d267f495787f09dc526997ffb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: BovineLabs.Timeline.Spatial.Authoring::BovineLabs.Timeline.Spatial.Authoring.InfluenceTrailEmitterAuthoring
-  layer: 8
-  value: 1
 --- !u!1 &3720165474794730506
 GameObject:
   m_ObjectHideFlags: 0
@@ -1236,7 +1209,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 5202540583985552405}
+  m_Father: {fileID: 2791925454507442292}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &4544405988324904446
 MeshFilter:
@@ -1563,7 +1536,6 @@ Transform:
   - {fileID: 7087645115788207942}
   - {fileID: 8124840533805552042}
   - {fileID: 7565687470650853391}
-  - {fileID: 1364053009855571817}
   - {fileID: 2301236722976900562}
   - {fileID: 2791925454507442292}
   - {fileID: 266011509450895190}
@@ -6516,6 +6488,14 @@ PrefabInstance:
       propertyPath: m_LocalRotation.z
       value: -0.006022662
       objectReference: {fileID: 0}
+    - target: {fileID: -9055803372529180718, guid: 45e46922349eb5144bb396aa0f5d85f5, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -9055803372529180718, guid: 45e46922349eb5144bb396aa0f5d85f5, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
     - target: {fileID: -8987284056475055590, guid: 45e46922349eb5144bb396aa0f5d85f5, type: 3}
       propertyPath: m_LocalPosition.x
       value: -0.035328634
@@ -7364,6 +7344,14 @@ PrefabInstance:
       propertyPath: m_LocalRotation.z
       value: 0.22096771
       objectReference: {fileID: 0}
+    - target: {fileID: 3007301953765639546, guid: 45e46922349eb5144bb396aa0f5d85f5, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3007301953765639546, guid: 45e46922349eb5144bb396aa0f5d85f5, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
     - target: {fileID: 3009293330605938485, guid: 45e46922349eb5144bb396aa0f5d85f5, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0.000000016763806
@@ -7635,6 +7623,10 @@ PrefabInstance:
     - target: {fileID: 5864416946313269338, guid: 45e46922349eb5144bb396aa0f5d85f5, type: 3}
       propertyPath: m_LocalRotation.z
       value: -0.00803578
+      objectReference: {fileID: 0}
+    - target: {fileID: 5866666021909216657, guid: 45e46922349eb5144bb396aa0f5d85f5, type: 3}
+      propertyPath: m_CullingMode
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5866666021909216657, guid: 45e46922349eb5144bb396aa0f5d85f5, type: 3}
       propertyPath: m_ApplyRootMotion

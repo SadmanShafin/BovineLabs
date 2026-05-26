@@ -9,7 +9,6 @@
     "com.bovinelabs.hitstop": "https://github.com/IAFahim/BovineLabs.HitStop.git",
     "com.bovinelabs.quill": "https://github.com/IAFahim/tertle-monorepo.git?path=com.bovinelabs.quill",
     "com.bovinelabs.reaction": "https://github.com/IAFahim/tertle-monorepo.git?path=com.bovinelabs.reaction",
-    "com.bovinelabs.spatial": "https://github.com/IAFahim/BovineLabs.Spatial.git",
     "com.bovinelabs.timeline": "https://github.com/IAFahim/tertle-monorepo.git?path=com.bovinelabs.timeline",
     "com.bovinelabs.timeline.animation": "https://github.com/IAFahim/BovineLabs.Timeline.Animation.git",
     "com.bovinelabs.timeline.core": "https://github.com/IAFahim/com.bovinelabs.timeline.core.git",
