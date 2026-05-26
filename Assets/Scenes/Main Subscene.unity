@@ -1757,7 +1757,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1586938274
 Transform:
   m_ObjectHideFlags: 0
@@ -2400,6 +2400,14 @@ PrefabInstance:
     - target: {fileID: 103982967875703183, guid: 2cf96c7253b99a4f0b8878443af0fb1e, type: 3}
       propertyPath: m_PrefabInstanceID
       value: 2960574491
+      objectReference: {fileID: 0}
+    - target: {fileID: 2015872191263223086, guid: 2cf96c7253b99a4f0b8878443af0fb1e, type: 3}
+      propertyPath: m_LinearDamping
+      value: 3.93
+      objectReference: {fileID: 0}
+    - target: {fileID: 2015872191263223086, guid: 2cf96c7253b99a4f0b8878443af0fb1e, type: 3}
+      propertyPath: m_AngularDamping
+      value: 2.47
       objectReference: {fileID: 0}
     - target: {fileID: 2507177760741887977, guid: 2cf96c7253b99a4f0b8878443af0fb1e, type: 3}
       propertyPath: m_PrefabInstanceID
