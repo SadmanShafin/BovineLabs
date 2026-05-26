@@ -2209,17 +2209,17 @@ MonoBehaviour:
   uniformAxes: 1
   tuning:
     Proportional:
-      x: 10
-      y: 10
-      z: 10
+      x: 8
+      y: 8
+      z: 8
     Derivative:
-      x: 3
-      y: 3
-      z: 3
-    Integral:
       x: 1
       y: 1
       z: 1
+    Integral:
+      x: 0
+      y: 0
+      z: 0
     MaxOutput: 100
   trackingTarget: 1
   targetMode: 0

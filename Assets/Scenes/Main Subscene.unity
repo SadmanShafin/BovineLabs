@@ -448,17 +448,12 @@ PlayableDirector:
     value: {fileID: 1064930412}
   m_ExposedReferences:
     m_References: []
---- !u!1 &456499382 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 1067107209536289264, guid: 2cf96c7253b99a4f0b8878443af0fb1e, type: 3}
-  m_PrefabInstance: {fileID: 8763122180439853083}
-  m_PrefabAsset: {fileID: 0}
 --- !u!114 &456499386 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 6658203493862875240, guid: 2cf96c7253b99a4f0b8878443af0fb1e, type: 3}
   m_PrefabInstance: {fileID: 8763122180439853083}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 456499382}
+  m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0038df9991804dab9b4127193908728a, type: 3}
@@ -2406,10 +2401,6 @@ PrefabInstance:
       propertyPath: m_PrefabInstanceID
       value: 2960574491
       objectReference: {fileID: 0}
-    - target: {fileID: 318942152117994479, guid: 2cf96c7253b99a4f0b8878443af0fb1e, type: 3}
-      propertyPath: Custom
-      value: 
-      objectReference: {fileID: 456499382}
     - target: {fileID: 2507177760741887977, guid: 2cf96c7253b99a4f0b8878443af0fb1e, type: 3}
       propertyPath: m_PrefabInstanceID
       value: 2960574491
@@ -2462,9 +2453,7 @@ PrefabInstance:
       propertyPath: m_PrefabInstanceID
       value: 2960574491
       objectReference: {fileID: 0}
-    m_RemovedComponents:
-    - {fileID: 3909136235796829177, guid: 2cf96c7253b99a4f0b8878443af0fb1e, type: 3}
-    - {fileID: 5723082701912539971, guid: 2cf96c7253b99a4f0b8878443af0fb1e, type: 3}
+    m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
