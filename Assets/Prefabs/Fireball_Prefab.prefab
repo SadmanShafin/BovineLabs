@@ -15,9 +15,9 @@ GameObject:
   - component: {fileID: 75008557763278655}
   - component: {fileID: 3783271197857776407}
   - component: {fileID: 302441327725636661}
-  - component: {fileID: 6489785001860496676}
   - component: {fileID: 853205268249535771}
   - component: {fileID: -5368595632898734154}
+  - component: {fileID: 7349411281561390939}
   m_Layer: 0
   m_Name: Fireball_Prefab
   m_TagString: Untagged
@@ -167,22 +167,6 @@ MonoBehaviour:
   references:
     version: 2
     RefIds: []
---- !u!114 &6489785001860496676
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4474905881597846591}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: baddbaf9d465492f893085a6710849e4, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: BovineLabs.Reaction.Authoring::BovineLabs.Reaction.Authoring.Actions.ActionCreateAuthoring
-  Create:
-  - Definition: {fileID: 11400000, guid: 9e38df8b35f84594e9d43655037fb8fe, type: 2}
-    Target: 0
-    DestroyOnDisabled: 0
 --- !u!114 &853205268249535771
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -208,3 +192,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: BovineLabs.Reaction.Addon.Authoring::BovineLabs.Reaction.Addon.Authoring.ActionDestroyOnDeactivateAuthoring
   Target: 4
+--- !u!114 &7349411281561390939
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4474905881597846591}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cfc74f86af1a4bcbb88866caa200aa0d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: BovineLabs.Reaction.Addon.Authoring::BovineLabs.Reaction.Authoring.Actions.ActionCreateOnDeactivateAuthoring
+  Spawns:
+  - Definition: {fileID: 11400000, guid: 9e38df8b35f84594e9d43655037fb8fe, type: 2}
+    Target: 0
