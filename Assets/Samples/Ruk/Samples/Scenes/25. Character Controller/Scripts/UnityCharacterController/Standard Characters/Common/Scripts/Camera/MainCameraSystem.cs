@@ -2,7 +2,8 @@ using Unity.Entities;
 using Unity.Transforms;
 
 [UpdateInGroup(typeof(PresentationSystemGroup))]
-public partial class MainCameraSystem : SystemBase
+[Unity.Entities.WorldSystemFilter(Unity.Entities.WorldSystemFilterFlags.LocalSimulation | Unity.Entities.WorldSystemFilterFlags.ClientSimulation | Unity.Entities.WorldSystemFilterFlags.ServerSimulation)]
+partial class MainCameraSystem : SystemBase
 {
     protected override void OnUpdate()
     {

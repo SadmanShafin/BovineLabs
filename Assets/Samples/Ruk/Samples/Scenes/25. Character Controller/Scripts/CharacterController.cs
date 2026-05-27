@@ -15,7 +15,8 @@ using Random = Unity.Mathematics.Random;
 namespace Rukhanka.Samples
 {
 [BurstCompile]
-partial struct CharacterControllerSystem: ISystem
+[Unity.Entities.WorldSystemFilter(Unity.Entities.WorldSystemFilterFlags.LocalSimulation | Unity.Entities.WorldSystemFilterFlags.ClientSimulation | Unity.Entities.WorldSystemFilterFlags.ServerSimulation)]
+partial struct CharacterControllerSystem : ISystem
 {
     static readonly FastAnimatorParameter groundedParam = new ("Grounded");
     static readonly FastAnimatorParameter verticalSpeedParam = new ("VerticalSpeed");
@@ -86,7 +87,8 @@ partial struct CharacterControllerSystem: ISystem
 [UpdateBefore(typeof(PhysicsCreateJacobiansGroup))]
 [UpdateAfter(typeof(PhysicsCreateContactsGroup))]
 [RequireMatchingQueriesForUpdate]
-public partial struct HandleCannonballHitsSystem: ISystem
+[Unity.Entities.WorldSystemFilter(Unity.Entities.WorldSystemFilterFlags.LocalSimulation | Unity.Entities.WorldSystemFilterFlags.ClientSimulation | Unity.Entities.WorldSystemFilterFlags.ServerSimulation)]
+partial struct HandleCannonballHitsSystem : ISystem
 {
     static readonly FastAnimatorParameter hurtParam = new ("Hurt");
     static readonly FastAnimatorParameter hurtFromXParam = new ("HurtFromX");

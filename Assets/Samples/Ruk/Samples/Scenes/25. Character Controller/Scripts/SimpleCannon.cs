@@ -24,7 +24,8 @@ public struct SimpleCannonComponent: IComponentData
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 [BurstCompile]
-public partial struct SimpleCannonSystem: ISystem
+[Unity.Entities.WorldSystemFilter(Unity.Entities.WorldSystemFilterFlags.LocalSimulation | Unity.Entities.WorldSystemFilterFlags.ClientSimulation | Unity.Entities.WorldSystemFilterFlags.ServerSimulation)]
+partial struct SimpleCannonSystem : ISystem
 {
     Random rng;
     

@@ -53,7 +53,9 @@ struct FrustumRenderJob: IJob
 	
 /////////////////////////////////////////////////////////////////////////////////
 	
-partial class AnimCullingSampleVisualizationSystem: SystemBase
+[Unity.Entities.WorldSystemFilter(Unity.Entities.WorldSystemFilterFlags.LocalSimulation | Unity.Entities.WorldSystemFilterFlags.ClientSimulation | Unity.Entities.WorldSystemFilterFlags.ServerSimulation)]
+	
+partial class AnimCullingSampleVisualizationSystem : SystemBase
 {
 	protected override void OnUpdate()
 	{

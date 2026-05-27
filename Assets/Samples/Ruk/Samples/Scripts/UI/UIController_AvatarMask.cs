@@ -44,7 +44,8 @@ class UIController_AvatarMask: MonoBehaviour
 [DisableAutoCreation]
 [UpdateAfter(typeof(FillAnimationsFromControllerSystem))]
 [UpdateBefore(typeof(AnimationProcessSystem))]
-partial struct OverrideAvatarMaskSystem: ISystem
+[Unity.Entities.WorldSystemFilter(Unity.Entities.WorldSystemFilterFlags.LocalSimulation | Unity.Entities.WorldSystemFilterFlags.ClientSimulation | Unity.Entities.WorldSystemFilterFlags.ServerSimulation)]
+partial struct OverrideAvatarMaskSystem : ISystem
 {
     [BurstCompile]
     public void OnUpdate(ref SystemState ss)

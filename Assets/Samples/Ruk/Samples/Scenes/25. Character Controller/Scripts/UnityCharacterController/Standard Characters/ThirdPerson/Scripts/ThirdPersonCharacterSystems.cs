@@ -8,7 +8,8 @@ using Unity.Burst.Intrinsics;
 
 [UpdateInGroup(typeof(KinematicCharacterPhysicsUpdateGroup))]
 [BurstCompile]
-public partial struct ThirdPersonCharacterPhysicsUpdateSystem : ISystem
+[Unity.Entities.WorldSystemFilter(Unity.Entities.WorldSystemFilterFlags.LocalSimulation | Unity.Entities.WorldSystemFilterFlags.ClientSimulation | Unity.Entities.WorldSystemFilterFlags.ServerSimulation)]
+partial struct ThirdPersonCharacterPhysicsUpdateSystem : ISystem
 {
     EntityQuery m_CharacterQuery;
     ThirdPersonCharacterUpdateContext m_Context;
@@ -101,7 +102,8 @@ public partial struct ThirdPersonCharacterPhysicsUpdateSystem : ISystem
 [UpdateAfter(typeof(ThirdPersonPlayerVariableStepControlSystem))]
 [UpdateBefore(typeof(TransformSystemGroup))]
 [BurstCompile]
-public partial struct ThirdPersonCharacterVariableUpdateSystem : ISystem
+[Unity.Entities.WorldSystemFilter(Unity.Entities.WorldSystemFilterFlags.LocalSimulation | Unity.Entities.WorldSystemFilterFlags.ClientSimulation | Unity.Entities.WorldSystemFilterFlags.ServerSimulation)]
+partial struct ThirdPersonCharacterVariableUpdateSystem : ISystem
 {
     EntityQuery m_CharacterQuery;
     ThirdPersonCharacterUpdateContext m_Context;

@@ -11,7 +11,8 @@ using Unity.CharacterController;
 
 [UpdateInGroup(typeof(SimulationSystemGroup), OrderFirst = true)]
 [UpdateBefore(typeof(FixedStepSimulationSystemGroup))]
-public partial class ThirdPersonPlayerInputsSystem : SystemBase
+[Unity.Entities.WorldSystemFilter(Unity.Entities.WorldSystemFilterFlags.LocalSimulation | Unity.Entities.WorldSystemFilterFlags.ClientSimulation | Unity.Entities.WorldSystemFilterFlags.ServerSimulation)]
+partial class ThirdPersonPlayerInputsSystem : SystemBase
 {
     protected override void OnCreate()
     {
@@ -50,7 +51,8 @@ public partial class ThirdPersonPlayerInputsSystem : SystemBase
 [UpdateInGroup(typeof(SimulationSystemGroup))]
 [UpdateAfter(typeof(FixedStepSimulationSystemGroup))]
 [BurstCompile]
-public partial struct ThirdPersonPlayerVariableStepControlSystem : ISystem
+[Unity.Entities.WorldSystemFilter(Unity.Entities.WorldSystemFilterFlags.LocalSimulation | Unity.Entities.WorldSystemFilterFlags.ClientSimulation | Unity.Entities.WorldSystemFilterFlags.ServerSimulation)]
+partial struct ThirdPersonPlayerVariableStepControlSystem : ISystem
 {
     [BurstCompile]
     public void OnCreate(ref SystemState state)
@@ -83,7 +85,8 @@ public partial struct ThirdPersonPlayerVariableStepControlSystem : ISystem
 /// </summary>
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup), OrderFirst = true)]
 [BurstCompile]
-public partial struct ThirdPersonPlayerFixedStepControlSystem : ISystem
+[Unity.Entities.WorldSystemFilter(Unity.Entities.WorldSystemFilterFlags.LocalSimulation | Unity.Entities.WorldSystemFilterFlags.ClientSimulation | Unity.Entities.WorldSystemFilterFlags.ServerSimulation)]
+partial struct ThirdPersonPlayerFixedStepControlSystem : ISystem
 {
     [BurstCompile]
     public void OnCreate(ref SystemState state)

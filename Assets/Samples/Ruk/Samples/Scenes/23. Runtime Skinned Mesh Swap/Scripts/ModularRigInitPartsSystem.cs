@@ -9,7 +9,8 @@ using UnityEngine;
 
 namespace Rukhanka.Samples
 {
-public partial class ModularRigInitPartsSystem: SystemBase
+[Unity.Entities.WorldSystemFilter(Unity.Entities.WorldSystemFilterFlags.LocalSimulation | Unity.Entities.WorldSystemFilterFlags.ClientSimulation | Unity.Entities.WorldSystemFilterFlags.ServerSimulation)]
+partial class ModularRigInitPartsSystem : SystemBase
 {
     EntityQuery modularRigQuery, switchableBodyPartsQuery;
     BufferTypeHandle<ModularRigPartComponent> modularRigBufAccessor;

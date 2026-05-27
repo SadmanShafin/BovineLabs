@@ -55,7 +55,8 @@ namespace Unity.Physics.Extensions
     // Limitations: works only if the physics objects in the scene come from the same subscene as MouseHoverAuthoring
     // Will be fixable if there is a Unity.Rendering API that lets you get the UnityEngine.Mesh that an entity is using for renderin.
     [UpdateInGroup(typeof(InitializationSystemGroup))]
-    public partial class MouseHoverSystem : SystemBase
+    [Unity.Entities.WorldSystemFilter(Unity.Entities.WorldSystemFilterFlags.LocalSimulation | Unity.Entities.WorldSystemFilterFlags.ClientSimulation | Unity.Entities.WorldSystemFilterFlags.ServerSimulation)]
+    partial class MouseHoverSystem : SystemBase
     {
         [BurstCompile]
         public struct WorldRaycastJob : IJob

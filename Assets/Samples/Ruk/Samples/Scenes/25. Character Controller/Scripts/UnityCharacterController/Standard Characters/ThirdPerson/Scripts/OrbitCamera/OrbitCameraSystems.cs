@@ -13,7 +13,8 @@ using Unity.CharacterController;
 [UpdateAfter(typeof(ThirdPersonCharacterVariableUpdateSystem))]
 [UpdateBefore(typeof(TransformSystemGroup))]
 [BurstCompile]
-public partial struct OrbitCameraSimulationSystem : ISystem
+[Unity.Entities.WorldSystemFilter(Unity.Entities.WorldSystemFilterFlags.LocalSimulation | Unity.Entities.WorldSystemFilterFlags.ClientSimulation | Unity.Entities.WorldSystemFilterFlags.ServerSimulation)]
+partial struct OrbitCameraSimulationSystem : ISystem
 {
     [BurstCompile]
     public void OnCreate(ref SystemState state)
@@ -106,7 +107,8 @@ public partial struct OrbitCameraSimulationSystem : ISystem
 [UpdateInGroup(typeof(SimulationSystemGroup))]
 [UpdateAfter(typeof(TransformSystemGroup))]
 [BurstCompile]
-public partial struct OrbitCameraLateUpdateSystem : ISystem
+[Unity.Entities.WorldSystemFilter(Unity.Entities.WorldSystemFilterFlags.LocalSimulation | Unity.Entities.WorldSystemFilterFlags.ClientSimulation | Unity.Entities.WorldSystemFilterFlags.ServerSimulation)]
+partial struct OrbitCameraLateUpdateSystem : ISystem
 {
     [BurstCompile]
     public void OnCreate(ref SystemState state)

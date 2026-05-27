@@ -4,7 +4,8 @@ using UnityEngine;
 
 [UpdateInGroup(typeof(FixedStepSimulationSystemGroup), OrderLast = true)]
 [BurstCompile]
-public partial struct FixedTickSystem : ISystem
+[Unity.Entities.WorldSystemFilter(Unity.Entities.WorldSystemFilterFlags.LocalSimulation | Unity.Entities.WorldSystemFilterFlags.ClientSimulation | Unity.Entities.WorldSystemFilterFlags.ServerSimulation)]
+partial struct FixedTickSystem : ISystem
 {
     public struct Singleton : IComponentData
     {

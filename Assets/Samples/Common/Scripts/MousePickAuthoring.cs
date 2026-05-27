@@ -100,7 +100,8 @@ namespace Unity.Physics.Extensions
 
     // Attaches a virtual spring to the picked entity
     [UpdateInGroup(typeof(AfterPhysicsSystemGroup))]
-    public partial class MousePickSystem : SystemBase
+    [Unity.Entities.WorldSystemFilter(Unity.Entities.WorldSystemFilterFlags.LocalSimulation | Unity.Entities.WorldSystemFilterFlags.ClientSimulation | Unity.Entities.WorldSystemFilterFlags.ServerSimulation)]
+    partial class MousePickSystem : SystemBase
     {
         public const float k_MaxDistance = 100.0f;
         public NativeReference<SpringData> SpringDataRef;
@@ -217,7 +218,8 @@ namespace Unity.Physics.Extensions
 
     // Applies any mouse spring as a change in velocity on the entity's motion component
     [UpdateInGroup(typeof(BeforePhysicsSystemGroup))]
-    public partial class MouseSpringSystem : SystemBase
+    [Unity.Entities.WorldSystemFilter(Unity.Entities.WorldSystemFilterFlags.LocalSimulation | Unity.Entities.WorldSystemFilterFlags.ClientSimulation | Unity.Entities.WorldSystemFilterFlags.ServerSimulation)]
+    partial class MouseSpringSystem : SystemBase
     {
         MousePickSystem m_PickSystem;
 

@@ -4,7 +4,8 @@ using Unity.Entities;
 
 namespace Rukhanka.Samples
 {
-partial class DynamicBoneChainSampleSystem: SystemBase
+[Unity.Entities.WorldSystemFilter(Unity.Entities.WorldSystemFilterFlags.LocalSimulation | Unity.Entities.WorldSystemFilterFlags.ClientSimulation | Unity.Entities.WorldSystemFilterFlags.ServerSimulation)]
+partial class DynamicBoneChainSampleSystem : SystemBase
 {
 	
 ////////////////////////////////////////////////////////////////////////////////////////
