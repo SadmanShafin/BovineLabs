@@ -13,10 +13,13 @@ MonoBehaviour:
   m_Name: PhysicsForceClip
   m_EditorClassIdentifier: BovineLabs.Timeline.Physics.Authoring::BovineLabs.Timeline.Physics.Authoring.PhysicsForceClip
   mode: 1
+  directionMode: 1
   linearForce: {x: 0, y: 0, z: 10}
-  angularForce: {x: 0, y: 0, z: 0}
   space: 1
-  spaceLink: {fileID: 0}
+  magnitude: 10
+  directionTarget: 1
+  directionTargetLink: {fileID: 0}
+  angularForce: {x: 0, y: 0, z: 0}
   strengthStat: {fileID: 0}
   readStatFrom: 4
   readStatLink: {fileID: 0}
