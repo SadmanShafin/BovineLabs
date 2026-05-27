@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6030fde919e1488ea7e5855f39cf1cd3, type: 3}
   m_Name: Fireball
   m_EditorClassIdentifier: BovineLabs.Core.Extensions.Authoring::BovineLabs.Core.Authoring.ObjectManagement.ObjectDefinition
-  id: 0
+  id: 4
   friendlyName: 
   description: 
   categories: 0

@@ -19,6 +19,7 @@ GameObject:
   - component: {fileID: 3305047710032299585}
   - component: {fileID: 7943562095193895293}
   - component: {fileID: 2138153433620403704}
+  - component: {fileID: -1542655314713116607}
   m_Layer: 0
   m_Name: TRA
   m_TagString: Untagged
@@ -157,7 +158,7 @@ MonoBehaviour:
     trigger: 0
     cooldown: 0
     cooldownAfterDuration: 0
-    duration: 0
+    duration: 1
     cancellable: 0
   Conditions:
     conditions: []
@@ -175,7 +176,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7912966824055113308}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d132318fd4a94957947f32561bd4f38f, type: 3}
   m_Name: 
@@ -226,7 +227,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7912966824055113308}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 72f40eccefaf4b1d9a64964f08d866b8, type: 3}
   m_Name: 
@@ -249,3 +250,16 @@ MonoBehaviour:
       ModifyType: 0
       Min: 0
       Max: 0
+--- !u!114 &-1542655314713116607
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7912966824055113308}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ae4be56f1f506bc01bd1d6ac56dd054b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: BovineLabs.Reaction.Addon.Authoring::BovineLabs.Reaction.Addon.Authoring.ActionDestroyOnDeactivateAuthoring
+  Target: 4

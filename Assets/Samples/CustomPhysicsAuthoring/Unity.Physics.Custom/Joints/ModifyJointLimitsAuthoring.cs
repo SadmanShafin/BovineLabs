@@ -164,6 +164,7 @@ namespace Unity.Physics.Authoring
     // apply an animated effect to the limits on supported types of joints
     [RequireMatchingQueriesForUpdate]
     [UpdateInGroup(typeof(PhysicsSystemGroup), OrderLast = true)]
+    [Unity.Entities.WorldSystemFilter(Unity.Entities.WorldSystemFilterFlags.LocalSimulation | Unity.Entities.WorldSystemFilterFlags.ClientSimulation | Unity.Entities.WorldSystemFilterFlags.ServerSimulation)]
     partial struct ModifyJointLimitsSystem : ISystem
     {
         public void OnUpdate(ref SystemState state)

@@ -495,6 +495,7 @@ namespace Unity.Physics.Tests
     }
 
     [UpdateInGroup(typeof(AfterPhysicsSystemGroup))]
+    [Unity.Entities.WorldSystemFilter(Unity.Entities.WorldSystemFilterFlags.LocalSimulation | Unity.Entities.WorldSystemFilterFlags.ClientSimulation | Unity.Entities.WorldSystemFilterFlags.ServerSimulation)]
     public partial struct SimulationValidationSystem : ISystem
     {
         private ComponentLookup<LocalTransform> TransformLookup;
@@ -659,6 +660,7 @@ namespace Unity.Physics.Tests
     /// </summary>
     [UpdateInGroup(typeof(BeforePhysicsSystemGroup))]
     [RequireMatchingQueriesForUpdate]
+    [Unity.Entities.WorldSystemFilter(Unity.Entities.WorldSystemFilterFlags.LocalSimulation | Unity.Entities.WorldSystemFilterFlags.ClientSimulation | Unity.Entities.WorldSystemFilterFlags.ServerSimulation)]
     public partial struct ComputeKineticEnergySystem : ISystem
     {
         public void OnCreate(ref SystemState state)
@@ -701,6 +703,7 @@ namespace Unity.Physics.Tests
     /// </summary>
     [UpdateInGroup(typeof(AfterPhysicsSystemGroup))]
     [RequireMatchingQueriesForUpdate]
+    [Unity.Entities.WorldSystemFilter(Unity.Entities.WorldSystemFilterFlags.LocalSimulation | Unity.Entities.WorldSystemFilterFlags.ClientSimulation | Unity.Entities.WorldSystemFilterFlags.ServerSimulation)]
     public partial struct ValidateKinematicEnergyConservationSystem : ISystem
     {
         private float ElapsedTime;
