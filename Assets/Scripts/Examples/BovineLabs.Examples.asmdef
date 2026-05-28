@@ -1,0 +1,18 @@
+{
+    "name": "BovineLabs.Examples",
+    "rootNamespace": "BovineLabs.Examples",
+    "references": [
+        "UnityEngine",
+        "UnityEngine.CoreModule",
+        "UnityEditor"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
