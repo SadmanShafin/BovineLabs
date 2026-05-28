@@ -1,0 +1,17 @@
+{
+    "name": "com.bovinelabs.grid.bounds",
+    "rootNamespace": "",
+    "references": [
+        "Unity.Mathematics",
+        "com.bovinelabs.grid.coordinates"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

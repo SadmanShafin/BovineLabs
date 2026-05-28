@@ -1,3 +1,0 @@
-interface:
-  display_name: "Shattered Debug Logging"
-  short_description: "Use BLLogger in ECS systems and BLGlobalLogger outside systems, replacing Debug.Log* while preserving severity."

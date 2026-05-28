@@ -1,10 +1,9 @@
 {
-    "name": "shattered.unit.tests",
+    "name": "com.bovinelabs.grid.bounds.tests",
     "rootNamespace": "",
     "references": [
+        "com.bovinelabs.grid.bounds",
         "com.bovinelabs.grid.coordinates",
-        "Unity.Burst",
-        "Unity.Collections",
         "Unity.Mathematics",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
@@ -13,7 +12,7 @@
         "Editor"
     ],
     "excludePlatforms": [],
-    "allowUnsafeCode": true,
+    "allowUnsafeCode": false,
     "overrideReferences": true,
     "precompiledReferences": [
         "nunit.framework.dll"

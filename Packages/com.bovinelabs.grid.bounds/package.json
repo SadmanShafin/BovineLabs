@@ -1,0 +1,11 @@
+{
+    "name": "com.bovinelabs.grid.bounds",
+    "version": "0.0.1",
+    "unity": "6000.0",
+    "displayName": "BovineLabs Grid Bounds",
+    "description": "Rectangular 2D and 3D grid bounds with checked in-bounds queries. No storage, no indexing.",
+    "dependencies": {
+        "com.unity.mathematics": "1.2.0",
+        "com.bovinelabs.grid.coordinates": "0.0.1"
+    }
+}

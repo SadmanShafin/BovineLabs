@@ -1,0 +1,10 @@
+{
+    "name": "com.bovinelabs.grid.coordinates",
+    "version": "0.0.1",
+    "unity": "6000.0",
+    "displayName": "BovineLabs Grid Coordinates",
+    "description": "Integer grid coordinate types with distance metrics. No bounds, no storage, no algorithms.",
+    "dependencies": {
+        "com.unity.mathematics": "1.2.0"
+    }
+}
