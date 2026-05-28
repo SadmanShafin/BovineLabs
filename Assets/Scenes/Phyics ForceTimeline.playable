@@ -246,7 +246,7 @@ MonoBehaviour:
   triggerState: 2
   forceType: 1
   mode: 0
-  magnitude: -10
+  magnitude: 100
   direction: {x: 0, y: 0, z: 1}
   originMode: 0
   strengthStat: {fileID: 0}
