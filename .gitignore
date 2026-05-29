@@ -80,3 +80,7 @@ graphify-out/
 **/.pi/
 
 *.sqlite
+
+# Mono crash dumps
+exception_trace.txt
+mono_crash.mem.*
