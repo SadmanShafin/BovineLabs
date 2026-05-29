@@ -1,0 +1,294 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="30" result="Failed(Child)" total="30" passed="29" failed="1" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-05-29 09:45:04Z" end-time="2026-05-29 09:45:04Z" duration="0.2464238">
+  <test-suite type="TestSuite" id="1000" name="BovineLabs" fullname="BovineLabs" runstate="Runnable" testcasecount="256" result="Failed" site="Child" start-time="2026-05-29 09:45:04Z" end-time="2026-05-29 09:45:04Z" duration="0.246424" total="30" passed="29" failed="1" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="EditMode" />
+    </properties>
+    <failure>
+      <message><![CDATA[One or more child tests had errors]]></message>
+    </failure>
+    <test-suite type="Assembly" id="1278" name="BovineLabs.Timeline.Physics.Tests.dll" fullname="/home/i/GitHub/BovineLabs/Library/ScriptAssemblies/BovineLabs.Timeline.Physics.Tests.dll" runstate="Runnable" testcasecount="30" result="Failed" site="Child" start-time="2026-05-29 09:45:04Z" end-time="2026-05-29 09:45:04Z" duration="0.233175" total="30" passed="29" failed="1" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="496513" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <failure>
+        <message><![CDATA[One or more child tests had errors]]></message>
+      </failure>
+      <test-suite type="TestSuite" id="1279" name="BovineLabs" fullname="BovineLabs" runstate="Runnable" testcasecount="30" result="Failed" site="Child" start-time="2026-05-29 09:45:04Z" end-time="2026-05-29 09:45:04Z" duration="0.232695" total="30" passed="29" failed="1" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <failure>
+          <message><![CDATA[One or more child tests had errors]]></message>
+        </failure>
+        <test-suite type="TestSuite" id="1280" name="Timeline" fullname="BovineLabs.Timeline" runstate="Runnable" testcasecount="30" result="Failed" site="Child" start-time="2026-05-29 09:45:04Z" end-time="2026-05-29 09:45:04Z" duration="0.232393" total="30" passed="29" failed="1" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <failure>
+            <message><![CDATA[One or more child tests had errors]]></message>
+          </failure>
+          <test-suite type="TestSuite" id="1281" name="Physics" fullname="BovineLabs.Timeline.Physics" runstate="Runnable" testcasecount="30" result="Failed" site="Child" start-time="2026-05-29 09:45:04Z" end-time="2026-05-29 09:45:04Z" duration="0.232061" total="30" passed="29" failed="1" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <failure>
+              <message><![CDATA[One or more child tests had errors]]></message>
+            </failure>
+            <test-suite type="TestSuite" id="1282" name="Tests" fullname="BovineLabs.Timeline.Physics.Tests" runstate="Runnable" testcasecount="30" result="Failed" site="Child" start-time="2026-05-29 09:45:04Z" end-time="2026-05-29 09:45:04Z" duration="0.231802" total="30" passed="29" failed="1" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <failure>
+                <message><![CDATA[One or more child tests had errors]]></message>
+              </failure>
+              <test-suite type="TestFixture" id="1242" name="BrilliantEdgeCaseTests" fullname="BovineLabs.Timeline.Physics.Tests.BrilliantEdgeCaseTests" classname="BovineLabs.Timeline.Physics.Tests.BrilliantEdgeCaseTests" runstate="Runnable" testcasecount="16" result="Failed" site="Child" start-time="2026-05-29 09:45:04Z" end-time="2026-05-29 09:45:04Z" duration="0.179069" total="16" passed="15" failed="1" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <failure>
+                  <message><![CDATA[One or more child tests had errors]]></message>
+                </failure>
+                <test-case id="1251" name="Accumulator_ExtremeForces_HandlesLargeValues" fullname="BovineLabs.Timeline.Physics.Tests.BrilliantEdgeCaseTests.Accumulator_ExtremeForces_HandlesLargeValues" methodname="Accumulator_ExtremeForces_HandlesLargeValues" classname="BovineLabs.Timeline.Physics.Tests.BrilliantEdgeCaseTests" runstate="Runnable" seed="1173584508" result="Passed" start-time="2026-05-29 09:45:04Z" end-time="2026-05-29 09:45:04Z" duration="0.026069" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1245" name="Accumulator_InfiniteMass_ForcesDoNotAffectVelocity" fullname="BovineLabs.Timeline.Physics.Tests.BrilliantEdgeCaseTests.Accumulator_InfiniteMass_ForcesDoNotAffectVelocity" methodname="Accumulator_InfiniteMass_ForcesDoNotAffectVelocity" classname="BovineLabs.Timeline.Physics.Tests.BrilliantEdgeCaseTests" runstate="Runnable" seed="924181591" result="Passed" start-time="2026-05-29 09:45:04Z" end-time="2026-05-29 09:45:04Z" duration="0.004424" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1246" name="Accumulator_InfiniteMass_VelocityDeltasStillAffectVelocity" fullname="BovineLabs.Timeline.Physics.Tests.BrilliantEdgeCaseTests.Accumulator_InfiniteMass_VelocityDeltasStillAffectVelocity" methodname="Accumulator_InfiniteMass_VelocityDeltasStillAffectVelocity" classname="BovineLabs.Timeline.Physics.Tests.BrilliantEdgeCaseTests" runstate="Runnable" seed="560704668" result="Passed" start-time="2026-05-29 09:45:04Z" end-time="2026-05-29 09:45:04Z" duration="0.003193" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1243" name="Accumulator_MissingLocalToWorld_SkipsEntity" fullname="BovineLabs.Timeline.Physics.Tests.BrilliantEdgeCaseTests.Accumulator_MissingLocalToWorld_SkipsEntity" methodname="Accumulator_MissingLocalToWorld_SkipsEntity" classname="BovineLabs.Timeline.Physics.Tests.BrilliantEdgeCaseTests" runstate="Runnable" seed="1474079963" result="Passed" start-time="2026-05-29 09:45:04Z" end-time="2026-05-29 09:45:04Z" duration="0.002362" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1244" name="Accumulator_MissingPhysicsMass_DefaultsToKinematic" fullname="BovineLabs.Timeline.Physics.Tests.BrilliantEdgeCaseTests.Accumulator_MissingPhysicsMass_DefaultsToKinematic" methodname="Accumulator_MissingPhysicsMass_DefaultsToKinematic" classname="BovineLabs.Timeline.Physics.Tests.BrilliantEdgeCaseTests" runstate="Runnable" seed="1817082445" result="Passed" start-time="2026-05-29 09:45:04Z" end-time="2026-05-29 09:45:04Z" duration="0.003159" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1255" name="Drag_NegativeDrag_CausesVelocityGrowth" fullname="BovineLabs.Timeline.Physics.Tests.BrilliantEdgeCaseTests.Drag_NegativeDrag_CausesVelocityGrowth" methodname="Drag_NegativeDrag_CausesVelocityGrowth" classname="BovineLabs.Timeline.Physics.Tests.BrilliantEdgeCaseTests" runstate="Runnable" seed="347277712" result="Passed" start-time="2026-05-29 09:45:04Z" end-time="2026-05-29 09:45:04Z" duration="0.005872" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1253" name="FullFrame_VelocityAccumulationOrder" fullname="BovineLabs.Timeline.Physics.Tests.BrilliantEdgeCaseTests.FullFrame_VelocityAccumulationOrder" methodname="FullFrame_VelocityAccumulationOrder" classname="BovineLabs.Timeline.Physics.Tests.BrilliantEdgeCaseTests" runstate="Runnable" seed="1436335450" result="Passed" start-time="2026-05-29 09:45:04Z" end-time="2026-05-29 09:45:04Z" duration="0.010598" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1257" name="KinematicOverride_WithActiveGravityOverride_SkipsGravityFactorManipulation" fullname="BovineLabs.Timeline.Physics.Tests.BrilliantEdgeCaseTests.KinematicOverride_WithActiveGravityOverride_SkipsGravityFactorManipulation" methodname="KinematicOverride_WithActiveGravityOverride_SkipsGravityFactorManipulation" classname="BovineLabs.Timeline.Physics.Tests.BrilliantEdgeCaseTests" runstate="Runnable" seed="46734682" result="Failed" label="Error" start-time="2026-05-29 09:45:04Z" end-time="2026-05-29 09:45:04Z" duration="0.012351" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                  <failure>
+                    <message><![CDATA[System.InvalidOperationException : System.InvalidOperationException: GetSingleton<Unity.Entities.EndFixedStepSimulationEntityCommandBufferSystem+Singleton>() requires that exactly one entity exists that match this query, but there are none. Are you missing a call to RequireForUpdate<T>()? You could also use TryGetSingleton<T>()
+This Exception was thrown from a function compiled with Burst, which has limited exception support.
+ #3 burst_abort(char const*, char const*)
+ #4 Unity.Entities.EntityQueryImpl, Unity.Entities, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null.GetSingleton<Unity.Entities.EndFixedStepSimulationEntityCommandBufferSystem+Singleton, Unity.Entities, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null>(Unity.Entities.EntityQueryImpl*, Unity.Entities, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null this) -> Unity.Entities.EndFixedStepSimulationEntityCommandBufferSystem+Singleton, Unity.Entities, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null_6981486cacd27f11a02388f857b2a601 from Unity.Entities, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+ #5 BovineLabs.Timeline.Physics.PhysicsKinematicOverrideApplySystem, BovineLabs.Timeline.Physics, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null.OnUpdate(BovineLabs.Timeline.Physics.PhysicsKinematicOverrideApplySystem*, BovineLabs.Timeline.Physics, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null this, Unity.Entities.SystemState&, Unity.Entities, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null state) -> System.Void, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089_f6196adefd66a88d1f58af410ae4034e from BovineLabs.Timeline.Physics, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+ #6 03c50e12bc408d52f79645b9ac094a4e
+ #7 Unity.Entities.WorldUnmanagedImpl+UnmanagedUpdate_000015EB$BurstDirectCall, Unity.Entities, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null.Invoke(System.Void*, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089 pSystemState) -> System.Void, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089_6981486cacd27f11a02388f857b2a601 from Unity.Entities, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+ #8 7bf3b3dc1c88cb657fd69b548232391d
+ #9  (Mono JIT Code) (wrapper managed-to-native) Unity.Entities.WorldUnmanagedImpl/Unity.Entities.UnmanagedUpdate_000015EB$BurstDirectCall:wrapper_native_indirect_0x6447f183be20 (intptr&,void*)
+ #10  (Mono JIT Code) [WorldUnmanaged.cs:169] Unity.Entities.SystemHandle:Update (Unity.Entities.WorldUnmanaged)
+ #11  (Mono JIT Code) [BrilliantEdgeCaseTests.cs:498] BovineLabs.Timeline.Physics.Tests.BrilliantEdgeCaseTests:KinematicOverride_WithActiveGravityOverride_SkipsGravityFactorManipulation ()
+ #12  (Mono JIT Code) (wrapper runtime-invoke) object:runtime_invoke_void__this__ (object,intptr,intptr,intptr)
+ #13 ???
+ #14 ???
+ #15 ???
+ #16 ???
+ #17 ???
+ #18  (Mono JIT Code) (wrapper managed-to-native) System.Reflection.RuntimeMethodInfo:InternalInvoke (System.Reflection.RuntimeMethodInfo,object,object[],System.Exception&)
+ #19  (Mono JIT Code) System.Reflection.MethodBase:Invoke (object,object[])
+ #20  (Mono JIT Code) NUnit.Framework.Internal.MethodWrapper:Invoke (object,object[])
+ #21  (Mono JIT Code) [UnityLogCheckDelegatingCommand.cs:24] UnityEngine.TestRunner.NUnitExtensions.Runner.UnityLogCheckDelegatingCommand/<>c__DisplayClass2_0:<Execute>b__0 ()
+ #22  (Mono JIT Code) [UnityLogCheckDelegatingCommand.cs:83] UnityEngine.TestRunner.NUnitExtensions.Runner.UnityLogCheckDelegatingCommand:ExecuteAndCheckLog (UnityEngine.TestTools.Logging.LogScope,NUnit.Framework.Internal.TestResult,System.Action)
+ #23  (Mono JIT Code) [UnityLogCheckDelegatingCommand.cs:35] UnityEngine.TestRunner.NUnitExtensions.Runner.UnityLogCheckDelegatingCommand/<ExecuteEnumerable>d__3:MoveNext ()
+ #24  (Mono JIT Code) [BeforeAfterTestCommandBase.cs:212] UnityEngine.TestTools.BeforeAfterTestCommandBase`1/<ExecuteEnumerable>d__16<T_REF>:MoveNext ()
+ #25  (Mono JIT Code) [ImmediateEnumerableCommand.cs:18] UnityEngine.TestTools.ImmediateEnumerableCommand:Execute (NUnit.Framework.Internal.ITestExecutionContext)
+ #26  (Mono JIT Code) [BeforeAfterTestCommandBase.cs:219] UnityEngine.TestTools.BeforeAfterTestCommandBase`1/<ExecuteEnumerable>d__16<T_REF>:MoveNext ()
+ #27  (Mono JIT Code) [BeforeAfterTestCommandBase.cs:212] UnityEngine.TestTools.BeforeAfterTestCommandBase`1/<ExecuteEnumerable>d__16<T_REF>:MoveNext ()
+ #28  (Mono JIT Code) [BeforeAfterTestCommandBase.cs:212] UnityEngine.TestTools.BeforeAfterTestCommandBase`1/<ExecuteEnumerable>d__16<T_REF>:MoveNext ()
+ #29  (Mono JIT Code) [RetryCommand.cs:37] UnityEngine.TestTools.RetryCommand/<ExecuteEnumerable>d__2:MoveNext ()
+ #30  (Mono JIT Code) [RepeatCommand.cs:36] UnityEngine.TestTools.RepeatCommand/<ExecuteEnumerable>d__2:MoveNext ()
+ #31  (Mono JIT Code) [IgnoreTestCommand.cs:42] UnityEngine.TestTools.IgnoreTestCommand/<ExecuteEnumerable>d__3:MoveNext ()
+ #32  (Mono JIT Code) [StrictCheckCommand.cs:29] UnityEngine.TestTools.StrictCheckCommand/<ExecuteEnumerable>d__2:MoveNext ()
+ #33  (Mono JIT Code) [DefaultTestWorkItem.]]></message>
+                    <stack-trace><![CDATA[  at (wrapper managed-to-native) Unity.Entities.WorldUnmanagedImpl+UnmanagedUpdate_000015EB$BurstDirectCall.wrapper_native_indirect_0x6447f183be20(intptr&,void*)
+  at Unity.Entities.WorldUnmanagedImpl+UnmanagedUpdate_000015EB$BurstDirectCall.Invoke (System.Void* pSystemState) [0x0000f] in <995523b34ec04be08a5e0a89163b1487>:0 
+  at Unity.Entities.WorldUnmanagedImpl.UnmanagedUpdate (System.Void* pSystemState) <0x428703f0 + 0x00043> in <995523b34ec04be08a5e0a89163b1487>:0 
+  at Unity.Entities.WorldUnmanagedImpl.UpdateSystem (Unity.Entities.SystemHandle sh) [0x000b4] in ./Library/PackageCache/com.unity.entities@9015a37c0450/Unity.Entities/WorldUnmanaged.cs:961 
+  at Unity.Entities.SystemHandle.Update (Unity.Entities.WorldUnmanaged world) [0x00001] in ./Library/PackageCache/com.unity.entities@9015a37c0450/Unity.Entities/WorldUnmanaged.cs:169 
+  at BovineLabs.Timeline.Physics.Tests.BrilliantEdgeCaseTests.KinematicOverride_WithActiveGravityOverride_SkipsGravityFactorManipulation () [0x00152] in ./Packages/BovineLabs.Timeline.Physics/BovineLabs.Timeline.Physics.Tests/BrilliantEdgeCaseTests.cs:498 
+  at (wrapper managed-to-native) System.Reflection.RuntimeMethodInfo.InternalInvoke(System.Reflection.RuntimeMethodInfo,object,object[],System.Exception&)
+  at System.Reflection.RuntimeMethodInfo.Invoke (System.Object obj, System.Reflection.BindingFlags invokeAttr, System.Reflection.Binder binder, System.Object[] parameters, System.Globalization.CultureInfo culture) [0x0006a] in <363849f5097246f09f2f82273d566c6a>:0 ]]></stack-trace>
+                  </failure>
+                </test-case>
+                <test-case id="1249" name="KinematicsApply_ZeroDeltaTime_DoesNotAddContinuousForce" fullname="BovineLabs.Timeline.Physics.Tests.BrilliantEdgeCaseTests.KinematicsApply_ZeroDeltaTime_DoesNotAddContinuousForce" methodname="KinematicsApply_ZeroDeltaTime_DoesNotAddContinuousForce" classname="BovineLabs.Timeline.Physics.Tests.BrilliantEdgeCaseTests" runstate="Runnable" seed="734223651" result="Passed" start-time="2026-05-29 09:45:04Z" end-time="2026-05-29 09:45:04Z" duration="0.003154" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1252" name="Override_Overwrites_AccumulatedForcesInSameGroup" fullname="BovineLabs.Timeline.Physics.Tests.BrilliantEdgeCaseTests.Override_Overwrites_AccumulatedForcesInSameGroup" methodname="Override_Overwrites_AccumulatedForcesInSameGroup" classname="BovineLabs.Timeline.Physics.Tests.BrilliantEdgeCaseTests" runstate="Runnable" seed="826507880" result="Passed" start-time="2026-05-29 09:45:04Z" end-time="2026-05-29 09:45:04Z" duration="0.003308" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1254" name="Performance_Accumulator_10000Entities" fullname="BovineLabs.Timeline.Physics.Tests.BrilliantEdgeCaseTests.Performance_Accumulator_10000Entities" methodname="Performance_Accumulator_10000Entities" classname="BovineLabs.Timeline.Physics.Tests.BrilliantEdgeCaseTests" runstate="Runnable" seed="897067988" result="Passed" start-time="2026-05-29 09:45:04Z" end-time="2026-05-29 09:45:04Z" duration="0.056497" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                  <output><![CDATA[Accumulator System took 0.3034ms for 10,000 entities
+]]></output>
+                </test-case>
+                <test-case id="1256" name="TriggerFilter_IgnoreTargetSelf_IgnoresEventsWithSelf" fullname="BovineLabs.Timeline.Physics.Tests.BrilliantEdgeCaseTests.TriggerFilter_IgnoreTargetSelf_IgnoresEventsWithSelf" methodname="TriggerFilter_IgnoreTargetSelf_IgnoresEventsWithSelf" classname="BovineLabs.Timeline.Physics.Tests.BrilliantEdgeCaseTests" runstate="Runnable" seed="1521708788" result="Passed" start-time="2026-05-29 09:45:04Z" end-time="2026-05-29 09:45:04Z" duration="0.009189" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1258" name="VelocityMixer_DifferingSpaces_AddsVectors" fullname="BovineLabs.Timeline.Physics.Tests.BrilliantEdgeCaseTests.VelocityMixer_DifferingSpaces_AddsVectors" methodname="VelocityMixer_DifferingSpaces_AddsVectors" classname="BovineLabs.Timeline.Physics.Tests.BrilliantEdgeCaseTests" runstate="Runnable" seed="354910433" result="Passed" start-time="2026-05-29 09:45:04Z" end-time="2026-05-29 09:45:04Z" duration="0.003835" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1248" name="VelocityOverride_InvalidTarget_DefaultsToSelf" fullname="BovineLabs.Timeline.Physics.Tests.BrilliantEdgeCaseTests.VelocityOverride_InvalidTarget_DefaultsToSelf" methodname="VelocityOverride_InvalidTarget_DefaultsToSelf" classname="BovineLabs.Timeline.Physics.Tests.BrilliantEdgeCaseTests" runstate="Runnable" seed="1020378346" result="Passed" start-time="2026-05-29 09:45:04Z" end-time="2026-05-29 09:45:04Z" duration="0.015259" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1247" name="VelocityOverride_MissingStat_DefaultsToMultiplierOne" fullname="BovineLabs.Timeline.Physics.Tests.BrilliantEdgeCaseTests.VelocityOverride_MissingStat_DefaultsToMultiplierOne" methodname="VelocityOverride_MissingStat_DefaultsToMultiplierOne" classname="BovineLabs.Timeline.Physics.Tests.BrilliantEdgeCaseTests" runstate="Runnable" seed="1943288453" result="Passed" start-time="2026-05-29 09:45:04Z" end-time="2026-05-29 09:45:04Z" duration="0.002519" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1250" name="VelocityOverride_NaNInConfig_PropagatesNaN" fullname="BovineLabs.Timeline.Physics.Tests.BrilliantEdgeCaseTests.VelocityOverride_NaNInConfig_PropagatesNaN" methodname="VelocityOverride_NaNInConfig_PropagatesNaN" classname="BovineLabs.Timeline.Physics.Tests.BrilliantEdgeCaseTests" runstate="Runnable" seed="1127007320" result="Passed" start-time="2026-05-29 09:45:04Z" end-time="2026-05-29 09:45:04Z" duration="0.002849" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+              </test-suite>
+              <test-suite type="TestFixture" id="1259" name="PhysicsDragApplySystemTests" fullname="BovineLabs.Timeline.Physics.Tests.PhysicsDragApplySystemTests" classname="BovineLabs.Timeline.Physics.Tests.PhysicsDragApplySystemTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-05-29 09:45:04Z" end-time="2026-05-29 09:45:04Z" duration="0.010880" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-case id="1262" name="ApplyDrag_DisabledStat_DoesNotReduceVelocity" fullname="BovineLabs.Timeline.Physics.Tests.PhysicsDragApplySystemTests.ApplyDrag_DisabledStat_DoesNotReduceVelocity" methodname="ApplyDrag_DisabledStat_DoesNotReduceVelocity" classname="BovineLabs.Timeline.Physics.Tests.PhysicsDragApplySystemTests" runstate="Runnable" seed="654197192" result="Passed" start-time="2026-05-29 09:45:04Z" end-time="2026-05-29 09:45:04Z" duration="0.004325" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1260" name="ApplyDrag_ReducesVelocityEveryFrame" fullname="BovineLabs.Timeline.Physics.Tests.PhysicsDragApplySystemTests.ApplyDrag_ReducesVelocityEveryFrame" methodname="ApplyDrag_ReducesVelocityEveryFrame" classname="BovineLabs.Timeline.Physics.Tests.PhysicsDragApplySystemTests" runstate="Runnable" seed="799767971" result="Passed" start-time="2026-05-29 09:45:04Z" end-time="2026-05-29 09:45:04Z" duration="0.002318" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1261" name="ApplyDrag_ZeroDeltaTime_DoesNotReduceVelocity" fullname="BovineLabs.Timeline.Physics.Tests.PhysicsDragApplySystemTests.ApplyDrag_ZeroDeltaTime_DoesNotReduceVelocity" methodname="ApplyDrag_ZeroDeltaTime_DoesNotReduceVelocity" classname="BovineLabs.Timeline.Physics.Tests.PhysicsDragApplySystemTests" runstate="Runnable" seed="2075094451" result="Passed" start-time="2026-05-29 09:45:04Z" end-time="2026-05-29 09:45:04Z" duration="0.001629" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+              </test-suite>
+              <test-suite type="TestFixture" id="1263" name="PhysicsForceAccumulatorSystemTests" fullname="BovineLabs.Timeline.Physics.Tests.PhysicsForceAccumulatorSystemTests" classname="BovineLabs.Timeline.Physics.Tests.PhysicsForceAccumulatorSystemTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-05-29 09:45:04Z" end-time="2026-05-29 09:45:04Z" duration="0.004593" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-case id="1264" name="AccumulatesPendingForcesIntoVelocity" fullname="BovineLabs.Timeline.Physics.Tests.PhysicsForceAccumulatorSystemTests.AccumulatesPendingForcesIntoVelocity" methodname="AccumulatesPendingForcesIntoVelocity" classname="BovineLabs.Timeline.Physics.Tests.PhysicsForceAccumulatorSystemTests" runstate="Runnable" seed="651413311" result="Passed" start-time="2026-05-29 09:45:04Z" end-time="2026-05-29 09:45:04Z" duration="0.001981" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1265" name="AccumulatesPendingVelocitiesIntoVelocity" fullname="BovineLabs.Timeline.Physics.Tests.PhysicsForceAccumulatorSystemTests.AccumulatesPendingVelocitiesIntoVelocity" methodname="AccumulatesPendingVelocitiesIntoVelocity" classname="BovineLabs.Timeline.Physics.Tests.PhysicsForceAccumulatorSystemTests" runstate="Runnable" seed="1774486491" result="Passed" start-time="2026-05-29 09:45:04Z" end-time="2026-05-29 09:45:04Z" duration="0.001748" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+              </test-suite>
+              <test-suite type="TestFixture" id="1266" name="PhysicsKinematicsApplySystemTests" fullname="BovineLabs.Timeline.Physics.Tests.PhysicsKinematicsApplySystemTests" classname="BovineLabs.Timeline.Physics.Tests.PhysicsKinematicsApplySystemTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-05-29 09:45:04Z" end-time="2026-05-29 09:45:04Z" duration="0.007335" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-case id="1267" name="AddContinuous_AppendsPendingVelocityEveryFrame" fullname="BovineLabs.Timeline.Physics.Tests.PhysicsKinematicsApplySystemTests.AddContinuous_AppendsPendingVelocityEveryFrame" methodname="AddContinuous_AppendsPendingVelocityEveryFrame" classname="BovineLabs.Timeline.Physics.Tests.PhysicsKinematicsApplySystemTests" runstate="Runnable" seed="1622307137" result="Passed" start-time="2026-05-29 09:45:04Z" end-time="2026-05-29 09:45:04Z" duration="0.002116" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1269" name="AddContinuous_AwayFromTarget_AppendsForceInCorrectDirection" fullname="BovineLabs.Timeline.Physics.Tests.PhysicsKinematicsApplySystemTests.AddContinuous_AwayFromTarget_AppendsForceInCorrectDirection" methodname="AddContinuous_AwayFromTarget_AppendsForceInCorrectDirection" classname="BovineLabs.Timeline.Physics.Tests.PhysicsKinematicsApplySystemTests" runstate="Runnable" seed="2110543764" result="Passed" start-time="2026-05-29 09:45:04Z" end-time="2026-05-29 09:45:04Z" duration="0.002173" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1268" name="AddInstant_AppendsPendingForceOnce" fullname="BovineLabs.Timeline.Physics.Tests.PhysicsKinematicsApplySystemTests.AddInstant_AppendsPendingForceOnce" methodname="AddInstant_AppendsPendingForceOnce" classname="BovineLabs.Timeline.Physics.Tests.PhysicsKinematicsApplySystemTests" runstate="Runnable" seed="52951768" result="Passed" start-time="2026-05-29 09:45:04Z" end-time="2026-05-29 09:45:04Z" duration="0.002064" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+              </test-suite>
+              <test-suite type="TestFixture" id="1270" name="PhysicsTriggerForceSystemTests" fullname="BovineLabs.Timeline.Physics.Tests.PhysicsTriggerForceSystemTests" classname="BovineLabs.Timeline.Physics.Tests.PhysicsTriggerForceSystemTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-05-29 09:45:04Z" end-time="2026-05-29 09:45:04Z" duration="0.015041" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-case id="1272" name="StepFalloff_DropsToZeroOutsideEndRadius" fullname="BovineLabs.Timeline.Physics.Tests.PhysicsTriggerForceSystemTests.StepFalloff_DropsToZeroOutsideEndRadius" methodname="StepFalloff_DropsToZeroOutsideEndRadius" classname="BovineLabs.Timeline.Physics.Tests.PhysicsTriggerForceSystemTests" runstate="Runnable" seed="611477572" result="Passed" start-time="2026-05-29 09:45:04Z" end-time="2026-05-29 09:45:04Z" duration="0.012202" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1271" name="StepFalloff_MaintainsMagnitudeWithinEndRadius" fullname="BovineLabs.Timeline.Physics.Tests.PhysicsTriggerForceSystemTests.StepFalloff_MaintainsMagnitudeWithinEndRadius" methodname="StepFalloff_MaintainsMagnitudeWithinEndRadius" classname="BovineLabs.Timeline.Physics.Tests.PhysicsTriggerForceSystemTests" runstate="Runnable" seed="1833472808" result="Passed" start-time="2026-05-29 09:45:04Z" end-time="2026-05-29 09:45:04Z" duration="0.002047" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+              </test-suite>
+              <test-suite type="TestFixture" id="1273" name="PhysicsVelocityOverrideSystemTests" fullname="BovineLabs.Timeline.Physics.Tests.PhysicsVelocityOverrideSystemTests" classname="BovineLabs.Timeline.Physics.Tests.PhysicsVelocityOverrideSystemTests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-05-29 09:45:04Z" end-time="2026-05-29 09:45:04Z" duration="0.012982" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-case id="1274" name="SetContinuous_OverridesVelocityEveryFrame" fullname="BovineLabs.Timeline.Physics.Tests.PhysicsVelocityOverrideSystemTests.SetContinuous_OverridesVelocityEveryFrame" methodname="SetContinuous_OverridesVelocityEveryFrame" classname="BovineLabs.Timeline.Physics.Tests.PhysicsVelocityOverrideSystemTests" runstate="Runnable" seed="1825956045" result="Passed" start-time="2026-05-29 09:45:04Z" end-time="2026-05-29 09:45:04Z" duration="0.001743" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1276" name="SetContinuous_SpaceSelf_RotatesVelocityToLocalSpace" fullname="BovineLabs.Timeline.Physics.Tests.PhysicsVelocityOverrideSystemTests.SetContinuous_SpaceSelf_RotatesVelocityToLocalSpace" methodname="SetContinuous_SpaceSelf_RotatesVelocityToLocalSpace" classname="BovineLabs.Timeline.Physics.Tests.PhysicsVelocityOverrideSystemTests" runstate="Runnable" seed="2051321863" result="Passed" start-time="2026-05-29 09:45:04Z" end-time="2026-05-29 09:45:04Z" duration="0.002538" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1277" name="SetContinuous_WithStatStrength_ScalesVelocityByStatMultiplier" fullname="BovineLabs.Timeline.Physics.Tests.PhysicsVelocityOverrideSystemTests.SetContinuous_WithStatStrength_ScalesVelocityByStatMultiplier" methodname="SetContinuous_WithStatStrength_ScalesVelocityByStatMultiplier" classname="BovineLabs.Timeline.Physics.Tests.PhysicsVelocityOverrideSystemTests" runstate="Runnable" seed="529125700" result="Passed" start-time="2026-05-29 09:45:04Z" end-time="2026-05-29 09:45:04Z" duration="0.005767" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1275" name="SetInstant_OverridesVelocityOnce" fullname="BovineLabs.Timeline.Physics.Tests.PhysicsVelocityOverrideSystemTests.SetInstant_OverridesVelocityOnce" methodname="SetInstant_OverridesVelocityOnce" classname="BovineLabs.Timeline.Physics.Tests.PhysicsVelocityOverrideSystemTests" runstate="Runnable" seed="2119070942" result="Passed" start-time="2026-05-29 09:45:04Z" end-time="2026-05-29 09:45:04Z" duration="0.001802" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                  <output><![CDATA[Saving results to: /home/i/.config/unity3d/iafahim/BovineLabs/TestResults.xml
+]]></output>
+                </test-case>
+              </test-suite>
+            </test-suite>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

@@ -1504,6 +1504,8 @@ PlayableDirector:
     value: {fileID: 1319626935}
   - key: {fileID: -7655345696952888290, guid: 6859290a3f49de0e19ca9bee321e85e9, type: 2}
     value: {fileID: 456499386}
+  - key: {fileID: 2071501284772150596, guid: 6859290a3f49de0e19ca9bee321e85e9, type: 2}
+    value: {fileID: 588256448}
   m_ExposedReferences:
     m_References: []
 --- !u!4 &1241495310
@@ -2129,7 +2131,7 @@ Transform:
   m_GameObject: {fileID: 1715107373}
   serializedVersion: 2
   m_LocalRotation: {x: 0.3314136, y: 0.46193975, z: -0.19134174, w: 0.8001032}
-  m_LocalPosition: {x: -11.291589, y: 13.038405, z: -6.519202}
+  m_LocalPosition: {x: -11.291589, y: 13.038405, z: -4.049202}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -2401,17 +2403,9 @@ PrefabInstance:
       propertyPath: m_PrefabInstanceID
       value: 2960574491
       objectReference: {fileID: 0}
-    - target: {fileID: 2015872191263223086, guid: 2cf96c7253b99a4f0b8878443af0fb1e, type: 3}
-      propertyPath: m_LinearDamping
-      value: 3.93
-      objectReference: {fileID: 0}
-    - target: {fileID: 2015872191263223086, guid: 2cf96c7253b99a4f0b8878443af0fb1e, type: 3}
-      propertyPath: m_AngularDamping
-      value: 2.47
-      objectReference: {fileID: 0}
-    - target: {fileID: 2507177760741887977, guid: 2cf96c7253b99a4f0b8878443af0fb1e, type: 3}
-      propertyPath: m_PrefabInstanceID
-      value: 2960574491
+    - target: {fileID: 1067107209536289264, guid: 2cf96c7253b99a4f0b8878443af0fb1e, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5202540583985552405, guid: 2cf96c7253b99a4f0b8878443af0fb1e, type: 3}
       propertyPath: m_LocalPosition.x
@@ -2423,7 +2417,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5202540583985552405, guid: 2cf96c7253b99a4f0b8878443af0fb1e, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: 2.47
       objectReference: {fileID: 0}
     - target: {fileID: 5202540583985552405, guid: 2cf96c7253b99a4f0b8878443af0fb1e, type: 3}
       propertyPath: m_LocalRotation.w
@@ -2456,10 +2450,6 @@ PrefabInstance:
     - target: {fileID: 6451661644574034311, guid: 2cf96c7253b99a4f0b8878443af0fb1e, type: 3}
       propertyPath: m_Name
       value: Player
-      objectReference: {fileID: 0}
-    - target: {fileID: 8807183359092518101, guid: 2cf96c7253b99a4f0b8878443af0fb1e, type: 3}
-      propertyPath: m_PrefabInstanceID
-      value: 2960574491
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

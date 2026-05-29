@@ -286,6 +286,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1
   m_Children:
+  - {fileID: 1364053009855571817}
   - {fileID: 8821198028533858119}
   - {fileID: 6416113213760499931}
   - {fileID: 5418466884551858294}
@@ -306,8 +307,8 @@ MonoBehaviour:
   m_MotionType: 0
   m_Smoothing: 0
   m_Mass: 1
-  m_LinearDamping: 0.05
-  m_AngularDamping: 0.01
+  m_LinearDamping: 3.93
+  m_AngularDamping: 2.47
   m_InitialLinearVelocity:
     x: 0
     y: 0
@@ -791,6 +792,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: BovineLabs.Timeline.PlayerInputs.Authoring::BovineLabs.Timeline.PlayerInputs.Authoring.InputConsumerAuthoring
   PlayerId: 0
+  Controllable: 0
+  OverrideTrigger: 1
+  ReleaseIdleSeconds: 0.25
 --- !u!114 &8879352341966155615
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1003,7 +1007,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 5202540583985552405}
+  m_Father: {fileID: 2791925454507442292}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &4544405988324904446
 MeshFilter:
@@ -1130,7 +1134,6 @@ Transform:
   - {fileID: 8124840533805552042}
   - {fileID: 7565687470650853391}
   - {fileID: 2301236722976900562}
-  - {fileID: 1364053009855571817}
   - {fileID: 2791925454507442292}
   - {fileID: 266011509450895190}
   m_Father: {fileID: 0}
@@ -6420,7 +6423,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -5425651340251124830, guid: 45e46922349eb5144bb396aa0f5d85f5, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0.015663283
+      value: -0.015663398
       objectReference: {fileID: 0}
     - target: {fileID: -5425651340251124830, guid: 45e46922349eb5144bb396aa0f5d85f5, type: 3}
       propertyPath: m_LocalRotation.x
