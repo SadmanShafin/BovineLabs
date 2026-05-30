@@ -8,6 +8,18 @@ namespace Game.Steering
 
     public static class Influences { public const int Count = 5; }
 
+    public enum InfluenceShape : byte
+    {
+        Point,   // Single-cell stamp (objectives, goals).
+        Sphere,  // Radial falloff (threats, lures).
+    }
+
+    public enum InfluenceOp : byte
+    {
+        Add,      // Positive contribution (objective, lure).
+        Subtract, // Negative contribution / avoidance (threat, hazard).
+    }
+
     public struct InfluenceField : IComponentData
     {
         public int2 Size;
@@ -55,5 +67,34 @@ namespace Game.Steering
     public struct OccupancyValue : IBufferElementData
     {
         public byte Blocked;
+    }
+
+    /// <summary>
+    /// Configuration for the influence field, baked from SteeringSettings.
+    /// Stored as a separate component so FieldBootstrapSystem can read it
+    /// without coupling to authoring/Settings assemblies.
+    /// </summary>
+    public struct InfluenceFieldConfig : IComponentData
+    {
+        public int2 Size;
+        public float Step;
+        public float InvStep;
+        public int Channels;
+        public float FocusRadius;
+    }
+
+    /// <summary>
+    /// A single influence source in the world. Baked from InfluenceAuthoring.
+    /// The unified field system reads all InfluenceSource entities and stamps
+    /// the field based on Shape, Operation, and Channel.
+    /// </summary>
+    public struct InfluenceSource : IComponentData
+    {
+        public byte Channel;
+        public byte Operation; // InfluenceOp
+        public byte Shape;     // InfluenceShape
+        public byte IsCameraFocus;
+        public float Radius;
+        public float Strength;
     }
 }

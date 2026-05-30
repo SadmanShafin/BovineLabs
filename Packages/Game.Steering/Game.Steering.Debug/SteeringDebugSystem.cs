@@ -27,11 +27,8 @@ namespace Game.Steering.Debug
         [ConfigVar("steering.draw-boundary", true, "Draw the field boundary rectangle.")]
         public static readonly SharedStatic<bool> DrawBoundary = SharedStatic<bool>.GetOrCreate<Tags.DrawBoundary>();
 
-        [ConfigVar("steering.draw-objectives", true, "Draw nav objective markers.")]
-        public static readonly SharedStatic<bool> DrawObjectives = SharedStatic<bool>.GetOrCreate<Tags.DrawObjectives>();
-
-        [ConfigVar("steering.draw-threats", true, "Draw threat source markers.")]
-        public static readonly SharedStatic<bool> DrawThreats = SharedStatic<bool>.GetOrCreate<Tags.DrawThreats>();
+        [ConfigVar("steering.draw-sources", true, "Draw influence source markers.")]
+        public static readonly SharedStatic<bool> DrawSources = SharedStatic<bool>.GetOrCreate<Tags.DrawSources>();
 
         [ConfigVar("steering.field-step", 4, "Cell sampling stride (higher = sparser arrows).")]
         public static readonly SharedStatic<int> FieldStep = SharedStatic<int>.GetOrCreate<Tags.FieldStep>();
@@ -45,8 +42,7 @@ namespace Game.Steering.Debug
             public struct DrawIntent { }
             public struct DrawField { }
             public struct DrawBoundary { }
-            public struct DrawObjectives { }
-            public struct DrawThreats { }
+            public struct DrawSources { }
             public struct FieldStep { }
             public struct FieldScale { }
         }
@@ -83,18 +79,14 @@ namespace Game.Steering.Debug
             if (SteeringDebugConfig.DrawBoundary.Data)
                 state.Dependency = new DrawBoundaryJob { Drawer = drawer }.ScheduleParallel(state.Dependency);
 
-            if (SteeringDebugConfig.DrawObjectives.Data)
-                state.Dependency = new DrawObjectivesJob { Drawer = drawer }.ScheduleParallel(state.Dependency);
-
-            if (SteeringDebugConfig.DrawThreats.Data)
-                state.Dependency = new DrawThreatsJob { Drawer = drawer }.ScheduleParallel(state.Dependency);
+            if (SteeringDebugConfig.DrawSources.Data)
+                state.Dependency = new DrawSourcesJob { Drawer = drawer }.ScheduleParallel(state.Dependency);
         }
 
         // -----------------------------------------------------------------------
         // Per-channel color lookup
         // -----------------------------------------------------------------------
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static UnityEngine.Color ChannelColor(int channel)
         {
             return channel switch
@@ -108,7 +100,6 @@ namespace Game.Steering.Debug
             };
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static float ChannelHeight(int channel)
         {
             // Stack each channel at a different height so they don't overlap.
@@ -178,43 +169,42 @@ namespace Game.Steering.Debug
 
             private void Execute(in InfluenceField field)
             {
-                var half = (float2)(field.Size) * field.Step * 0.5f;
-                var center = field.WorldOrigin + half;
+                unsafe
+                {
+                    var half = (float2)(field.Size) * field.Step * 0.5f;
+                    var center = field.WorldOrigin + half;
 
-                var corners = stackalloc float3[4];
-                corners[0] = new float3(center.x - half.x, 0f, center.y - half.y);
-                corners[1] = new float3(center.x + half.x, 0f, center.y - half.y);
-                corners[2] = new float3(center.x + half.x, 0f, center.y + half.y);
-                corners[3] = new float3(center.x - half.x, 0f, center.y + half.y);
+                    var corners = stackalloc float3[4];
+                    corners[0] = new float3(center.x - half.x, 0f, center.y - half.y);
+                    corners[1] = new float3(center.x + half.x, 0f, center.y - half.y);
+                    corners[2] = new float3(center.x + half.x, 0f, center.y + half.y);
+                    corners[3] = new float3(center.x - half.x, 0f, center.y + half.y);
 
-                for (var i = 0; i < 4; i++)
-                    Drawer.Line(corners[i], corners[(i + 1) % 4], SteeringDebugColors.Field);
+                    for (var i = 0; i < 4; i++)
+                        Drawer.Line(corners[i], corners[(i + 1) % 4], SteeringDebugColors.Field);
+                }
             }
         }
 
         [BurstCompile]
-        private partial struct DrawObjectivesJob : IJobEntity
+        private partial struct DrawSourcesJob : IJobEntity
         {
             public Drawer Drawer;
 
-            private void Execute(in NavObjective obj)
-            {
-                var pos = new float3(obj.Position.x, 0f, obj.Position.y);
-                Drawer.Sphere(pos, 0.5f, 16, SteeringDebugColors.Objective);
-                Drawer.Text32(pos + new float3(0f, 1f, 0f), "Objective", SteeringDebugColors.Objective, 10f);
-            }
-        }
-
-        [BurstCompile]
-        private partial struct DrawThreatsJob : IJobEntity
-        {
-            public Drawer Drawer;
-
-            private void Execute(in ThreatSource threat, in LocalTransform transform)
+            private void Execute(in InfluenceSource source, in LocalTransform transform)
             {
                 var pos = transform.Position;
-                Drawer.Circle(pos, new float3(0f, threat.Radius, 0f), SteeringDebugColors.Threat);
-                Drawer.Text32(pos + new float3(0f, 0.5f, 0f), "Threat", SteeringDebugColors.Threat, 10f);
+                var color = ChannelColor(source.Channel);
+
+                if (source.Shape == (byte)InfluenceShape.Sphere && source.Radius > 0f)
+                {
+                    Drawer.Circle(pos, new float3(0f, source.Radius, 0f), color);
+                }
+
+                Drawer.Sphere(pos, 0.3f, 12, color);
+
+                var label = ((Influence)source.Channel).ToString();
+                Drawer.Text32(pos + new float3(0f, 1f, 0f), label, color, 10f);
             }
         }
     }

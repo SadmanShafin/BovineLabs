@@ -6,14 +6,15 @@
         "Unity.Collections",
         "Unity.Entities",
         "Unity.Mathematics",
-        "Unity.Transforms"
+        "Unity.Transforms",
+        "BovineLabs.Core"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": true,
     "overrideReferences": false,
     "precompiledReferences": [],
-    "autoReferenced": true,
+    "autoReferenced": false,
     "defineConstraints": [],
     "versionDefines": [],
     "noEngineReferences": false

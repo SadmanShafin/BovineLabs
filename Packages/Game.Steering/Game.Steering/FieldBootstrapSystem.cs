@@ -6,64 +6,88 @@ using Unity.Transforms;
 
 namespace Game.Steering
 {
-    public struct CameraFocus : IComponentData
-    {
-        public float2 Position;
-    }
-
     [UpdateInGroup(typeof(SimulationSystemGroup))]
-    [UpdateBefore(typeof(ThreatFieldSystem))]
+    [UpdateBefore(typeof(InfluenceFieldSystem))]
     public partial struct FieldBootstrapSystem : ISystem
     {
+        private EntityQuery _configQuery;
+
+        [BurstCompile]
         public void OnCreate(ref SystemState state)
         {
-            var size = new int2(128, 128);
-            var step = 1f;
-            var channels = Influences.Count;
-            var totalCells = size.x * size.y * channels;
-
-            var entity = state.EntityManager.CreateEntity();
-            state.EntityManager.AddComponentData(entity, new InfluenceField
-            {
-                Size = size,
-                Step = step,
-                InvStep = math.rcp(step),
-                Channels = channels,
-                Origin = int2.zero,
-                WorldOrigin = float2.zero,
-            });
-
-            var fieldBuffer = state.EntityManager.AddBuffer<InfluenceValue>(entity);
-            fieldBuffer.ResizeUninitialized(totalCells);
-            for (var i = 0; i < totalCells; i++) fieldBuffer[i] = new InfluenceValue { Value = float2.zero };
-
-            var occBuffer = state.EntityManager.AddBuffer<OccupancyValue>(entity);
-            occBuffer.ResizeUninitialized(size.x * size.y);
-            for (var i = 0; i < size.x * size.y; i++) occBuffer[i] = new OccupancyValue { Blocked = 0 };
+            _configQuery = SystemAPI.QueryBuilder().WithAll<InfluenceFieldConfig>().Build();
+            state.RequireForUpdate(_configQuery);
         }
 
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
-            if (!SystemAPI.TryGetSingletonRW<InfluenceField>(out var field)) return;
+            // Create or resize the field entity if config changes.
+            var config = _configQuery.GetSingleton<InfluenceFieldConfig>();
 
-            if (SystemAPI.TryGetSingleton<CameraFocus>(out var focus))
+            var fieldEntity = SystemAPI.GetSingletonEntity<InfluenceField>();
+            var field = SystemAPI.GetComponent<InfluenceField>(fieldEntity);
+
+            var needsRebuild = field.Size.x != config.Size.x ||
+                               field.Size.y != config.Size.y ||
+                               field.Channels != config.Channels;
+
+            if (needsRebuild)
             {
-                var focusCell = (int2)math.floor(focus.Position * field.ValueRO.InvStep);
-                field.ValueRW.Origin = focusCell - (field.ValueRO.Size / 2);
-                field.ValueRW.WorldOrigin = focus.Position - ((float2)(field.ValueRO.Size / 2)) * field.ValueRO.Step;
+                field.Size = config.Size;
+                field.Step = config.Step;
+                field.InvStep = config.InvStep;
+                field.Channels = config.Channels;
+                field.Origin = int2.zero;
+                field.WorldOrigin = float2.zero;
+
+                var totalCells = field.Size.x * field.Size.y * field.Channels;
+                var fieldBuffer = state.EntityManager.GetBuffer<InfluenceValue>(fieldEntity);
+                fieldBuffer.ResizeUninitialized(totalCells);
+                for (var i = 0; i < totalCells; i++) fieldBuffer[i] = new InfluenceValue { Value = float2.zero };
+
+                var occBuffer = state.EntityManager.GetBuffer<OccupancyValue>(fieldEntity);
+                var occTotal = field.Size.x * field.Size.y;
+                occBuffer.ResizeUninitialized(occTotal);
+                for (var i = 0; i < occTotal; i++) occBuffer[i] = new OccupancyValue { Blocked = 0 };
+
+                SystemAPI.SetComponent(fieldEntity, field);
+            }
+
+            // Find camera focus from any InfluenceSource marked IsCameraFocus.
+            float2 focusPosition = float2.zero;
+            bool hasFocus = false;
+
+            foreach (var (source, transform) in
+                SystemAPI.Query<RefRO<InfluenceSource>, RefRO<LocalTransform>>())
+            {
+                if (source.ValueRO.IsCameraFocus != 0)
+                {
+                    focusPosition = transform.ValueRO.Position.xz;
+                    hasFocus = true;
+                    break;
+                }
+            }
+
+            // Update origin so the grid is centered on the focus.
+            if (hasFocus)
+            {
+                var focusCell = (int2)math.floor(focusPosition * field.InvStep);
+                field.Origin = focusCell - (field.Size / 2);
+                field.WorldOrigin = focusPosition - ((float2)(field.Size / 2)) * field.Step;
             }
             else
             {
-                field.ValueRW.Origin = -(field.ValueRO.Size / 2);
-                field.ValueRW.WorldOrigin = float2.zero;
+                field.Origin = -(field.Size / 2);
+                field.WorldOrigin = float2.zero;
             }
+
+            SystemAPI.SetComponent(fieldEntity, field);
         }
     }
 
     [UpdateInGroup(typeof(SimulationSystemGroup))]
-    [UpdateAfter(typeof(ThreatFieldSystem))]
-    [UpdateAfter(typeof(ObjectiveFieldSystem))]
+    [UpdateAfter(typeof(InfluenceFieldSystem))]
     public partial struct SteeringSystem : ISystem
     {
         private EntityQuery _fieldQuery;
