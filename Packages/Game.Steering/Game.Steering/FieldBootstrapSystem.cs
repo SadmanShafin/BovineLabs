@@ -11,23 +11,50 @@ namespace Game.Steering
     public partial struct FieldBootstrapSystem : ISystem
     {
         private EntityQuery _configQuery;
+        private EntityQuery _fieldQuery;
 
         [BurstCompile]
         public void OnCreate(ref SystemState state)
         {
             _configQuery = SystemAPI.QueryBuilder().WithAll<InfluenceFieldConfig>().Build();
+            _fieldQuery = SystemAPI.QueryBuilder().WithAll<InfluenceField>().Build();
             state.RequireForUpdate(_configQuery);
         }
 
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
-            // Create or resize the field entity if config changes.
             var config = _configQuery.GetSingleton<InfluenceFieldConfig>();
 
-            var fieldEntity = SystemAPI.GetSingletonEntity<InfluenceField>();
+            // Create the field entity if it doesn't exist yet.
+            if (_fieldQuery.IsEmpty)
+            {
+                var entity = state.EntityManager.CreateEntity();
+
+                state.EntityManager.AddComponentData(entity, new InfluenceField
+                {
+                    Size = config.Size,
+                    Step = config.Step,
+                    InvStep = config.InvStep,
+                    Channels = config.Channels,
+                    Origin = int2.zero,
+                    WorldOrigin = float2.zero,
+                });
+
+                var totalCells = config.Size.x * config.Size.y * config.Channels;
+                var fieldBuffer = state.EntityManager.AddBuffer<InfluenceValue>(entity);
+                fieldBuffer.ResizeUninitialized(totalCells);
+
+                var occBuffer = state.EntityManager.AddBuffer<OccupancyValue>(entity);
+                occBuffer.ResizeUninitialized(config.Size.x * config.Size.y);
+
+                return;
+            }
+
+            var fieldEntity = _fieldQuery.GetSingletonEntity();
             var field = SystemAPI.GetComponent<InfluenceField>(fieldEntity);
 
+            // Resize if config changed.
             var needsRebuild = field.Size.x != config.Size.x ||
                                field.Size.y != config.Size.y ||
                                field.Channels != config.Channels;
@@ -44,19 +71,17 @@ namespace Game.Steering
                 var totalCells = field.Size.x * field.Size.y * field.Channels;
                 var fieldBuffer = state.EntityManager.GetBuffer<InfluenceValue>(fieldEntity);
                 fieldBuffer.ResizeUninitialized(totalCells);
-                for (var i = 0; i < totalCells; i++) fieldBuffer[i] = new InfluenceValue { Value = float2.zero };
 
                 var occBuffer = state.EntityManager.GetBuffer<OccupancyValue>(fieldEntity);
                 var occTotal = field.Size.x * field.Size.y;
                 occBuffer.ResizeUninitialized(occTotal);
-                for (var i = 0; i < occTotal; i++) occBuffer[i] = new OccupancyValue { Blocked = 0 };
 
                 SystemAPI.SetComponent(fieldEntity, field);
             }
 
             // Find camera focus from any InfluenceSource marked IsCameraFocus.
             float2 focusPosition = float2.zero;
-            bool hasFocus = false;
+            var hasFocus = false;
 
             foreach (var (source, transform) in
                 SystemAPI.Query<RefRO<InfluenceSource>, RefRO<LocalTransform>>())
@@ -96,7 +121,7 @@ namespace Game.Steering
         [BurstCompile]
         public void OnCreate(ref SystemState state)
         {
-            _fieldQuery = SystemAPI.QueryBuilder().WithAll<InfluenceField, InfluenceValue>().Build();
+            _fieldQuery = SystemAPI.QueryBuilder().WithAll<InfluenceField>().WithAllRW<InfluenceValue>().Build();
             _valuesLookup = state.GetBufferLookup<InfluenceValue>(true);
             state.RequireForUpdate(_fieldQuery);
         }
@@ -105,7 +130,7 @@ namespace Game.Steering
         public void OnUpdate(ref SystemState state)
         {
             _valuesLookup.Update(ref state);
-            
+
             var fieldEntity = _fieldQuery.GetSingletonEntity();
             var field = SystemAPI.GetComponent<InfluenceField>(fieldEntity);
 

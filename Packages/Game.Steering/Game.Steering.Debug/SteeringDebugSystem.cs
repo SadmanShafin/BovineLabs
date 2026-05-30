@@ -102,8 +102,20 @@ namespace Game.Steering.Debug
 
         private static float ChannelHeight(int channel)
         {
-            // Stack each channel at a different height so they don't overlap.
             return 0.1f + (channel * 0.2f);
+        }
+
+        private static FixedString32Bytes ChannelLabel(int channel)
+        {
+            switch (channel)
+            {
+                case (int)Influence.Objective: return "Objective";
+                case (int)Influence.Threat: return "Threat";
+                case (int)Influence.AllyPressure: return "AllyPressure";
+                case (int)Influence.Hazard: return "Hazard";
+                case (int)Influence.Lure: return "Lure";
+                default: return "Unknown";
+            }
         }
 
         // -----------------------------------------------------------------------
@@ -203,7 +215,7 @@ namespace Game.Steering.Debug
 
                 Drawer.Sphere(pos, 0.3f, 12, color);
 
-                var label = ((Influence)source.Channel).ToString();
+                var label = ChannelLabel(source.Channel);
                 Drawer.Text32(pos + new float3(0f, 1f, 0f), label, color, 10f);
             }
         }

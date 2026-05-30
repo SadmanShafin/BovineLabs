@@ -29,7 +29,7 @@ namespace Game.Steering
         public void OnCreate(ref SystemState state)
         {
             _sourcesQuery = SystemAPI.QueryBuilder().WithAll<InfluenceSource, LocalTransform>().Build();
-            _fieldQuery = SystemAPI.QueryBuilder().WithAll<InfluenceField, InfluenceValue>().WithAllRW<InfluenceValue>().Build();
+            _fieldQuery = SystemAPI.QueryBuilder().WithAll<InfluenceField>().WithAllRW<InfluenceValue>().Build();
             _valuesLookup = state.GetBufferLookup<InfluenceValue>(false);
             state.RequireForUpdate(_fieldQuery);
         }
