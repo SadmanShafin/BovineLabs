@@ -30,6 +30,7 @@ namespace Game.Steering
                 InvStep = math.rcp(step),
                 Channels = channels,
                 Origin = int2.zero,
+                WorldOrigin = float2.zero,
             });
 
             var fieldBuffer = state.EntityManager.AddBuffer<InfluenceValue>(entity);
@@ -48,12 +49,14 @@ namespace Game.Steering
 
             if (SystemAPI.TryGetSingleton<CameraFocus>(out var focus))
             {
-                var focusCell = (int2)math.floor((focus.Position * field.ValueRO.InvStep) + 0.5f);
+                var focusCell = (int2)math.floor(focus.Position * field.ValueRO.InvStep);
                 field.ValueRW.Origin = focusCell - (field.ValueRO.Size / 2);
+                field.ValueRW.WorldOrigin = focus.Position - ((float2)(field.ValueRO.Size / 2)) * field.ValueRO.Step;
             }
             else
             {
                 field.ValueRW.Origin = -(field.ValueRO.Size / 2);
+                field.ValueRW.WorldOrigin = float2.zero;
             }
         }
     }
