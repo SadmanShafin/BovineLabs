@@ -17,4 +17,4 @@ MonoBehaviour:
     y: 128
   CellStep: 1
   Channels: 5
-  FocusRadius: 64
+  FocusRadius: 20
