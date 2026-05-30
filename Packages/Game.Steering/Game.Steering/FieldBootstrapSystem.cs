@@ -48,7 +48,7 @@ namespace Game.Steering
 
             if (SystemAPI.TryGetSingleton<CameraFocus>(out var focus))
             {
-                var focusCell = (int2)math.floor(focus.Position * field.ValueRO.InvStep);
+                var focusCell = (int2)math.floor((focus.Position * field.ValueRO.InvStep) + 0.5f);
                 field.ValueRW.Origin = focusCell - (field.ValueRO.Size / 2);
             }
             else

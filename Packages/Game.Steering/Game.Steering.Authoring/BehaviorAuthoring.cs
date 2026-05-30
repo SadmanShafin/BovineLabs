@@ -19,9 +19,10 @@ public class BehaviorAuthoring : MonoBehaviour
     {
         public string Name;
         public float MaxSpeed;
-        public float MaxAcceleration;
-        public float TurnResponse;
-        public float DeadZone;
+
+        // Acceleration / steering force limit.
+        public float MaxForce;
+
         public InfluenceWeight[] Weights;
     }
 
@@ -33,7 +34,7 @@ public class BehaviorAuthoring : MonoBehaviour
         {
             var entity = GetEntity(TransformUsageFlags.Dynamic);
 
-            var blob = BuildBlob(authoring.Stages);
+            var blob = BuildBlob(authoring.Stages ?? Array.Empty<StageDefinition>());
             AddBlobAsset(ref blob, out _);
 
             AddComponent(entity, new BehaviorRef { Value = blob });
@@ -54,29 +55,27 @@ public class BehaviorAuthoring : MonoBehaviour
 
             for (var s = 0; s < stages.Length; s++)
             {
+                var maxSpeed = math.max(0f, stages[s].MaxSpeed);
+
                 headers[s] = new StageHeader
                 {
-                    MaxSpeed = math.max(0f, stages[s].MaxSpeed),
+                    MaxSpeed = maxSpeed,
 
-                    // Good default: can reach max speed in about 0.125 seconds.
-                    MaxAcceleration = stages[s].MaxAcceleration > 0f
-                        ? stages[s].MaxAcceleration
-                        : math.max(1f, stages[s].MaxSpeed * 8f),
-
-                    TurnResponse = stages[s].TurnResponse > 0f
-                        ? stages[s].TurnResponse
-                        : 12f,
-
-                    DeadZone = stages[s].DeadZone > 0f
-                        ? stages[s].DeadZone
-                        : 0.001f,
+                    // Default: can reach max speed in about 0.125 seconds.
+                    MaxForce = stages[s].MaxForce > 0f
+                        ? stages[s].MaxForce
+                        : math.max(1f, maxSpeed * 8f),
                 };
 
-                foreach (var entry in stages[s].Weights)
+                var stageWeights = stages[s].Weights;
+                if (stageWeights == null)
+                    continue;
+
+                foreach (var entry in stageWeights)
                 {
                     var channel = (int)entry.Influence;
                     if ((uint)channel < Influences.Count)
-                        weights[(s * Influences.Count) + channel] = entry.Weight;
+                        weights[(s * Influences.Count) + channel] = math.max(0f, entry.Weight);
                 }
             }
 

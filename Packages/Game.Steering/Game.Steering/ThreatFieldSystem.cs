@@ -107,12 +107,12 @@ namespace Game.Steering
 
                 for (var i = 0; i < Threats.Length; i++)
                 {
-                    var away = center - Transforms[i].Position.xz;
-                    var distance = math.length(away);
+                    var towardThreat = Transforms[i].Position.xz - center;
+                    var distance = math.length(towardThreat);
                     if (distance >= Threats[i].Radius) continue;
 
                     var falloff = math.saturate(1f - (distance * math.rcp(Threats[i].Radius)));
-                    accumulation += math.normalizesafe(away) * (Threats[i].Strength * falloff * falloff);
+                    accumulation += math.normalizesafe(towardThreat) * (Threats[i].Strength * falloff * falloff);
                 }
 
                 values[Field.IndexOf(Channel, cell)] = new InfluenceValue { Value = accumulation };

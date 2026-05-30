@@ -44,7 +44,7 @@ public static class ExampleCreator
         {
             Name = "Default",
             MaxSpeed = 5f,
-            TurnResponse = 10f,
+            MaxForce = 40f,
             Weights = new[]
             {
                 new BehaviorAuthoring.InfluenceWeight
