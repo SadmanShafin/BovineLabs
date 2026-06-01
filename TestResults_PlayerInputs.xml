@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="2" result="Passed" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-05-29 07:32:14Z" end-time="2026-05-29 07:32:14Z" duration="0.0504576">
+  <test-suite type="TestSuite" id="1000" name="BovineLabs" fullname="BovineLabs" runstate="Runnable" testcasecount="254" result="Passed" start-time="2026-05-29 07:32:14Z" end-time="2026-05-29 07:32:14Z" duration="0.050458" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="EditMode" />
+    </properties>
+    <test-suite type="Assembly" id="1284" name="BovineLabs.Timeline.PlayerInputs.Tests.dll" fullname="/home/i/GitHub/BovineLabs/Library/ScriptAssemblies/BovineLabs.Timeline.PlayerInputs.Tests.dll" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-05-29 07:32:14Z" end-time="2026-05-29 07:32:14Z" duration="0.041412" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="248745" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <test-suite type="TestSuite" id="1285" name="BovineLabs" fullname="BovineLabs" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-05-29 07:32:14Z" end-time="2026-05-29 07:32:14Z" duration="0.041082" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1286" name="Timeline" fullname="BovineLabs.Timeline" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-05-29 07:32:14Z" end-time="2026-05-29 07:32:14Z" duration="0.040893" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestSuite" id="1287" name="PlayerInputs" fullname="BovineLabs.Timeline.PlayerInputs" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-05-29 07:32:14Z" end-time="2026-05-29 07:32:14Z" duration="0.040693" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-suite type="TestSuite" id="1288" name="Tests" fullname="BovineLabs.Timeline.PlayerInputs.Tests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-05-29 07:32:14Z" end-time="2026-05-29 07:32:14Z" duration="0.040505" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-suite type="TestFixture" id="1281" name="InputRegistryTests" fullname="BovineLabs.Timeline.PlayerInputs.Tests.InputRegistryTests" classname="BovineLabs.Timeline.PlayerInputs.Tests.InputRegistryTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-05-29 07:32:14Z" end-time="2026-05-29 07:32:14Z" duration="0.039829" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-case id="1283" name="Registry_FiresJoinLeaveEvents" fullname="BovineLabs.Timeline.PlayerInputs.Tests.InputRegistryTests.Registry_FiresJoinLeaveEvents" methodname="Registry_FiresJoinLeaveEvents" classname="BovineLabs.Timeline.PlayerInputs.Tests.InputRegistryTests" runstate="Runnable" seed="266008460" result="Passed" start-time="2026-05-29 07:32:14Z" end-time="2026-05-29 07:32:14Z" duration="0.029329" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1282" name="Registry_MapsPlayerIdToProvider" fullname="BovineLabs.Timeline.PlayerInputs.Tests.InputRegistryTests.Registry_MapsPlayerIdToProvider" methodname="Registry_MapsPlayerIdToProvider" classname="BovineLabs.Timeline.PlayerInputs.Tests.InputRegistryTests" runstate="Runnable" seed="691073295" result="Passed" start-time="2026-05-29 07:32:14Z" end-time="2026-05-29 07:32:14Z" duration="0.002265" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                  <output><![CDATA[Saving results to: /home/i/.config/unity3d/iafahim/BovineLabs/TestResults.xml
+]]></output>
+                </test-case>
+              </test-suite>
+            </test-suite>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

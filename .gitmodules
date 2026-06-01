@@ -1,0 +1,42 @@
+[submodule "Packages/BovineLabs.HitStop"]
+	path = Packages/BovineLabs.HitStop
+	url = https://github.com/IAFahim/BovineLabs.HitStop.git
+[submodule "Packages/BovineLabs.Spatial"]
+	path = Packages/BovineLabs.Spatial
+	url = https://github.com/IAFahim/BovineLabs.Spatial.git
+[submodule "Packages/BovineLabs.Timeline.Animation"]
+	path = Packages/BovineLabs.Timeline.Animation
+	url = https://github.com/IAFahim/BovineLabs.Timeline.Animation.git
+[submodule "Packages/BovineLabs.Timeline.Core"]
+	path = Packages/BovineLabs.Timeline.Core
+	url = https://github.com/IAFahim/BovineLabs.Timeline.Core.git
+[submodule "Packages/BovineLabs.Timeline.EntityLinks"]
+	path = Packages/BovineLabs.Timeline.EntityLinks
+	url = https://github.com/IAFahim/BovineLabs.Timeline.EntityLinks.git
+[submodule "Packages/BovineLabs.Timeline.Essence"]
+	path = Packages/BovineLabs.Timeline.Essence
+	url = https://github.com/IAFahim/BovineLabs.Timeline.Essence.git
+[submodule "Packages/BovineLabs.Timeline.Physics"]
+	path = Packages/BovineLabs.Timeline.Physics
+	url = https://github.com/IAFahim/BovineLabs.Timeline.Physics.git
+[submodule "Packages/BovineLabs.Timeline.PlayerInputs"]
+	path = Packages/BovineLabs.Timeline.PlayerInputs
+	url = https://github.com/IAFahim/BovineLabs.Timeline.PlayerInputs.git
+[submodule "Packages/BovineLabs.Timeline.Spatial"]
+	path = Packages/BovineLabs.Timeline.Spatial
+	url = https://github.com/IAFahim/BovineLabs.Timeline.Spatial.git
+[submodule "Packages/BovineLabs.Timeline.Time"]
+	path = Packages/BovineLabs.Timeline.Time
+	url = https://github.com/IAFahim/BovineLabs.Timeline.Time.git
+[submodule "Packages/BovineLabs.Timeline.UI"]
+	path = Packages/BovineLabs.Timeline.UI
+	url = https://github.com/IAFahim/BovineLabs.Timeline.UI.git
+[submodule "Packages/com.bovinelabs.timeline.parenting"]
+	path = Packages/com.bovinelabs.timeline.parenting
+	url = https://github.com/IAFahim/com.bovinelabs.timeline.parenting.git
+[submodule "Packages/com.bovinelabs.timeline.transform"]
+	path = Packages/com.bovinelabs.timeline.transform
+	url = https://github.com/IAFahim/com.bovinelabs.timeline.transform.git
+[submodule "Packages/com.rukhanka.animation"]
+	path = Packages/com.rukhanka.animation
+	url = https://github.com/IAFahim/com.rukhanka.animation.git

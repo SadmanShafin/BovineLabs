@@ -1,40 +1,294 @@
 {
   "dependencies": {
     "com.bovinelabs.anchor": {
-      "version": "https://gitlab.com/tertle/com.bovinelabs.anchor.git#2.0.0",
+      "version": "https://github.com/IAFahim/tertle-monorepo.git?path=com.bovinelabs.anchor",
       "depth": 0,
       "source": "git",
       "dependencies": {
-        "com.bovinelabs.core": "1.6.0"
+        "com.bovinelabs.core": "1.6.1"
       },
-      "hash": "b3af043cfdd486553e9402a5be1c2b41eedde41c"
+      "hash": "e9b6f530c17b6e7aa9a9639cc61e0e84e0fb4d2b"
+    },
+    "com.bovinelabs.bridge": {
+      "version": "https://github.com/IAFahim/tertle-monorepo.git?path=com.bovinelabs.bridge",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "e9b6f530c17b6e7aa9a9639cc61e0e84e0fb4d2b"
     },
     "com.bovinelabs.core": {
-      "version": "https://gitlab.com/tertle/com.bovinelabs.core.git#1.6.1",
+      "version": "https://github.com/IAFahim/tertle-monorepo.git?path=com.bovinelabs.core",
       "depth": 0,
       "source": "git",
       "dependencies": {
         "com.unity.entities": "1.4.5"
       },
-      "hash": "12212f45215469275e1dbc69f9ba3791fd390e11"
+      "hash": "e9b6f530c17b6e7aa9a9639cc61e0e84e0fb4d2b"
     },
-    "com.bovinelabs.quill": {
-      "version": "https://github.com/IAFahim/com.bovinelabs.quill.git",
+    "com.bovinelabs.essence": {
+      "version": "https://github.com/IAFahim/tertle-monorepo.git?path=com.bovinelabs.essence",
       "depth": 0,
       "source": "git",
       "dependencies": {
-        "com.bovinelabs.core": "1.4.6",
-        "com.unity.entities.graphics": "1.4.13-pre.4"
+        "com.bovinelabs.core": "1.4.4",
+        "com.bovinelabs.reaction": "0.5.0"
       },
-      "hash": "e79f2abd10ffd0418ac388b3403be189fe9baa13"
+      "hash": "e9b6f530c17b6e7aa9a9639cc61e0e84e0fb4d2b"
+    },
+    "com.bovinelabs.grid": {
+      "version": "https://github.com/IAFahim/com.bovinelabs.grid.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {
+        "com.unity.collections": "2.0.0",
+        "com.unity.mathematics": "1.0.0"
+      },
+      "hash": "a09c68103ebba5104b7a3dc385056a8f1b5467e1"
+    },
+    "com.bovinelabs.hitstop": {
+      "version": "file:BovineLabs.HitStop",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.unity.burst": "1.8.11",
+        "com.unity.entities": "6.5.0",
+        "com.unity.mathematics": "1.3.2",
+        "com.bovinelabs.core": "1.6.1",
+        "com.bovinelabs.reaction": "1.0.0"
+      }
+    },
+    "com.bovinelabs.quill": {
+      "version": "https://github.com/IAFahim/tertle-monorepo.git?path=com.bovinelabs.quill",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {
+        "com.bovinelabs.core": "1.6.0",
+        "com.unity.entities.graphics": "1.4.15"
+      },
+      "hash": "e9b6f530c17b6e7aa9a9639cc61e0e84e0fb4d2b"
+    },
+    "com.bovinelabs.reaction": {
+      "version": "https://github.com/IAFahim/tertle-monorepo.git?path=com.bovinelabs.reaction",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {
+        "com.bovinelabs.core": "1.4.6"
+      },
+      "hash": "e9b6f530c17b6e7aa9a9639cc61e0e84e0fb4d2b"
+    },
+    "com.bovinelabs.reaction.addon": {
+      "version": "file:com.bovinelabs.reaction.addon",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.unity.test-framework": "1.6.0"
+      }
+    },
+    "com.bovinelabs.timeline": {
+      "version": "https://github.com/IAFahim/tertle-monorepo.git?path=com.bovinelabs.timeline",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {
+        "com.bovinelabs.core": "1.6.0",
+        "com.unity.timeline": "1.8.11"
+      },
+      "hash": "e9b6f530c17b6e7aa9a9639cc61e0e84e0fb4d2b"
+    },
+    "com.bovinelabs.timeline.animation": {
+      "version": "file:BovineLabs.Timeline.Animation",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.unity.entities": "6.5.0",
+        "com.unity.collections": "6.5.0",
+        "com.unity.burst": "1.8.11",
+        "com.unity.mathematics": "1.3.2",
+        "com.bovinelabs.timeline.core": "1.0.0",
+        "com.rukhanka.animation": "1.0.0"
+      }
+    },
+    "com.bovinelabs.timeline.core": {
+      "version": "file:BovineLabs.Timeline.Core",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.unity.entities": "6.5.0",
+        "com.unity.collections": "6.5.0",
+        "com.unity.burst": "1.8.11",
+        "com.unity.mathematics": "1.3.2"
+      }
+    },
+    "com.bovinelabs.timeline.entitylinks": {
+      "version": "file:BovineLabs.Timeline.EntityLinks",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.unity.test-framework": "1.6.0"
+      }
+    },
+    "com.bovinelabs.timeline.essence": {
+      "version": "file:BovineLabs.Timeline.Essence",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.unity.test-framework": "1.6.0"
+      }
+    },
+    "com.bovinelabs.timeline.grid.influence": {
+      "version": "file:BovineLabs.Timeline.Grid.Influence",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.unity.burst": "1.8.11",
+        "com.unity.collections": "6.5.0",
+        "com.unity.entities": "6.5.0",
+        "com.unity.mathematics": "1.3.2",
+        "com.unity.timeline": "1.8.12",
+        "com.bovinelabs.core": "1.6.1",
+        "com.bovinelabs.timeline": "1.0.0",
+        "com.bovinelabs.timeline.core": "1.0.0"
+      }
+    },
+    "com.bovinelabs.timeline.group-tool": {
+      "version": "https://github.com/IAFahim/com.bovinelabs.timeline.group-tool.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {
+        "com.unity.timeline": "1.7.6"
+      },
+      "hash": "c326a49f87956b6e42017946507f2df7a2518a09"
+    },
+    "com.bovinelabs.timeline.parenting": {
+      "version": "file:com.bovinelabs.timeline.parenting",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.unity.entities": "6.5.0",
+        "com.unity.collections": "6.5.0",
+        "com.unity.burst": "1.8.11",
+        "com.unity.mathematics": "1.3.2",
+        "com.bovinelabs.timeline.core": "1.0.0"
+      }
+    },
+    "com.bovinelabs.timeline.physics": {
+      "version": "file:BovineLabs.Timeline.Physics",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.unity.burst": "1.8.11",
+        "com.unity.collections": "6.5.0",
+        "com.unity.entities": "6.5.0",
+        "com.unity.mathematics": "1.3.2",
+        "com.unity.physics": "6.5.0",
+        "com.unity.timeline": "1.8.12",
+        "com.bovinelabs.core": "1.6.1",
+        "com.bovinelabs.reaction": "1.0.0",
+        "com.bovinelabs.timeline.entitylinks": "1.0.0",
+        "com.bovinelabs.timeline": "1.0.0",
+        "com.bovinelabs.timeline.core": "1.0.0"
+      }
+    },
+    "com.bovinelabs.timeline.playerinputs": {
+      "version": "file:BovineLabs.Timeline.PlayerInputs",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.unity.entities": "1.3.0",
+        "com.unity.collections": "1.5.1",
+        "com.unity.burst": "1.8.11",
+        "com.unity.mathematics": "1.3.2",
+        "com.unity.inputsystem": "1.7.0",
+        "com.bovinelabs.reaction": "2.0.0",
+        "com.bovinelabs.timeline": "1.0.0",
+        "com.bovinelabs.timeline.core": "1.0.0"
+      }
+    },
+    "com.bovinelabs.timeline.time": {
+      "version": "file:BovineLabs.Timeline.Time",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.unity.burst": "1.8.11",
+        "com.unity.collections": "6.5.0",
+        "com.unity.entities": "6.5.0",
+        "com.unity.mathematics": "1.3.2",
+        "com.unity.timeline": "1.8.12",
+        "com.bovinelabs.core": "1.6.1",
+        "com.bovinelabs.essence": "1.0.0",
+        "com.bovinelabs.reaction": "1.0.0",
+        "com.bovinelabs.timeline": "1.0.0",
+        "com.bovinelabs.timeline.core": "1.0.0"
+      }
+    },
+    "com.bovinelabs.timeline.transform": {
+      "version": "file:com.bovinelabs.timeline.transform",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.unity.burst": "1.8.11",
+        "com.unity.collections": "6.5.0",
+        "com.unity.entities": "6.5.0",
+        "com.unity.mathematics": "1.3.2",
+        "com.unity.timeline": "1.8.12",
+        "com.bovinelabs.core": "1.6.1",
+        "com.bovinelabs.timeline": "1.0.0",
+        "com.bovinelabs.timeline.core": "1.0.0"
+      }
+    },
+    "com.bovinelabs.timeline.ui": {
+      "version": "https://github.com/IAFahim/BovineLabs.Timeline.UI.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {
+        "com.unity.burst": "1.8.11",
+        "com.unity.collections": "6.5.0",
+        "com.unity.entities": "6.5.0",
+        "com.unity.mathematics": "1.3.2",
+        "com.unity.timeline": "1.8.12",
+        "com.unity.dt.app-ui": "2.2.0-pre.8",
+        "com.bovinelabs.anchor": "1.0.0",
+        "com.bovinelabs.core": "1.6.1",
+        "com.bovinelabs.reaction": "1.0.0",
+        "com.bovinelabs.timeline.entitylinks": "1.0.0",
+        "com.bovinelabs.timeline": "1.0.0",
+        "com.bovinelabs.timeline.core": "1.0.0"
+      },
+      "hash": "8e5f28e3ddf30c5728928a3a31db5954edffced5"
+    },
+    "com.rukhanka.animation": {
+      "version": "https://github.com/iafahim/com.rukhanka.animation.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {
+        "com.unity.entities.graphics": "1.4.16"
+      },
+      "hash": "8e537fb56271d2d9331614b75f2d864d78950e35"
+    },
+    "com.splinemesherpro.bovinelabstimelinedistance": {
+      "version": "file:BovineLabs.Timeline.Distance",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.unity.test-framework": "1.6.0"
+      }
     },
     "com.unity.burst": {
-      "version": "1.8.28",
+      "version": "1.8.29",
       "depth": 1,
       "source": "registry",
       "dependencies": {
         "com.unity.mathematics": "1.2.1",
         "com.unity.modules.jsonserialize": "1.0.0"
+      },
+      "url": "https://packages.unity.com"
+    },
+    "com.unity.cinemachine": {
+      "version": "3.1.6",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {
+        "com.unity.splines": "2.0.0",
+        "com.unity.modules.imgui": "1.0.0"
       },
       "url": "https://packages.unity.com"
     },
@@ -50,16 +304,16 @@
       }
     },
     "com.unity.dt.app-ui": {
-      "version": "https://github.com/IAFahim/com.unity.dt.app-ui.git",
+      "version": "2.2.0-pre.8",
       "depth": 0,
-      "source": "git",
+      "source": "registry",
       "dependencies": {
+        "com.unity.modules.physics": "1.0.0",
         "com.unity.modules.androidjni": "1.0.0",
         "com.unity.modules.uielements": "1.0.0",
-        "com.unity.modules.physics": "1.0.0",
         "com.unity.modules.screencapture": "1.0.0"
       },
-      "hash": "74b82d607f97744b8f2d1abf1159538e9c495a25"
+      "url": "https://packages.unity.com"
     },
     "com.unity.entities": {
       "version": "6.5.0",
@@ -99,7 +353,7 @@
       "dependencies": {}
     },
     "com.unity.ide.rider": {
-      "version": "3.0.39",
+      "version": "3.0.40",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -158,36 +412,35 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.render-pipelines.core": {
-      "version": "17.5.0",
+      "version": "17.6.0",
       "depth": 1,
       "source": "builtin",
       "dependencies": {
         "com.unity.burst": "1.8.14",
         "com.unity.collections": "2.4.3",
-        "com.unity.modules.terrain": "1.0.0",
         "com.unity.modules.jsonserialize": "1.0.0"
       }
     },
     "com.unity.render-pipelines.universal": {
-      "version": "17.5.0",
+      "version": "17.6.0",
       "depth": 0,
       "source": "builtin",
       "dependencies": {
-        "com.unity.render-pipelines.core": "17.5.0",
-        "com.unity.shadergraph": "17.5.0",
-        "com.unity.render-pipelines.universal-config": "17.5.0"
+        "com.unity.render-pipelines.core": "17.6.0",
+        "com.unity.shadergraph": "17.6.0",
+        "com.unity.render-pipelines.universal-config": "17.6.0"
       }
     },
     "com.unity.render-pipelines.universal-config": {
-      "version": "17.5.0",
+      "version": "17.6.0",
       "depth": 1,
       "source": "builtin",
       "dependencies": {
-        "com.unity.render-pipelines.core": "17.5.0"
+        "com.unity.render-pipelines.core": "17.6.0"
       }
     },
     "com.unity.scriptablebuildpipeline": {
-      "version": "2.6.1",
+      "version": "3.0.2",
       "depth": 1,
       "source": "registry",
       "dependencies": {
@@ -221,14 +474,32 @@
         "com.unity.burst": "1.7.2"
       }
     },
+    "com.unity.settings-manager": {
+      "version": "2.1.1",
+      "depth": 2,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://packages.unity.com"
+    },
     "com.unity.shadergraph": {
-      "version": "17.5.0",
+      "version": "17.6.0",
       "depth": 1,
       "source": "builtin",
       "dependencies": {
-        "com.unity.render-pipelines.core": "17.5.0",
+        "com.unity.render-pipelines.core": "17.6.0",
         "com.unity.searcher": "4.9.3"
       }
+    },
+    "com.unity.splines": {
+      "version": "2.8.4",
+      "depth": 1,
+      "source": "registry",
+      "dependencies": {
+        "com.unity.mathematics": "1.2.1",
+        "com.unity.modules.imgui": "1.0.0",
+        "com.unity.settings-manager": "1.0.3"
+      },
+      "url": "https://packages.unity.com"
     },
     "com.unity.sysroot.base": {
       "version": "1.0.2",
@@ -238,7 +509,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.test-framework": {
-      "version": "1.7.0",
+      "version": "1.8.0",
       "depth": 0,
       "source": "builtin",
       "dependencies": {
@@ -248,7 +519,7 @@
       }
     },
     "com.unity.test-framework.performance": {
-      "version": "3.2.0",
+      "version": "3.4.0",
       "depth": 1,
       "source": "registry",
       "dependencies": {
@@ -256,6 +527,17 @@
         "com.unity.modules.jsonserialize": "1.0.0"
       },
       "url": "https://packages.unity.com"
+    },
+    "com.unity.timeline": {
+      "version": "6.6.0",
+      "depth": 1,
+      "source": "builtin",
+      "dependencies": {
+        "com.unity.modules.director": "1.0.0",
+        "com.unity.modules.animation": "1.0.0",
+        "com.unity.modules.audio": "1.0.0",
+        "com.unity.modules.particlesystem": "1.0.0"
+      }
     },
     "com.unity.toolchain.linux-x86_64-linux": {
       "version": "1.0.2",
@@ -266,14 +548,26 @@
       },
       "url": "https://packages.unity.com"
     },
+    "com.unity.ugui": {
+      "version": "2.6.0",
+      "depth": 0,
+      "source": "builtin",
+      "dependencies": {
+        "com.unity.modules.ui": "1.0.0",
+        "com.unity.modules.imgui": "1.0.0",
+        "com.unity.modules.audio": "1.0.0",
+        "com.unity.modules.physics2d": "1.0.0",
+        "com.unity.modules.physics": "1.0.0"
+      }
+    },
     "com.youngwoocho02.unity-cli-connector": {
-      "version": "https://github.com/IAFahim/unity-cli.git?path=unity-connector#linux-patch-DotNetSdkRoslyn",
+      "version": "https://github.com/youngwoocho02/unity-cli.git?path=unity-connector",
       "depth": 0,
       "source": "git",
       "dependencies": {
         "com.unity.nuget.newtonsoft-json": "3.2.1"
       },
-      "hash": "19f979f28dfc56444f3d41de50299133574ece06"
+      "hash": "a0830fc252b45c197ae338c100baeabb25a34a66"
     },
     "com.unity.modules.androidjni": {
       "version": "1.0.0",
@@ -300,6 +594,15 @@
       "depth": 1,
       "source": "builtin",
       "dependencies": {}
+    },
+    "com.unity.modules.director": {
+      "version": "1.0.0",
+      "depth": 2,
+      "source": "builtin",
+      "dependencies": {
+        "com.unity.modules.audio": "1.0.0",
+        "com.unity.modules.animation": "1.0.0"
+      }
     },
     "com.unity.modules.hierarchy": {
       "version": "1.0.0",
@@ -347,6 +650,20 @@
       "source": "builtin",
       "dependencies": {}
     },
+    "com.unity.modules.physics2d": {
+      "version": "1.0.0",
+      "depth": 1,
+      "source": "builtin",
+      "dependencies": {
+        "com.unity.modules.physicscore2d": "1.0.0"
+      }
+    },
+    "com.unity.modules.physicscore2d": {
+      "version": "1.0.0",
+      "depth": 2,
+      "source": "builtin",
+      "dependencies": {}
+    },
     "com.unity.modules.screencapture": {
       "version": "1.0.0",
       "depth": 1,
@@ -357,13 +674,22 @@
     },
     "com.unity.modules.terrain": {
       "version": "1.0.0",
-      "depth": 2,
+      "depth": 1,
       "source": "builtin",
       "dependencies": {}
     },
+    "com.unity.modules.terrainphysics": {
+      "version": "1.0.0",
+      "depth": 0,
+      "source": "builtin",
+      "dependencies": {
+        "com.unity.modules.physics": "1.0.0",
+        "com.unity.modules.terrain": "1.0.0"
+      }
+    },
     "com.unity.modules.ui": {
       "version": "1.0.0",
-      "depth": 2,
+      "depth": 1,
       "source": "builtin",
       "dependencies": {}
     },

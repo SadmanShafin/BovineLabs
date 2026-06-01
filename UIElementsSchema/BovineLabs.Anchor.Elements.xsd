@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:tns="BovineLabs.Anchor.Elements" elementFormDefault="qualified" targetNamespace="BovineLabs.Anchor.Elements" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:import schemaLocation="Unity.AppUI.UI.xsd" namespace="Unity.AppUI.UI" />
+  <xs:import schemaLocation="UnityEngine.UIElements.xsd" namespace="UnityEngine.UIElements" />
+  <xs:import schemaLocation="BovineLabs.Anchor.xsd" namespace="BovineLabs.Anchor" />
+  <xs:complexType name="AnchorTouchSliderFloatType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q1="Unity.AppUI.UI" base="q1:ExVisualElementType">
+        <xs:choice />
+        <xs:attribute default="g7" name="format-string" type="xs:string" />
+        <xs:attribute default="false" name="invalid" type="xs:boolean" />
+        <xs:attribute default="Horizontal" name="orientation" type="q1:DirectionType" />
+        <xs:attribute default="false" name="swap-thumbs" type="xs:boolean" />
+        <xs:attribute default="M" name="size" type="q1:SizeType" />
+        <xs:attribute name="label" type="xs:string" />
+        <xs:attribute default="0" name="low-value" type="xs:float" />
+        <xs:attribute default="1" name="high-value" type="xs:float" />
+        <xs:attribute default="0" name="value" type="xs:float" />
+        <xs:attribute default="0.1" name="step" type="xs:float" />
+        <xs:attribute default="1" name="shift-step" type="xs:float" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="AnchorTouchSliderFloat" xmlns:q2="Unity.AppUI.UI" substitutionGroup="q2:ExVisualElement" type="tns:AnchorTouchSliderFloatType" />
+  <xs:complexType name="KeyValueGroupType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q3="UnityEngine.UIElements" base="q3:VisualElementType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="KeyValueGroup" xmlns:q4="UnityEngine.UIElements" substitutionGroup="q4:VisualElement" type="tns:KeyValueGroupType" />
+  <xs:complexType name="AnchorActionButtonType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q5="Unity.AppUI.UI" base="q5:ActionButtonType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="AnchorActionButton" xmlns:q6="Unity.AppUI.UI" substitutionGroup="q6:ActionButton" type="tns:AnchorActionButtonType" />
+  <xs:complexType name="AnchorAccordionType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q7="Unity.AppUI.UI" base="q7:AccordionType">
+        <xs:choice />
+        <xs:attribute name="item-template" type="xs:string" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="AnchorAccordion" xmlns:q8="Unity.AppUI.UI" substitutionGroup="q8:Accordion" type="tns:AnchorAccordionType" />
+  <xs:complexType name="AnchorButtonType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q9="Unity.AppUI.UI" base="q9:ButtonType">
+        <xs:choice />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="AnchorButton" xmlns:q10="Unity.AppUI.UI" substitutionGroup="q10:Button" type="tns:AnchorButtonType" />
+  <xs:complexType name="AnchorGridViewType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q11="Unity.AppUI.UI" base="q11:GridViewType">
+        <xs:choice />
+        <xs:attribute name="item-template" type="xs:string" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="AnchorGridView" xmlns:q12="Unity.AppUI.UI" substitutionGroup="q12:GridView" type="tns:AnchorGridViewType" />
+  <xs:complexType name="OptionPagerType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q13="UnityEngine.UIElements" base="q13:VisualElementType">
+        <xs:choice />
+        <xs:attribute default="-1" name="selected-index" type="xs:int" />
+        <xs:attribute default="true" name="wrap" type="xs:boolean" />
+        <xs:attribute name="empty-text" type="xs:string" />
+        <xs:attribute default="caret-left" name="previous-button-icon" type="xs:string" />
+        <xs:attribute default="caret-right" name="next-button-icon" type="xs:string" />
+        <xs:attribute default="true" name="show-indicator" type="xs:boolean" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="OptionPager" xmlns:q14="UnityEngine.UIElements" substitutionGroup="q14:VisualElement" type="tns:OptionPagerType" />
+  <xs:complexType name="AnchorTouchSliderIntType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q15="Unity.AppUI.UI" base="q15:ExVisualElementType">
+        <xs:choice />
+        <xs:attribute default="#######0" name="format-string" type="xs:string" />
+        <xs:attribute default="false" name="invalid" type="xs:boolean" />
+        <xs:attribute default="Horizontal" name="orientation" type="q15:DirectionType" />
+        <xs:attribute default="false" name="swap-thumbs" type="xs:boolean" />
+        <xs:attribute default="M" name="size" type="q15:SizeType" />
+        <xs:attribute name="label" type="xs:string" />
+        <xs:attribute default="0" name="low-value" type="xs:int" />
+        <xs:attribute default="1" name="high-value" type="xs:int" />
+        <xs:attribute default="0" name="value" type="xs:int" />
+        <xs:attribute default="1" name="step" type="xs:int" />
+        <xs:attribute default="10" name="shift-step" type="xs:int" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="AnchorTouchSliderInt" xmlns:q16="Unity.AppUI.UI" substitutionGroup="q16:ExVisualElement" type="tns:AnchorTouchSliderIntType" />
+  <xs:complexType name="TimerType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q17="UnityEngine.UIElements" base="q17:VisualElementType">
+        <xs:choice />
+        <xs:attribute default="0" name="interval" type="xs:long" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="Timer" xmlns:q18="UnityEngine.UIElements" substitutionGroup="q18:VisualElement" type="tns:TimerType" />
+  <xs:complexType name="AnchorSafeAreaType">
+    <xs:complexContent mixed="false">
+      <xs:extension xmlns:q19="UnityEngine.UIElements" base="q19:VisualElementType">
+        <xs:choice />
+        <xs:attribute default="All" name="edges" xmlns:q20="BovineLabs.Anchor" type="q20:AnchorSafeAreaEdgesType" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="AnchorSafeArea" xmlns:q21="UnityEngine.UIElements" substitutionGroup="q21:VisualElement" type="tns:AnchorSafeAreaType" />
+</xs:schema>

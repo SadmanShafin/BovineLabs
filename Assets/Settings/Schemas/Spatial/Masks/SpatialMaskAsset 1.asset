@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1769eb93dfef476cb3886e2a5e2ea572, type: 3}
+  m_Name: SpatialMaskAsset 1
+  m_EditorClassIdentifier: BovineLabs.Spatial.Authoring::BovineLabs.Spatial.Authoring.SpatialMaskAsset
+  id: 2
+  width: 11
+  height: 11
+  values: 6363636363636363636363007f7f7f7f7f7f7f7f7f0000007f7f7f7f7f7f7f00000000007f7f7f7f7f000000000000007f7f7f00000000000000000000000000000000000000000900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000

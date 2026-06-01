@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/Scenes.meta
 guid: 100e59958bb6d04008574584f95df45c
+========
+guid: 09f51999408cc1ef8a5405e1fc9627be
+>>>>>>>> 2323d9e13fcf8444c67a258737ad9ac02869fd77:Assets/UI Toolkit/UnityThemes.meta
 folderAsset: yes
 DefaultImporter:
   externalObjects: {}
